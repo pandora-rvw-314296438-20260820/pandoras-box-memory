@@ -16,15 +16,15 @@ This registry supersedes `PANDORA_CAPABILITY_REGISTRY_V2.md` **for current-state
 
 | Capability | Source | Runtime | Current verdict |
 | --- | --- | --- | --- |
-| Durable Memory schema/migrations | recovered in canonical Memory repo | recorded Supabase project currently unavailable to connected management scope | source present; runtime parity unverified |
+| Durable Memory schema/migrations | recovered in canonical Memory repo | Supabase project `ivmvufhcsezyhczzondn` is `ACTIVE_HEALTHY` under current management readback | source present; database runtime reachable |
 | Memory API/MCP routes | recovered in canonical Memory repo | public origin recorded | deployment/source parity unverified |
-| ProjectOS → Memory bridge | bridge contract and URL documented | workload OIDC round trip not freshly proven | unverified |
-| Health/search | contracts present | authenticated positive proof missing | unverified |
+| ProjectOS → Memory bridge | bridge contract and URL documented | bridge active; production service principal rebound to Vercel team `mbanatao` / `team_3yw1CN59ce4pj5SwyQGCAqN3`; positive token round trip still pending fresh recovery-source Vercel production | partially verified |
+| Health/search | contracts present | bridge runtime active; authenticated positive proof awaits recovery-source Vercel production | partially verified |
 | Evidence intake/write | contracts present | authenticated production write proof missing | unverified |
 | Canon promotion | gates present | promotion proof missing | unverified |
 | Namespace isolation | tests/contracts present | fresh positive + negative identity run missing | unverified |
 | Vercel production binding | recorded project/origin | recorded project is provider-visible under `team_3yw1CN59ce4pj5SwyQGCAqN3`, but production still serves old `banataosystems` lineage; direct exact-source deployment is currently blocked by Vercel daily deployment quota and Git auto-deploy did not fire after a no-content `main` trigger commit | blocked on production source parity |
-| Supabase parity | recorded project ref | recorded ref not accessible from current Supabase management scope | blocked on production source parity |
+| Supabase parity | recorded project ref | project readback healthy; bridge active; transferred Vercel workload identity rebound | provider identity aligned; authenticated positive journey pending Vercel production parity |
 
 ## Required evidence to move a capability to production_verified
 
