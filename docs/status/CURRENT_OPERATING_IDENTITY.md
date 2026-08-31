@@ -24,7 +24,7 @@ Classification: **current operational identity**
 | Recorded Supabase project ref | `ivmvufhcsezyhczzondn` |
 | ProjectOS bridge | `https://ivmvufhcsezyhczzondn.supabase.co/functions/v1/pandora-projectos-bridge` |
 
-These are recorded runtime identities, not current provider-parity proof. On 2026-09-01 Vault-backed Vercel provider readback confirms the recorded Memory project under transferred team `team_3yw1CN59ce4pj5SwyQGCAqN3` and its Git link to the recovery repository; however, the promoted production deployment still points to the old `banataosystems` source lineage, and the currently connected Supabase management scope could not access the recorded Memory project ref. Production source parity, OIDC workload authentication, evidence write, canon promotion, and rollback remain **unverified until fresh provider readback succeeds**.
+These are recorded runtime identities, not current provider-parity proof. On 2026-09-01 Vault-backed Vercel provider readback confirms the recorded Memory project under transferred team `team_3yw1CN59ce4pj5SwyQGCAqN3` and its Git link to the recovery repository. Supabase management readback now confirms project `ivmvufhcsezyhczzondn` is `ACTIVE_HEALTHY`, the `pandora-projectos-bridge` is active, and the production ProjectOS service principal has been rebound to Vercel team slug `mbanatao`, team ID `team_3yw1CN59ce4pj5SwyQGCAqN3`, project `mcpmaster`, and environment `production`. The promoted Vercel production deployment still points to the old `banataosystems` source lineage, so exact production source parity and an authenticated positive workload round trip remain **unverified until a fresh recovery-source production deployment succeeds**.
 
 ## Current truth rules
 
@@ -36,7 +36,7 @@ These are recorded runtime identities, not current provider-parity proof. On 202
 
 ## Closure gates
 
-- Vercel production deployment rebound to exact recovery `main` after quota/Git-trigger recovery; Supabase management visibility restored for the recorded Memory project ref;
+- Vercel production deployment rebound to exact recovery `main` after quota/Git-trigger recovery;
 - production Memory deployment bound to exact current `main` SHA;
 - authenticated ProjectOS → Memory health/search/evidence round trip passes;
 - negative identity/isolation tests pass;
