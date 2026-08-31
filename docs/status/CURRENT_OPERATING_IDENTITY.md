@@ -24,7 +24,7 @@ Classification: **current operational identity**
 | Recorded Supabase project ref | `ivmvufhcsezyhczzondn` |
 | ProjectOS bridge | `https://ivmvufhcsezyhczzondn.supabase.co/functions/v1/pandora-projectos-bridge` |
 
-These are recorded runtime identities, not current provider-parity proof. On 2026-09-01 Vault-backed Vercel provider readback confirms the recorded Memory project under transferred team `team_3yw1CN59ce4pj5SwyQGCAqN3` and its Git link to the recovery repository; however, the promoted production deployment still points to the old `banataosystems` source lineage, and the currently connected Supabase management scope could not access the recorded Memory project ref. Production source parity, OIDC workload authentication, evidence write, canon promotion, and rollback remain **unverified until fresh provider readback succeeds**.
+These are recorded runtime identities, not complete source/runtime parity proof. On 2026-09-01 fresh provider readback confirms the Memory Vercel project under transferred team `team_3yw1CN59ce4pj5SwyQGCAqN3`, its Git link to `pandora-rvw-314296438-20260820/pandoras-box-memory`, and Supabase project `ivmvufhcsezyhczzondn` as `ACTIVE_HEALTHY`. The promoted production deployment still points to the historical `banataosystems` source lineage. The Vercel API deployment lane is currently quota-limited, so production convergence must complete through the Git-native deployment path. Production source parity, OIDC workload authentication, evidence write, canon promotion, and rollback remain **unverified until fresh exact-source production readback succeeds**.
 
 ## Current truth rules
 
@@ -36,7 +36,7 @@ These are recorded runtime identities, not current provider-parity proof. On 202
 
 ## Closure gates
 
-- Vercel production deployment rebound to exact recovery `main` after quota/Git-trigger recovery; Supabase management visibility restored for the recorded Memory project ref;
+- Vercel production deployment rebound to exact canonical `main` through the Git-native deployment path;
 - production Memory deployment bound to exact current `main` SHA;
 - authenticated ProjectOS → Memory health/search/evidence round trip passes;
 - negative identity/isolation tests pass;
