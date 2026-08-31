@@ -36,3 +36,11 @@ This registry supersedes `PANDORA_CAPABILITY_REGISTRY_V2.md` **for current-state
 6. rollback/restoration evidence for mutable production changes.
 
 No recovery document, green source gate, reachable public hostname, or old deployment receipt alone is sufficient to mark a capability production verified.
+
+
+## Recovery web build repair — PR #7
+
+- Memory recovery web build PR #7 restores the Next.js `@/*` path alias and excludes `supabase/functions/**/*` from the web TypeScript project.
+- This keeps Deno Edge Functions outside the Next.js/Node typecheck boundary while preserving their separate runtime contract.
+- Source repair is implemented on the candidate branch; production deployment/source parity remains unverified until CI is green and Vercel can accept a fresh deployment.
+- Vercel daily deployment quota remains an external deployment blocker and is not treated as source failure.
