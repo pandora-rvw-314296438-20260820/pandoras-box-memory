@@ -23,8 +23,8 @@ This registry supersedes `PANDORA_CAPABILITY_REGISTRY_V2.md` **for current-state
 | Evidence intake/write | contracts present | authenticated production write proof missing | unverified |
 | Canon promotion | gates present | promotion proof missing | unverified |
 | Namespace isolation | tests/contracts present | fresh positive + negative identity run missing | unverified |
-| Vercel production binding | recorded project/origin | recorded project ID not resolvable from current Vercel connector scope | blocked on provider visibility |
-| Supabase parity | recorded project ref | recorded ref not accessible from current Supabase management scope | blocked on provider visibility |
+| Vercel production binding | recorded project/origin | recorded project is provider-visible under `team_3yw1CN59ce4pj5SwyQGCAqN3`, but production still serves old `banataosystems` lineage; direct exact-source deployment is currently blocked by Vercel daily deployment quota and Git auto-deploy did not fire after a no-content `main` trigger commit | blocked on production source parity |
+| Supabase parity | recorded project ref | recorded ref not accessible from current Supabase management scope | blocked on production source parity |
 
 ## Required evidence to move a capability to production_verified
 
