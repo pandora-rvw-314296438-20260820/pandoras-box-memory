@@ -82,7 +82,7 @@ jobs:
                 ;;
             esac
             case "$changed_path" in
-              docs/capabilities/PANDORA_CAPABILITY_REGISTRY_V2.json|docs/capabilities/PANDORA_CANONICAL_SOURCE_MANIFEST_DB409325.json|docs/capabilities/evidence/*|docs/roadmap/PANDORA_COMPOUNDING_INTELLIGENCE_MASTER_ROADMAP_V2.md)
+              docs/capabilities/PANDORA_CAPABILITY_REGISTRY_V2.json|docs/capabilities/PANDORA_CAPABILITY_REGISTRY_V3.md|docs/capabilities/PANDORA_CANONICAL_SOURCE_MANIFEST_DB409325.json|docs/capabilities/evidence/*|docs/roadmap/PANDORA_COMPOUNDING_INTELLIGENCE_MASTER_ROADMAP_V2.md)
                 registry_changed=true
                 ;;
             esac
