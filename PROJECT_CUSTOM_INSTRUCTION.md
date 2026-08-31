@@ -1,11 +1,11 @@
 # Pandora's-Box Memory — Project Custom Instruction
 
-**Version:** 1.0.0  
-**Effective date:** 2026-08-08  
-**Canonical repository:** `banataosystems/pandoras-box-memory`  
+**Version:** 1.1.0  
+**Effective date:** 2026-09-01  
+**Canonical repository:** `pandora-rvw-314296438-20260820/pandoras-box-memory`  
 **Canonical project key:** `memory`  
-**Instruction status:** Canonical active-project instruction; source recovery incomplete  
-**Portfolio contract:** `BANATAO_25000_BUSINESSES_MASTER_INSTRUCTION.md` in `banataosystems/Pandoras-box`
+**Instruction status:** Canonical active-project instruction; recovery source present; runtime parity requires fresh provider proof  
+**Portfolio contract:** `BANATAO_25000_BUSINESSES_MASTER_INSTRUCTION.md` in `pandora-rvw-314296438-20260820/pandoras-box`
 
 ---
 
