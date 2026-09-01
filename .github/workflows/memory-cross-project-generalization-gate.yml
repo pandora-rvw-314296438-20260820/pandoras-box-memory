@@ -69,6 +69,6 @@ jobs:
             echo "::error::Chat C closure PR contains runtime, migration, or unrelated files."
             exit 1
           fi
-          for required in \n            .github/workflows/memory-cross-project-generalization-gate.yml \n            docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01.md \n            docs/capabilities/evidence/MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01.json \n            scripts/verify_memory_cross_project_generalization.mjs; do
+          for required in ".github/workflows/memory-cross-project-generalization-gate.yml" "docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01.md" "docs/capabilities/evidence/MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01.json" "scripts/verify_memory_cross_project_generalization.mjs"; do
             grep -Fxq "$required" /tmp/changed || { echo "::error::missing required cross-project gate file: $required"; exit 1; }
           done
