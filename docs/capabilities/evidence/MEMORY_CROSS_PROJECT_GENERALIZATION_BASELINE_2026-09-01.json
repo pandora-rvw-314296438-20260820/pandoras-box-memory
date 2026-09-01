@@ -1,0 +1,61 @@
+{
+  "schema_version": "memory-cross-project-generalization-baseline-v1",
+  "captured_at": "2026-09-01",
+  "authority": {
+    "memory_supabase_project": "ivmvufhcsezyhczzondn",
+    "memory_main_sha": "9da819876037aa6427e745189f7b3949747b3bef",
+    "bridge_blob_sha": "c35838f6dc35078378e3b27733f8e08bd52b1d65",
+    "scope_verifier_blob_sha": "9119150666b954c029646aec99879f6f4b5df983"
+  },
+  "no_duplication": {
+    "generalization_playbook_pattern_abstract_tables_or_routines": 0,
+    "decision": "extend_existing_governance_and_project_isolation; do_not_create_parallel_cross_project_authority"
+  },
+  "candidate_scope": {
+    "total_candidates": 3496,
+    "projectos_source_candidates": 3462,
+    "with_project_id": 3463,
+    "with_project_key": 3463,
+    "distinct_project_ids": 13,
+    "distinct_project_keys": 12,
+    "projects_array_single": 3493,
+    "projects_array_multi": 3,
+    "max_projects_array_len": 6
+  },
+  "candidate_privacy": {
+    "privacy_policy_metadata_only_v1": 3461,
+    "imported_secrets_true": 0,
+    "imported_personal_identifiers_true": 0,
+    "imported_raw_arguments_true": 0,
+    "imported_raw_results_true": 0,
+    "imported_raw_errors_true": 0,
+    "canonical_memory_written_true": 0,
+    "raw_excerpt_non_null": 11,
+    "redacted_excerpt_non_null": 3495
+  },
+  "review_scope": {
+    "total": 3464,
+    "with_project_key": 3464,
+    "with_source_ref": 3464,
+    "with_fingerprint": 3464,
+    "append_only_true": 3464,
+    "requires_review_true": 3464,
+    "persisted": 0
+  },
+  "cross_project_signals": {
+    "error_fingerprint_groups": 13,
+    "error_group_episodes": 329,
+    "error_group_max_projects": 9,
+    "result_fingerprint_groups": 1,
+    "result_group_episodes": 2826,
+    "result_group_max_projects": 6,
+    "cross_project_exact_content_hash_groups": 0
+  },
+  "classification": {
+    "project_scoped_rows": "source_only_never_directly_cross_project",
+    "cross_project_fingerprint_recurrence": "detection_signal_not_generalized_memory",
+    "generalized_abstraction": "future_governed_candidate_only_after_same_project_verified_source_and_privacy_transform",
+    "cross_namespace_generalization": "forbidden_without_explicit_authorized_design",
+    "raw_cross_project_retrieval": "forbidden"
+  }
+}

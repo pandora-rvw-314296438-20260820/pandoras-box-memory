@@ -1,0 +1,57 @@
+{
+  "canonical_bridge_blob_sha": "c35838f6dc35078378e3b27733f8e08bd52b1d65",
+  "canonical_memory_main_sha": "9da819876037aa6427e745189f7b3949747b3bef",
+  "canonical_memory_main_tree": "a4f95b3a6b488a328a08fb2b55178f35fc26154a",
+  "captured_at": "2026-09-01",
+  "lifecycle_graph": {
+    "active_approved_terminal_heads": 143,
+    "active_items": 275,
+    "cross_scope_resolutions": 0,
+    "cycle_steps": 0,
+    "eligible_alias_body_diff": 119,
+    "eligible_alias_hash_diff": 118,
+    "eligible_alias_title_diff": 119,
+    "eligible_resolved_to_terminal": 119,
+    "invalid_terminal_heads": 0,
+    "max_chain_depth": 29,
+    "missing_direct_targets": 0,
+    "pruning_candidates": 0,
+    "retrieval_eligible_nonheads": 119,
+    "review_due_null_all": 279,
+    "review_due_null_effective_heads": 143,
+    "superseded_links": 124,
+    "total_items": 280
+  },
+  "live_bridge": {
+    "effective_head_resolution": false,
+    "ezbr_sha256": "3c5857fa787cbfc039100722d32aacfea080743ba6c5b998fdf6854d3467a18b",
+    "project_scoped_search": false,
+    "source_runtime_relation": "older_than_canonical_main",
+    "version": 16
+  },
+  "memory_project_id": "ivmvufhcsezyhczzondn",
+  "non_actions": [
+    "no production lifecycle mutation",
+    "no production supersession/backfill",
+    "no pruning execution",
+    "no production data mutation",
+    "no migration execution"
+  ],
+  "schema_version": 1,
+  "supersede_rpc": {
+    "checks_cycle": false,
+    "checks_replacement_exists": true,
+    "enforces_same_memory_type": false,
+    "enforces_same_namespace": false,
+    "enforces_same_project": false,
+    "enforces_same_user": false,
+    "preserves_approval_audit": true,
+    "preserves_record_versions": true,
+    "rejects_self_supersession": true,
+    "requires_replacement_active": false,
+    "requires_replacement_approved": false,
+    "requires_replacement_non_revoked": false,
+    "requires_replacement_terminal": false,
+    "signature": "pandora_supersede_memory_record(uuid,uuid,text,text,text)"
+  }
+}

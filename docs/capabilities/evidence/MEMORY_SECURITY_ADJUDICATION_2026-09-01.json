@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_id": "C-E055-security-adjudication-live-boundary",
+  "captured_at": "2026-09-01T15:26:00+08:00",
+  "memory_project_ref": "ivmvufhcsezyhczzondn",
+  "primary_project_ref": "jcyqixttuebxqqfkjonq",
+  "memory_main_sha": "9da819876037aa6427e745189f7b3949747b3bef",
+  "memory_main_tree": "a4f95b3a6b488a328a08fb2b55178f35fc26154a",
+  "memory_production": {
+    "deployment_id": "dpl_BEexxMqWK6LYmzvbGHb9emd8HAX4",
+    "source_sha": "ae5aeb6a8a98582df9b4905381d3cff3298cc887",
+    "state": "READY",
+    "source_matches_main": false
+  },
+  "memory_private_boundary": {
+    "private_schema_usage": {
+      "anon": false,
+      "authenticated": false,
+      "service_role": false
+    },
+    "table_count": 8,
+    "rls_enabled_count": 2,
+    "rls_disabled_count": 6,
+    "tables": [
+      {"name":"flutterflow_credential_handoffs","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":false},
+      {"name":"flutterflow_github_oidc_attempts","rls":true,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":false},
+      {"name":"flutterflow_github_oidc_grants","rls":true,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":false},
+      {"name":"flutterflow_integration_credentials","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":false},
+      {"name":"flutterflow_project_snapshots","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":true},
+      {"name":"flutterflow_project_yaml_files","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":true},
+      {"name":"pandora_integration_credentials","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":false},
+      {"name":"pandora_recovery_auth_changes","rls":false,"anon_select":false,"auth_select":false,"auth_insert":false,"auth_update":false,"auth_delete":false,"service_all":true}
+    ],
+    "security_definer_count": 12,
+    "client_executable_security_definer_count": 0,
+    "disposition": "preserve_service_only_boundary; adjudicate per object before any RLS change"
+  },
+  "primary_pg_net_boundary": {
+    "schema_usage": {"anon":true,"authenticated":true,"service_role":true},
+    "http_functions": [
+      {"name":"http_get","anon_execute":true,"authenticated_execute":true,"service_role_execute":true},
+      {"name":"http_post","anon_execute":true,"authenticated_execute":true,"service_role_execute":true},
+      {"name":"http_delete","anon_execute":true,"authenticated_execute":true,"service_role_execute":true}
+    ],
+    "disposition": "excess_client_privilege_candidate; no live revoke before source-controlled compatibility and rollback proof"
+  },
+  "required_migration_markers": [
+    "PANDORA_SECURITY_ADJUDICATION: reviewed",
+    "PANDORA_SECURITY_ACCESS_PATH:",
+    "PANDORA_SECURITY_TEST_PLAN:",
+    "PANDORA_SECURITY_ROLLBACK:",
+    "PANDORA_SECURITY_OWNER:"
+  ],
+  "hard_fail_client_grants": [
+    "private_schema_usage_to_client_roles",
+    "private_table_privileges_to_client_roles",
+    "net_schema_usage_to_client_roles",
+    "net_http_execute_to_client_roles"
+  ],
+  "explicit_non_actions": [
+    "no production RLS mutation",
+    "no production grant or revoke",
+    "no Auth configuration mutation",
+    "no extension mutation",
+    "no Edge deployment or deletion",
+    "no Vercel production mutation",
+    "no Memory data mutation",
+    "no migration execution"
+  ]
+}
