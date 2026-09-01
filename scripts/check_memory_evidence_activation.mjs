@@ -1,8 +1,10 @@
+
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 
 const bridgePath = "supabase/functions/pandora-projectos-bridge/index.ts";
+const bridgeWorkflowPath = "supabase/functions/pandora-projectos-bridge/**";
 const manifestPath =
   "recovery/evidence/memory-evidence-intake-activation-release-manifest.md";
 const workflowPath = ".github/workflows/memory-evidence-intake.yml";
@@ -24,7 +26,11 @@ for (const marker of [
   assert.ok(bridge.includes(marker), `bridge activation marker missing: ${marker}`);
 }
 
-for (const path of [bridgePath, manifestPath, "scripts/check_memory_evidence_activation.mjs"]) {
+assert.ok(
+  workflow.includes(bridgePath) || workflow.includes(bridgeWorkflowPath),
+  `workflow path filter missing: ${bridgePath} or ${bridgeWorkflowPath}`,
+);
+for (const path of [manifestPath, "scripts/check_memory_evidence_activation.mjs"]) {
   assert.ok(workflow.includes(path), `workflow path filter missing: ${path}`);
 }
 assert.ok(workflow.includes("node scripts/check_memory_evidence_activation.mjs"));
