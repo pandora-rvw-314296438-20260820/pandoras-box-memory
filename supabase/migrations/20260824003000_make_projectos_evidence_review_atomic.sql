@@ -102,13 +102,18 @@ BEGIN
       'containsRawErrors', false
     ),
     jsonb_build_object(
+      'sourceNamespace', NEW.namespace,
+      'targetNamespace', NEW.namespace,
+      'namespaceMatch', true
+    ),
+    jsonb_build_object(
       'source', NEW.source,
       'sourceKind', 'projectos_evidence',
       'sourceRef', NEW.source_ref,
       'projectId', v_project_id,
       'projectKey', v_project_key,
       'proofStage', v_proof_stage
-   ),
+    ),
     jsonb_build_object(
       'schemaVersion', 1,
       'candidateId', NEW.id,
