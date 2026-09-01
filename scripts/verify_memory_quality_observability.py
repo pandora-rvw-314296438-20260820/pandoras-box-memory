@@ -9,7 +9,8 @@ B=R/'supabase/functions/pandora-projectos-bridge/index.ts'
 CLASSES={'measurable_live_now','source_intended_only','unavailable_causal'}
 CAUSAL={'retrieval_usefulness','memory_assisted_success_lift','retrieval_prevented_repeat_failure_rate','retrieval_caused_rework_rate'}
 BAD_KEYS={'query','raw_query','query_text','body','content','raw_content','email','user_id','candidate_id','memory_id','item_id','head_id','record_id','token','secret','password','credential','payload','raw_payload'}
-FILES={'.github/workflows/memory-quality-observability-gate.yml','docs/observability/MEMORY_QUALITY_OBSERVABILITY_CONTRACT.md','docs/capabilities/evidence/MEMORY_QUALITY_OBSERVABILITY_BASELINE_2026-09-01.json','scripts/verify_memory_quality_observability.py'}
+MILESTONE_FILES={'.github/workflows/memory-quality-observability-gate.yml','docs/observability/MEMORY_QUALITY_OBSERVABILITY_CONTRACT.md','docs/capabilities/evidence/MEMORY_QUALITY_OBSERVABILITY_BASELINE_2026-09-01.json','scripts/verify_memory_quality_observability.py'}
+ALLOWED_COMPOSITE_FILES=MILESTONE_FILES|{'.github/workflows/learning-intelligence-contract.yml','docs/capabilities/evidence/LEARNING_INTELLIGENCE_CONTRACT_2026-09-01.md','scripts/verify_learning_intelligence_contract.py','.github/workflows/memory-hardening-readiness.yml','docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json','scripts/verify_memory_hardening_readiness.py','.github/workflows/memory-security-adjudication-gate.yml','docs/capabilities/evidence/MEMORY_SECURITY_ADJUDICATION_2026-09-01.json','docs/security/MEMORY_SECURITY_ADJUDICATION_CONTRACT_2026-09-01.md','scripts/verify_memory_security_adjudication.py','.github/workflows/memory-lifecycle-contract-gate.yml','docs/capabilities/evidence/MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01.md','docs/capabilities/evidence/MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01.json','scripts/verify_memory_lifecycle_contract.py','.github/workflows/memory-cross-project-generalization-gate.yml','docs/capabilities/evidence/MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01.json','docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01.md','scripts/verify_memory_cross_project_generalization.mjs'}
 def fail(s): raise AssertionError(s)
 def load(): return json.loads(M.read_text())
 def walk(v,p='root'):
@@ -55,7 +56,7 @@ def changed():
  b=os.getenv('BASE_SHA','').strip()
  if not b:return
  out=subprocess.check_output(['git','diff','--name-only',f'{b}...HEAD'],cwd=R,text=True)
- got={x for x in out.splitlines() if x}; extra=got-FILES; missing=FILES-got
+ got={x for x in out.splitlines() if x}; extra=got-ALLOWED_COMPOSITE_FILES; missing=MILESTONE_FILES-got
  if extra: fail(f'source-only unexpected files {sorted(extra)}')
  if missing: fail(f'missing milestone files {sorted(missing)}')
 def selftest():
