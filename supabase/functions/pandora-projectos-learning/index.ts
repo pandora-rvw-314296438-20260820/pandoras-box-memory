@@ -8,7 +8,8 @@ const SOURCE = "projectos-post-task";
 const MAX_BODY_BYTES = 32 * 1024;
 const MAX_CLOCK_SKEW_MS = 5 * 60_000;
 const ROUTINE_AGGREGATE_WINDOW_HOURS = 6;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HASH_PATTERN = /^[0-9a-f]{64}$/i;
 const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9._:/-]{1,180}$/;
 const OUTCOME_STATUSES = new Set(["completed", "failed"]);
@@ -51,7 +52,9 @@ const safeToken = (value: unknown, max = 180): string | null => {
 
 const uuid = (value: unknown): string | null => {
   const normalized = requiredText(value, 64);
-  return normalized && UUID_PATTERN.test(normalized) ? normalized.toLowerCase() : null;
+  return normalized && UUID_PATTERN.test(normalized)
+    ? normalized.toLowerCase()
+    : null;
 };
 
 const optionalUuid = (value: unknown): string | null => {
@@ -98,7 +101,11 @@ const hmacHex = async (secret: string, value: string): Promise<string> => {
     false,
     ["sign"],
   );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(value),
+  );
   return Array.from(new Uint8Array(signature))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
@@ -225,7 +232,10 @@ Deno.serve(async (request: Request) => {
     return json(400, { ok: false, error: "invalid_context_gate_state" });
   }
   if (outcomeStatus === "failed" && !errorFingerprint) {
-    return json(400, { ok: false, error: "failed_event_requires_error_fingerprint" });
+    return json(400, {
+      ok: false,
+      error: "failed_event_requires_error_fingerprint",
+    });
   }
 
   const timestamp = request.headers.get("x-pandora-timestamp") || "";
@@ -292,8 +302,7 @@ Deno.serve(async (request: Request) => {
   // bounded aggregate marker. Durable lessons continue through the dedicated
   // evidence-candidate path, while failures/destructive/ambiguous outcomes
   // remain review-gated here.
-  const reviewRequired =
-    outcomeStatus === "failed" ||
+  const reviewRequired = outcomeStatus === "failed" ||
     risk === "destructive" ||
     errorFingerprint !== null ||
     (risk === "write" && !resultFingerprint);
@@ -310,7 +319,10 @@ Deno.serve(async (request: Request) => {
       [aggregateWindowStart, projectKey, tool, risk].join("\n"),
     );
     const aggregateSourceRef = `projectos-summary:${aggregateKey}`;
-    const aggregateTitle = `ProjectOS routine ${risk} activity: ${tool}`.slice(0, 240);
+    const aggregateTitle = `ProjectOS routine ${risk} activity: ${tool}`.slice(
+      0,
+      240,
+    );
     const aggregateSummary = [
       `Routine successful ${risk} activity for ${projectKey} via ${tool}`,
       `was observed during the ${ROUTINE_AGGREGATE_WINDOW_HOURS}-hour window beginning ${aggregateWindowStart}.`,
@@ -329,7 +341,10 @@ Deno.serve(async (request: Request) => {
       .maybeSingle();
 
     if (existingDigestError) {
-      console.error("projectos_aggregate_lookup_failed", existingDigestError.message);
+      console.error(
+        "projectos_aggregate_lookup_failed",
+        existingDigestError.message,
+      );
       return json(500, { ok: false, error: "aggregate_lookup_failed" });
     }
 
@@ -370,7 +385,10 @@ Deno.serve(async (request: Request) => {
         .maybeSingle();
 
       if (digestInsertError && digestInsertError.code !== "23505") {
-        console.error("projectos_aggregate_insert_failed", digestInsertError.message);
+        console.error(
+          "projectos_aggregate_insert_failed",
+          digestInsertError.message,
+        );
         return json(500, { ok: false, error: "aggregate_insert_failed" });
       }
 
@@ -394,33 +412,38 @@ Deno.serve(async (request: Request) => {
     }
 
     if (digestCreated && digestId) {
-      const { error: auditInsertError } = await admin.from("audit_logs").insert({
-        user_id: memoryUserId,
-        namespace: NAMESPACE,
-        action: "projectos_post_task_learning_aggregate_created",
-        table_name: "memory_session_digests",
-        record_id: digestId,
-        before_snapshot: null,
-        after_snapshot: {
-          digestId,
-          aggregateSourceRef,
-          projectKey,
-          tool,
-          risk,
-          aggregateWindowStart,
-          reviewRequired: false,
-          canonicalMemoryWritten: false,
+      const { error: auditInsertError } = await admin.from("audit_logs").insert(
+        {
+          user_id: memoryUserId,
+          namespace: NAMESPACE,
+          action: "projectos_post_task_learning_aggregate_created",
+          table_name: "memory_session_digests",
+          record_id: digestId,
+          before_snapshot: null,
+          after_snapshot: {
+            digestId,
+            aggregateSourceRef,
+            projectKey,
+            tool,
+            risk,
+            aggregateWindowStart,
+            reviewRequired: false,
+            canonicalMemoryWritten: false,
+          },
+          metadata: {
+            integration_key: INTEGRATION_KEY,
+            product_key: PRODUCT_KEY,
+            privacy_policy: "metadata_only_v1",
+            authoritative_event_source: "projectos",
+            aggregate_window_hours: ROUTINE_AGGREGATE_WINDOW_HOURS,
+          },
         },
-        metadata: {
-          integration_key: INTEGRATION_KEY,
-          product_key: PRODUCT_KEY,
-          privacy_policy: "metadata_only_v1",
-          authoritative_event_source: "projectos",
-          aggregate_window_hours: ROUTINE_AGGREGATE_WINDOW_HOURS,
-        },
-      });
+      );
       if (auditInsertError) {
-        console.error("projectos_aggregate_audit_failed", auditInsertError.message);
+        console.error(
+          "projectos_aggregate_audit_failed",
+          auditInsertError.message,
+        );
       }
     }
 
@@ -451,8 +474,8 @@ Deno.serve(async (request: Request) => {
   ].join(" ").slice(0, 1800);
   const requestHash = await sha256(rawBody);
   const fingerprint = await sha256(`${sourceRef}\n${summary}`);
-  const riskSignal =
-    outcomeStatus === "failed" || risk === "destructive" || errorFingerprint !== null;
+  const riskSignal = outcomeStatus === "failed" || risk === "destructive" ||
+    errorFingerprint !== null;
   const reviewRisk = outcomeStatus === "failed"
     ? "A ProjectOS operation failed; investigate using authoritative provider evidence."
     : risk === "destructive"
@@ -472,7 +495,10 @@ Deno.serve(async (request: Request) => {
     .maybeSingle();
 
   if (existingCandidateError) {
-    console.error("projectos_candidate_lookup_failed", existingCandidateError.message);
+    console.error(
+      "projectos_candidate_lookup_failed",
+      existingCandidateError.message,
+    );
     return json(500, { ok: false, error: "candidate_lookup_failed" });
   }
 
@@ -488,7 +514,11 @@ Deno.serve(async (request: Request) => {
       memory_type: riskSignal ? "risk_signal" : "business_fact",
       title,
       summary,
-      importance: outcomeStatus === "failed" ? 8 : risk === "destructive" ? 7 : 6,
+      importance: outcomeStatus === "failed"
+        ? 8
+        : risk === "destructive"
+        ? 7
+        : 6,
       sensitivity: "low",
       confidence: 0.92,
       should_capture: true,
@@ -499,7 +529,13 @@ Deno.serve(async (request: Request) => {
       people: [],
       projects: [projectKey],
       risks: [reviewRisk],
-      tags: ["projectos", "post_task_learning", outcomeStatus, risk, "review_required"],
+      tags: [
+        "projectos",
+        "post_task_learning",
+        outcomeStatus,
+        risk,
+        "review_required",
+      ],
       metadata: {
         schema_version: 1,
         source_event_id: sourceEventId,
@@ -541,7 +577,10 @@ Deno.serve(async (request: Request) => {
       .maybeSingle();
 
     if (candidateInsertError && candidateInsertError.code !== "23505") {
-      console.error("projectos_candidate_insert_failed", candidateInsertError.message);
+      console.error(
+        "projectos_candidate_insert_failed",
+        candidateInsertError.message,
+      );
       return json(500, { ok: false, error: "candidate_insert_failed" });
     }
 
@@ -640,7 +679,10 @@ Deno.serve(async (request: Request) => {
       .maybeSingle();
 
     if (reviewInsertError && reviewInsertError.code !== "23505") {
-      console.error("projectos_review_insert_failed", reviewInsertError.message);
+      console.error(
+        "projectos_review_insert_failed",
+        reviewInsertError.message,
+      );
       return json(500, { ok: false, error: "review_insert_failed" });
     }
 
@@ -729,7 +771,10 @@ Deno.serve(async (request: Request) => {
       .maybeSingle();
 
     if (digestInsertError && digestInsertError.code !== "23505") {
-      console.error("projectos_digest_insert_failed", digestInsertError.message);
+      console.error(
+        "projectos_digest_insert_failed",
+        digestInsertError.message,
+      );
       return json(500, { ok: false, error: "digest_insert_failed" });
     }
 
@@ -788,7 +833,10 @@ Deno.serve(async (request: Request) => {
       },
     });
     if (auditInsertError) {
-      console.error("projectos_learning_audit_failed", auditInsertError.message);
+      console.error(
+        "projectos_learning_audit_failed",
+        auditInsertError.message,
+      );
     }
   }
 
