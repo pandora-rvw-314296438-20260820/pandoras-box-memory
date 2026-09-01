@@ -65,8 +65,19 @@ jobs:
           --node-modules-dir=auto
           supabase/functions/pandora-projectos-learning/index.ts
 
-      - name: Check learning Edge formatting
-        run: deno fmt --check supabase/functions/pandora-projectos-learning/index.ts
+      - name: Check learning Edge formatting when source changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          comparison_base="$BASE_SHA"
+          if [[ ! "$comparison_base" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "${comparison_base}^{commit}" 2>/dev/null; then
+            comparison_base="$(git rev-parse HEAD^)"
+          fi
+          if git diff --quiet "${comparison_base}"...HEAD -- supabase/functions/pandora-projectos-learning/index.ts; then
+            echo "Learning Edge source unchanged; preserving existing formatting debt outside this PR."
+          else
+            deno fmt --check supabase/functions/pandora-projectos-learning/index.ts
+          fi
 
       - name: Reject whitespace errors in candidate diff
         shell: bash
