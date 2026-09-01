@@ -1,0 +1,39 @@
+name: Memory Quality Observability Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  observability-truth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Assert exact PR head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Self-test observability truth verifier
+        run: python3 scripts/verify_memory_quality_observability.py --self-test
+
+      - name: Verify observability truth contract
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python3 scripts/verify_memory_quality_observability.py
+
+      - name: Re-prove exact-project source isolation
+        run: python3 scripts/verify_projectos_bridge_project_scope.py
+
+      - name: Re-run literal-secret gate
+        run: bash scripts/check_no_literal_secrets.sh
