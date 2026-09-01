@@ -1,0 +1,28 @@
+{
+    "observedAt": "2026-09-02",
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "gitBlobSha1": "1a2f28224b313585dc3f55675785277eb22863c6",
+    "migrationFile": "supabase/migrations/20260901184935_pandora_provider_learning_v1.sql",
+    "schemaVersion": "1.0",
+    "learningContract": {
+        "projectScoped": true,
+        "namespaceScoped": true,
+        "freshnessGoverned": true,
+        "minimumSampleCount": 3,
+        "negativeOutcomesIncluded": true,
+        "retrievalFeedbackRecorded": true,
+        "minimumVerificationPassCount": 2,
+        "routingPlaybookMutatesProduction": false
+    },
+    "liveSourceParity": true,
+    "memoryProjectRef": "ivmvufhcsezyhczzondn",
+    "migrationVersion": "20260901184935",
+    "securityContract": {
+        "requiresReview": true,
+        "modelOutcomeIntake": "service_role_only",
+        "canonicalMemoryWritten": false,
+        "unsafeEvidenceRejected": true,
+        "rawProviderContentStored": false
+    },
+    "liveRuntimeVerified": true
+}
