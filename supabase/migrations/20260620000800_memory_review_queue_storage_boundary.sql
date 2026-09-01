@@ -1,0 +1,43 @@
+-- Memory review queue storage boundary draft.
+-- Safe placeholder: schema is documented here but not applied until RLS policy review is complete.
+-- No seed rows, no unsafe grants, no service-role shortcuts, no pgvector, no embeddings.
+
+-- Future table: public.memory_review_queue_items
+-- Required columns:
+--   id uuid primary key default gen_random_uuid()
+--   user_id uuid not null references auth.users(id)
+--   namespace pandora_namespace not null check (namespace in ('real_life','au'))
+--   status text not null check (status in ('pending_review','needs_clarification','blocked_namespace_mismatch','blocked_sensitive','blocked_policy','approved_for_append','rejected','archived'))
+--   candidate_type text not null
+--   normalized_text text not null
+--   proposed_operation text not null
+--   evidence_snapshot jsonb not null default '{}'::jsonb
+--   sensitivity_snapshot jsonb not null default '{}'::jsonb
+--   source_metadata jsonb not null default '{}'::jsonb
+--   audit_metadata jsonb not null default '{}'::jsonb
+--   created_at timestamptz not null default now()
+--   updated_at timestamptz not null default now()
+-- Immutability expectations:
+--   namespace must never mutate after insert.
+--   normalized_text, candidate_type, proposed_operation, evidence_snapshot, sensitivity_snapshot, and source_metadata
+--   must never mutate after insert; create a new item instead of silently overwriting candidate content.
+-- RLS expectations:
+--   enable row level security; policies must scope every select/insert/update to auth.uid() = user_id.
+--   public clients must not provide trusted user_id; server repository/auth context owns it.
+--   archive may update status only; no delete policy should be exposed.
+
+-- Future table: public.memory_review_queue_decisions
+-- Required columns:
+--   id uuid primary key default gen_random_uuid()
+--   item_id uuid not null references public.memory_review_queue_items(id)
+--   user_id uuid not null references auth.users(id)
+--   namespace pandora_namespace not null check (namespace in ('real_life','au'))
+--   action text not null
+--   reason text
+--   audit_metadata jsonb not null default '{}'::jsonb
+--   created_at timestamptz not null default now()
+-- Append-only expectations:
+--   decisions are insert-only history; never update or delete decision rows.
+--   approved decisions do not automatically persist memory.
+--   mixed content remains review-only and cannot auto-persist.
+--   AU/story data is never real-life evidence; real-life data enters AU only when explicitly fictionalized and reviewed.
