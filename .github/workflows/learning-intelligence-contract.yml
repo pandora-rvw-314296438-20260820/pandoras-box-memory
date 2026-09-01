@@ -60,7 +60,10 @@ jobs:
         run: python3 scripts/verify_projectos_bridge_project_scope.py
 
       - name: Type-check learning Edge source
-        run: deno check supabase/functions/pandora-projectos-learning/index.ts
+        run: >-
+          deno check
+          --node-modules-dir=auto
+          supabase/functions/pandora-projectos-learning/index.ts
 
       - name: Check learning Edge formatting
         run: deno fmt --check supabase/functions/pandora-projectos-learning/index.ts
