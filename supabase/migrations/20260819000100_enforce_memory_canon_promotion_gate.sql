@@ -4,7 +4,8 @@
 -- promotion remains a separately governed service-role operation with durable
 -- review evidence. This migration does not rewrite or reclassify existing data.
 
-DROP POLICY IF EXISTS memory_items_insert_own ON public.memory_itemsCREATE POLICY memory_items_insert_own
+DROP POLICY IF EXISTS memory_items_insert_own ON public.memory_items;
+CREATE POLICY memory_items_insert_own
 ON public.memory_items
 FOR INSERT
 TO authenticated
@@ -19,7 +20,8 @@ WITH CHECK (
   AND revoked_at IS NULL
   AND revocation_reason IS NULL
   AND is_active IS TRUE
-)CREATE OR REPLACE FUNCTION public.save_validated_memory_candidate_transaction(
+);
+CREATE OR REPLACE FUNCTION public.save_validated_memory_candidate_transaction(
   p_namespace public.pandora_namespace,
   p_memory_type public.memory_type,
   p_title text,
@@ -199,7 +201,8 @@ BEGIN
   RETURN QUERY
     SELECT v_memory_item_id, v_source_ids, v_record_id, TRUE, 'completed'::text;
 END;
-$$REVOKE ALL ON FUNCTION public.save_validated_memory_candidate_transaction(
+$$;
+REVOKE ALL ON FUNCTION public.save_validated_memory_candidate_transaction(
   public.pandora_namespace,
   public.memory_type,
   text,
@@ -218,7 +221,8 @@ $$REVOKE ALL ON FUNCTION public.save_validated_memory_candidate_transaction(
   text,
   text,
   timestamptz
-) FROM PUBLIC, anon, authenticatorGRANT EXECUTE ON FUNCTION public.save_validated_memory_candidate_transaction(
+) FROM PUBLIC, anon, authenticator;
+GRANT EXECUTE ON FUNCTION public.save_validated_memory_candidate_transaction(
   public.pandora_namespace,
   public.memory_type,
   text,
@@ -237,7 +241,8 @@ $$REVOKE ALL ON FUNCTION public.save_validated_memory_candidate_transaction(
   text,
   text,
   timestamptz
-) TO authenticated, service_roleCOMMENT ON FUNCTION public.save_validated_memory_candidate_transaction(
+) TO authenticated, service_role;
+COMMENT ON FUNCTION public.save_validated_memory_candidate_transaction(
   public.pandora_namespace,
   public.memory_type,
   text,
@@ -256,4 +261,4 @@ $$REVOKE ALL ON FUNCTION public.save_validated_memory_candidate_transaction(
   text,
   text,
   timestamptz
-) IS 'Authenticated candidate intake is draft-only. Canonical promotion requires the separately governed service-role review path.'
+) IS 'Authenticated candidate intake is draft-only. Canonical promotion requires the separately governed service-role review path.';
