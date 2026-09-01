@@ -15,11 +15,19 @@
         "vercel_changed": false,
         "memory_content_changed": false
     },
-    "captured_at": "2026-09-01T10:37:00Z",
     "project_key": "mcpmaster-pandoras-box",
-    "source_commit": "ec74509969f17b73301eb5bd94df97546325b8ec",
-    "schema_version": 1,
+    "implementation": {
+        "kind": "bounded operational registry metadata correction",
+        "reason": "Memory migration source lineage is intentionally frozen; this correction changes project registry metadata only",
+        "migration_lineage_changed": false
+    },
+    "schema_version": 2,
     "memory_project_id": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+    "production_readback": {
+        "verified": true,
+        "applied_at": "2026-09-01T18:59:16.535461Z",
+        "memory_project_ref": "ivmvufhcsezyhczzondn"
+    },
     "unchanged_authorities": {
         "production_url": "https://mcpmaster.vercel.app",
         "lifecycle_status": "active",
