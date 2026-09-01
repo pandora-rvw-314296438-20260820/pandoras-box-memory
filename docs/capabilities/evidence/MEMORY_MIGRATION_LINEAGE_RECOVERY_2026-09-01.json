@@ -2,14 +2,14 @@
     "recovery": {
         "authority": "supabase_migrations.schema_migrations.statements[]",
         "legacyRecoveryPolicy": "recover only from trusted provider evidence with conservative secret quarantine and exact content verification",
-        "remainingLegacyFiles": 30,
+        "remainingLegacyFiles": 25,
         "quarantinedLegacyFiles": 12,
         "recoveredPostVaultFiles": 29,
         "productionSchemaMutation": false,
-        "recoveredLegacySafeFiles": 22,
+        "recoveredLegacySafeFiles": 27,
         "repairedCorruptedVersion": "20260808190813",
         "productionReplayAuthorized": false,
-        "remainingCandidateSafeFiles": 18
+        "remainingCandidateSafeFiles": 13
     },
     "observedAt": "2026-09-01T08:48:06Z",
     "pendingSource": [
@@ -18,9 +18,9 @@
     "sourceSnapshot": {
         "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
         "baseMainSha": "9da819876037aa6427e745189f7b3949747b3bef",
-        "migrationTreeSha": "037b0f22dd02253ca33a19ca831533126bf1502f",
-        "sourceRecoveryTreeSha": "75b1c5e00e9f4d5bd54fbf2a84af9f4f25bebfa0",
-        "sourceRecoveryCommitSha": "e25f0dca1c67d0898efd0b05ec36c573a34ec064"
+        "migrationTreeSha": "837f591b26c5e3ed93d7b0970c2e1b67ed77d0d6",
+        "sourceRecoveryTreeSha": "e721deece04888fc1f985f109e45f42d3de80aa6",
+        "sourceRecoveryCommitSha": "ed971e6853ea5b0c18a4998476283f531c3920a0"
     },
     "memoryProjectRef": "ivmvufhcsezyhczzondn",
     "knownExactApplied": [
@@ -141,6 +141,46 @@
                 "filename": "20260620000700_memory_ingest_transactional_rpc_boundary.sql",
                 "gitBlobSha1": "4634637443ee5b33158da0380d1e3ade7b1355a7",
                 "statementCount": 1
+            },
+            {
+                "bytes": 2563,
+                "sha256": "547cc30b710e976b681718972320af24703501a4800d40a19cf908d9b7cebdab",
+                "version": "20260620000800",
+                "filename": "20260620000800_memory_review_queue_storage_boundary.sql",
+                "gitBlobSha1": "89b199078433cb7ec105b722bc3f036abe1c4571",
+                "statementCount": 1
+            },
+            {
+                "bytes": 3589,
+                "sha256": "fc826d3bf711aa7627f3f3d0c61b7bf1d48dc63a760800ad2f6a27b243ae3e38",
+                "version": "20260620000900",
+                "filename": "20260620000900_memory_review_decision_append_rpc.sql",
+                "gitBlobSha1": "e5162f6554b291c9e942865469bf67b2d898485d",
+                "statementCount": 2
+            },
+            {
+                "bytes": 4622,
+                "sha256": "83431e7814be6fc64ed158c3649ff3367e29717127072cba32061019c904f51b",
+                "version": "20260620006200",
+                "filename": "20260620006200_memory_review_queue_rls_tables.sql",
+                "gitBlobSha1": "8bd4b8f5870fea7048f5cbb916fa789445cacd48",
+                "statementCount": 20
+            },
+            {
+                "bytes": 5914,
+                "sha256": "dbc63b83f924b4b3561438945bc29beddab4b283ca733719b4cd5da0c5a758d9",
+                "version": "20260626040000",
+                "filename": "20260626040000_phase_4a_memory_proposals.sql",
+                "gitBlobSha1": "a43f956b2f8e337d1a751da136459361c990cd63",
+                "statementCount": 7
+            },
+            {
+                "bytes": 3465,
+                "sha256": "811ab0c0b87e39cb5601d34bfe61fee1d9590f7748459e3da87c73f82dd472ba",
+                "version": "20260626041000",
+                "filename": "20260626041000_phase_4a_daily_chatgpt_memory_bridge.sql",
+                "gitBlobSha1": "c451baacb51837df3275be7e1652e4bdd3e2ca28",
+                "statementCount": 12
             },
             {
                 "bytes": 1185,
@@ -269,14 +309,14 @@
             "20260807085935",
             "20260807090844"
         ],
-        "recoveredManifestBytes": 2662,
+        "recoveredManifestBytes": 3264,
         "quarantineManifestBytes": 1549,
-        "recoveredManifestSha256": "2f0cf1f7a573d680f0bc42cff7d6f195024cb9ce73c9c4bd38b73ffb25dacc6d",
+        "recoveredManifestSha256": "1e2afc954228338fc78144367a9ff84951c6e583283f0adf376adb0ad1969986",
         "quarantineManifestSha256": "9452c5cd5971011da16ff9c23510286f7e8e4fb62db1601f337bc4700476eb1c",
-        "remainingSafeManifestBytes": 2115,
-        "recoveredCandidateSafeCount": 22,
-        "remainingCandidateSafeCount": 18,
-        "remainingSafeManifestSha256": "6502acd5688f9e0bf46205894e50f6247a6aae9c5864057088cbda2a26b5fa0b"
+        "remainingSafeManifestBytes": 1513,
+        "recoveredCandidateSafeCount": 27,
+        "remainingCandidateSafeCount": 13,
+        "remainingSafeManifestSha256": "d530c2c268d771ae2973de0a485c53bd5239d3a31cbd5d6f0a647e145c1184df"
     },
     "supersededPendingSource": {
         "bytes": 1800,
@@ -287,9 +327,9 @@
         "liveLedgerContainsRemovedVersion": false
     },
     "sourceStateAfterRecovery": {
-        "migrationFiles": 55,
-        "exactAppliedFiles": 55,
-        "missingAppliedFiles": 30,
+        "migrationFiles": 60,
+        "exactAppliedFiles": 60,
+        "missingAppliedFiles": 25,
         "pendingUnappliedFiles": 0
     },
     "sourceStateBeforeRecovery": {
