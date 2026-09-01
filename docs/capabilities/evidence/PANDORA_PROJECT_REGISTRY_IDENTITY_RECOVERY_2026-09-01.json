@@ -1,0 +1,38 @@
+{
+    "after": {
+        "github_owner": "pandora-rvw-314296438-20260820",
+        "github_repository": "pandoras-box"
+    },
+    "scope": "pandora-project-registry-github-authority-recovery",
+    "before": {
+        "github_owner": "banataosystems",
+        "github_repository": "Pandoras-box"
+    },
+    "safety": {
+        "edge_changed": false,
+        "canon_changed": false,
+        "grants_changed": false,
+        "vercel_changed": false,
+        "memory_content_changed": false
+    },
+    "project_key": "mcpmaster-pandoras-box",
+    "implementation": {
+        "kind": "bounded operational registry metadata correction",
+        "reason": "Memory migration source lineage is intentionally frozen; this correction changes project registry metadata only",
+        "migration_lineage_changed": false
+    },
+    "schema_version": 2,
+    "memory_project_id": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+    "production_readback": {
+        "verified": true,
+        "applied_at": "2026-09-01T18:59:16.535461Z",
+        "memory_project_ref": "ivmvufhcsezyhczzondn"
+    },
+    "unchanged_authorities": {
+        "production_url": "https://mcpmaster.vercel.app",
+        "lifecycle_status": "active",
+        "memory_namespace": "real_life",
+        "vercel_project_id": "prj_Y5rZVcq8xJVzHVt4uvfmg9wPvXMk",
+        "supabase_project_ref": "jcyqixttuebxqqfkjonq"
+    }
+}
