@@ -7,7 +7,9 @@ import { resolve } from "node:path";
 const root = process.cwd();
 const migrationDir = resolve(root, "supabase/migrations");
 const evidencePath = resolve(root, "docs/capabilities/evidence/MEMORY_MIGRATION_LINEAGE_RECOVERY_2026-09-01.json");
+const anchorEvidencePath = resolve(root, "docs/capabilities/evidence/MEMORY_MIGRATION_SANITIZED_ANCHORS_2026-09-01.json");
 const evidence = JSON.parse(readFileSync(evidencePath, "utf8"));
+const anchorEvidence = JSON.parse(readFileSync(anchorEvidencePath, "utf8"));
 function fail(message) { throw new Error(message); }
 function assert(condition, message) { if (!condition) fail(message); }
 function sha256(bytes) { return createHash("sha256").update(bytes).digest("hex"); }
@@ -23,11 +25,11 @@ assert(evidence.memoryProjectRef === "ivmvufhcsezyhczzondn", "Memory project ref
 assert(evidence.liveMigrationLedger.appliedCount === 85, "live applied count must remain 85");
 assert(evidence.liveMigrationLedger.latestVersion === "20260831211258", "latest live migration changed");
 const migrationTree = execFileSync("git", ["rev-parse", "HEAD:supabase/migrations"], { cwd: root, encoding: "utf8" }).trim();
-assert(migrationTree === evidence.sourceSnapshot.migrationTreeSha, `migration tree mismatch: ${migrationTree}`);
+assert(migrationTree === anchorEvidence.migrationTreeSha, `migration tree mismatch: ${migrationTree}`);
 execFileSync("git", ["merge-base", "--is-ancestor", evidence.sourceSnapshot.sourceRecoveryCommitSha, "HEAD"], { cwd: root, stdio: "ignore" });
 
 const actualFiles = readdirSync(migrationDir).filter((name) => name.endsWith(".sql")).sort();
-assert(actualFiles.length === 73, `expected 73 migration files, got ${actualFiles.length}`);
+assert(actualFiles.length === 85, `expected 85 migration files, got ${actualFiles.length}`);
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
@@ -80,8 +82,28 @@ for (const row of boundary.recoveredSafe) {
 const recoveredManifest = recoveredManifestRows.join("\n");
 assert(Buffer.byteLength(recoveredManifest) === boundary.recoveredManifestBytes, "recovered provider manifest byte mismatch");
 assert(sha256(Buffer.from(recoveredManifest)) === boundary.recoveredManifestSha256, "recovered provider manifest digest mismatch");
-for (const version of expectedQuarantine) {
-  assert(!actualFiles.some((filename) => filename.startsWith(`${version}_`)), `quarantined migration source is present: ${version}`);
+assert(anchorEvidence.schemaVersion === "1.0", "unexpected sanitized-anchor evidence schema");
+assert(anchorEvidence.memoryProjectRef === evidence.memoryProjectRef, "sanitized-anchor project ref mismatch");
+assert(anchorEvidence.liveAppliedCount === 85, "sanitized-anchor live applied count mismatch");
+assert(anchorEvidence.replayableExactCount === 73, "replayable exact count must remain 73");
+assert(anchorEvidence.sanitizedHistoricalAnchorCount === 12, "sanitized anchor count must be 12");
+assert(anchorEvidence.missingAppliedCount === 0, "applied migration identities must have zero gaps");
+assert(anchorEvidence.productionSchemaMutation === false, "sanitized recovery must not mutate production schema");
+assert(anchorEvidence.productionReplayAuthorized === false, "historical replay must remain unauthorized");
+assert(anchorEvidence.sourceCommitSha === "24c8ff1c1f9f51ac6194e2f585e0c706feb8d04f", "sanitized-anchor source commit changed");
+assert(anchorEvidence.sourceTreeSha === "58dcbd11f807b8c5a6a148500713590bfbc0f603", "sanitized-anchor source tree changed");
+assert(anchorEvidence.migrationTreeSha === migrationTree, "sanitized-anchor migration tree mismatch");
+assert(Array.isArray(anchorEvidence.anchors) && anchorEvidence.anchors.length === 12, "sanitized anchor rows must be 12");
+const anchorVersions = anchorEvidence.anchors.map((row) => row.version);
+assert(JSON.stringify(anchorVersions) === JSON.stringify(expectedQuarantine), "sanitized anchor version set changed");
+for (const anchor of anchorEvidence.anchors) {
+  const bytes = readFileSync(resolve(migrationDir, anchor.filename));
+  assert(gitBlobSha1(bytes) === anchor.sanitizedBlobSha1, `sanitized anchor git blob mismatch: ${anchor.filename}`);
+  const text = bytes.toString("utf8");
+  assert(text.includes("sanitized historical anchor"), `sanitized marker missing: ${anchor.filename}`);
+  assert(text.includes("Do not reconstruct or replay omitted secret material."), `non-replay marker missing: ${anchor.filename}`);
+  assert(!/(?:secret_value|password|passwd|api[_ -]?key|access[_ -]?token|refresh[_ -]?token|private[_ -]?key)\s*[:=]/i.test(text), `credential-shaped assignment present in sanitized anchor: ${anchor.filename}`);
+  expectedFiles.add(anchor.filename);
 }
 
 const lastKnownExact = evidence.knownExactApplied.at(-1).version;
@@ -107,7 +129,7 @@ assert(evidence.postVaultExactSource.providerConcatenationManifestSha256 === "03
 assert(evidence.postVaultExactSource.multiStatementFiles === 4, "post-Vault multi-statement provider proof changed");
 assert(evidence.postVaultExactSource.replayableSource === true, "post-Vault replayability proof changed");
 assert(evidence.postVaultExactSource.serialization === "provider statements preserved in-order; multi-statement migrations add explicit semicolon/newline terminators; single-statement migrations preserve provider statement bytes plus one terminal newline", "post-Vault serialization contract changed");
-assert(expectedFiles.size === 73, `expected source set has ${expectedFiles.size} files`);
+assert(expectedFiles.size === 85, `expected source set has ${expectedFiles.size} files`);
 assert(JSON.stringify([...expectedFiles].sort()) === JSON.stringify(actualFiles), "migration tree contains an unexpected or missing SQL file");
 assert(evidence.pendingSource.length === 0, "pending unapplied migration source must remain absent");
 assert(evidence.recovery.recoveredPostVaultFiles === 29, "recovered post-Vault count stale");
@@ -117,4 +139,4 @@ assert(evidence.recovery.remainingCandidateSafeFiles === 0, "remaining safe coun
 assert(evidence.recovery.quarantinedLegacyFiles === 12, "quarantined count stale");
 assert(evidence.recovery.productionSchemaMutation === false, "production mutation must remain false");
 assert(evidence.recovery.productionReplayAuthorized === false, "production replay must remain unauthorized");
-process.stdout.write("Memory migration lineage checkpoint valid: 73/85 exact source; legacy boundary 40 safe / 12 quarantined; 40 safe restored / 0 safe pending.\n");
+process.stdout.write("Memory migration lineage checkpoint valid: 85/85 applied-version source; 73 exact replayable + 12 sanitized historical anchors; zero missing applied versions.\n");

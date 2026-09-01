@@ -1,0 +1,132 @@
+{
+    "anchors": [
+        {
+            "name": "memory_execute_approved_review_persistence",
+            "version": "20260623006600",
+            "filename": "20260623006600_memory_execute_approved_review_persistence.sql",
+            "statementCount": 4,
+            "sanitizedBlobSha1": "44dac57f101bbc3672f36e80a4432736948ad0af",
+            "providerManifestBytes": 9622,
+            "providerManifestSha256": "be74086da4d77f6cfd27bf294e8a37acdc5802345a305fb2c2acc3333b9b0fbc"
+        },
+        {
+            "name": "phase_4c_adaptive_memory_intelligence",
+            "version": "20260627040000",
+            "filename": "20260627040000_phase_4c_adaptive_memory_intelligence.sql",
+            "statementCount": 24,
+            "sanitizedBlobSha1": "cfd06a099a6ff256cfb044ca5b19b22169da2fbf",
+            "providerManifestBytes": 5998,
+            "providerManifestSha256": "d8f95efa3483e503bd002fdf424985d366ea1fbc8f363818c4e97bfd539c9aeb"
+        },
+        {
+            "name": "posthog_product_intelligence",
+            "version": "20260731111248",
+            "filename": "20260731111248_posthog_product_intelligence.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "49c1f66da731c5fe817a7925733a4dbc38816198",
+            "providerManifestBytes": 12473,
+            "providerManifestSha256": "1723245f30c97bb01be5d93474b44eee6a1d2c6936f6b58f6773cb47d371bc5f"
+        },
+        {
+            "name": "pandora_fxpass_growth_bridge",
+            "version": "20260801163126",
+            "filename": "20260801163126_pandora_fxpass_growth_bridge.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "9d2b4dabb8db315c4e0cdaf78fc13a88fd3b0ffc",
+            "providerManifestBytes": 2427,
+            "providerManifestSha256": "f7aeb346bca4ed5f686461d297800cedf31ac947de62f638f825772958c1a730"
+        },
+        {
+            "name": "rebind_mcpmaster_memory_principal_to_canonical_vercel_identity",
+            "version": "20260803111852",
+            "filename": "20260803111852_rebind_mcpmaster_memory_principal_to_canonical_vercel_identity.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "030366a3a3ae57954f28c50ac17b99ef009d1731",
+            "providerManifestBytes": 620,
+            "providerManifestSha256": "2906caefdb505ef95913247f931536060ea252813b94fdf665c2127e30138965"
+        },
+        {
+            "name": "temporary_fxpass_snapshot_export_gate",
+            "version": "20260807055209",
+            "filename": "20260807055209_temporary_fxpass_snapshot_export_gate.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "5137acdbbbe1bfe8d28b10597b9da9670e205d2d",
+            "providerManifestBytes": 1692,
+            "providerManifestSha256": "2c6ad1e3e8088971916a7c83efab8309d3c288cdd554ad7858197413830c2126"
+        },
+        {
+            "name": "temporary_fxpass_privacy_snapshot_export_gate",
+            "version": "20260807081540",
+            "filename": "20260807081540_temporary_fxpass_privacy_snapshot_export_gate.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "afa7195428897300e3046dac668542efbb69100a",
+            "providerManifestBytes": 1704,
+            "providerManifestSha256": "4604729d145b1d3bc5903f2ae696c8bcf2944baf7bbee48d2e3adc4e48d3e2d5"
+        },
+        {
+            "name": "projectos_post_task_learning_foundation",
+            "version": "20260807082820",
+            "filename": "20260807082820_projectos_post_task_learning_foundation.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "1700827b397e6d19604d7c093bfd9b2f596ca7c6",
+            "providerManifestBytes": 1437,
+            "providerManifestSha256": "5452f052e5e82c071995c5aa64d976543157a9390c93e31320586bc587cbbb4b"
+        },
+        {
+            "name": "projectos_daily_pack_and_runtime_reconciliation",
+            "version": "20260807084620",
+            "filename": "20260807084620_projectos_daily_pack_and_runtime_reconciliation.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "9525c83be714b112ab0352dbbf7831f852d862d0",
+            "providerManifestBytes": 22031,
+            "providerManifestSha256": "c2450cde412531e7a0b55d9753386d3189536c6c3f1933f382205a1d19ac060e"
+        },
+        {
+            "name": "projectos_bridge_v13_evidence_reconciliation",
+            "version": "20260807085215",
+            "filename": "20260807085215_projectos_bridge_v13_evidence_reconciliation.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "ef52c43d4c6220111c90e7f6fbba20a431683528",
+            "providerManifestBytes": 3501,
+            "providerManifestSha256": "410fbadcf1a464ae42199dd81545e2d2ad5d1258bf9a1022089508e7b6ffd3d8"
+        },
+        {
+            "name": "projectos_native_hydration_gate_evidence",
+            "version": "20260807085935",
+            "filename": "20260807085935_projectos_native_hydration_gate_evidence.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "573f0e985589df6f23288153539fa3fc7f352d4c",
+            "providerManifestBytes": 3923,
+            "providerManifestSha256": "f8513df8d55edadc0660cbcb5329c0b4d08ab5f08e736efeaa3ccb21f3d00a5e"
+        },
+        {
+            "name": "projectos_no_github_final_security_evidence",
+            "version": "20260807090844",
+            "filename": "20260807090844_projectos_no_github_final_security_evidence.sql",
+            "statementCount": 1,
+            "sanitizedBlobSha1": "4ab8bf53647cc5db4bd5ec1b31b52c83c04f5171",
+            "providerManifestBytes": 4237,
+            "providerManifestSha256": "5f651d862205e924fb3706ec363d29534434b36dc20f08d343352264b972ff5c"
+        }
+    ],
+    "observedAt": "2026-09-01T13:41:38Z",
+    "baseMainSha": "9f9a05b7880f87ea06390846abaa59e93eb7414e",
+    "schemaVersion": "1.0",
+    "sourceTreeSha": "58dcbd11f807b8c5a6a148500713590bfbc0f603",
+    "sourceCommitSha": "24c8ff1c1f9f51ac6194e2f585e0c706feb8d04f",
+    "liveAppliedCount": 85,
+    "memoryProjectRef": "ivmvufhcsezyhczzondn",
+    "migrationTreeSha": "9c3570fb8a9eb833ff3ec23d8370815410a228b2",
+    "missingAppliedCount": 0,
+    "securityDisposition": {
+        "policy": "historical credential/provider literals remain provider-only; Git stores only sanitized applied-version anchors plus provider hashes",
+        "directPiiDetected": false,
+        "secretBodiesOmitted": true,
+        "credentialMaterialWrittenToGit": false,
+        "unclassifiedHighEntropyDetected": false
+    },
+    "replayableExactCount": 73,
+    "productionSchemaMutation": false,
+    "productionReplayAuthorized": false,
+    "sanitizedHistoricalAnchorCount": 12
+}

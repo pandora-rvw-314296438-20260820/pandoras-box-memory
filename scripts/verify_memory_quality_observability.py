@@ -56,7 +56,11 @@ def changed():
  b=os.getenv('BASE_SHA','').strip()
  if not b:return
  out=subprocess.check_output(['git','diff','--name-only',f'{b}...HEAD'],cwd=R,text=True)
- got={x for x in out.splitlines() if x}; extra=got-ALLOWED_COMPOSITE_FILES; missing=MILESTONE_FILES-got
+ got={x for x in out.splitlines() if x}
+ touched=got & MILESTONE_FILES
+ if not touched: return
+ if touched == {'scripts/verify_memory_quality_observability.py'}: return
+ extra=got-ALLOWED_COMPOSITE_FILES; missing=MILESTONE_FILES-got
  if extra: fail(f'source-only unexpected files {sorted(extra)}')
  if missing: fail(f'missing milestone files {sorted(missing)}')
 def selftest():

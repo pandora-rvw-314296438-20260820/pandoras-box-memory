@@ -1,0 +1,5 @@
+-- Historical migration identity recovered from live Supabase ledger.
+-- Version: 20260627040000
+-- Name: phase_4c_adaptive_memory_intelligence
+-- Security disposition: sanitized historical anchor; credential/provider literals intentionally omitted.
+-- This version is already applied in production. Do not reconstruct or replay omitted secret material.
