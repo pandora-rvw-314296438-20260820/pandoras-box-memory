@@ -1,0 +1,63 @@
+name: Memory Security Adjudication Gate
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'docs/security/MEMORY_SECURITY_ADJUDICATION_CONTRACT_2026-09-01.md'
+      - 'docs/capabilities/evidence/MEMORY_SECURITY_ADJUDICATION_2026-09-01.json'
+      - 'scripts/verify_memory_security_adjudication.py'
+      - '.github/workflows/memory-security-adjudication-gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'docs/security/MEMORY_SECURITY_ADJUDICATION_CONTRACT_2026-09-01.md'
+      - 'docs/capabilities/evidence/MEMORY_SECURITY_ADJUDICATION_2026-09-01.json'
+      - 'scripts/verify_memory_security_adjudication.py'
+      - '.github/workflows/memory-security-adjudication-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  security-adjudication:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert exact candidate head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Resolve comparison base
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          if [ -z "$base" ] || [[ "$base" =~ ^0+$ ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          echo "BASE_SHA=$base" >> "$GITHUB_ENV"
+
+      - name: Verify gate logic
+        run: python scripts/verify_memory_security_adjudication.py --self-test
+
+      - name: Adjudicate changed migrations
+        run: python scripts/verify_memory_security_adjudication.py --base "$BASE_SHA"
