@@ -11,7 +11,7 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 const H40 = /^[0-9a-f]{40}$/;
 const H64 = /^[0-9a-f]{64}$/;
 const HISTORICAL_CANDIDATE_SHA = "120eada4ca23d4b680776379c16c0ac7d3db7e8c6710ef5165d0b65cf6c03fe3";
-const CURRENT_APPLIED_SHA = "470db976b1143afcba9879523145259c137ed9eab9f987b315c1cc677fc425c7";
+const CURRENT_REPLAYABLE_APPLIED_SHA = "eef816f73013e5926c43a301a1f4902d33b57c7938cd6f6f565a6989b96a56fd";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const PLANS = new Set([
   "62026a32-9bbb-4441-9f75-203906b73b31", "a0ba735f-d23f-4d14-b13d-e77fe27dccbd",
@@ -139,7 +139,7 @@ const migration=readFileSync(M,"utf8");
 const evidenceRaw=readFileSync(E,"utf8");
 const evidence=JSON.parse(evidenceRaw);
 if (argv.includes("--self-test")) selfTest(migration,evidence);
-const errors=[...validateSql(migration),...validateEvidence(evidence,migration)]; if (sha(migration) !== CURRENT_APPLIED_SHA) errors.push("current migration is not the exact live-applied recovery hash");
+const errors=[...validateSql(migration),...validateEvidence(evidence,migration)]; if (sha(migration) !== CURRENT_REPLAYABLE_APPLIED_SHA) errors.push("current migration is not the provider-derived replayable applied source hash");
 const side=readFileSync(S,"utf8").trim().split(/\s+/);
 if (side.length!==2 || !H64.test(side[0]??"") || side[1]!==E || side[0]!==sha(evidenceRaw)) errors.push("evidence sidecar mismatch");
 if (errors.length) { console.error("Canon-promotion gate FAILED:"); errors.forEach(x=>console.error(`  - ${x}`)); exit(1); }
