@@ -254,11 +254,15 @@ const warningsFor = (input: {
   }
   if (!input.contextPack) {
     warnings.push(
-      "No active context pack was available; canonical records and open loops were still returned.",
+      "No project-scoped context pack was returned; retrieval continued with exact-project records only.",
     );
   }
   return warnings;
 };
+
+const PROJECT_SEARCH_KEY_PATTERN = /^[a-z0-9][a-z0-9._-]{1,95}$/;
+const PROJECT_SEARCH_UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const searchMemory = async (
   body: JsonRecord,
@@ -275,6 +279,14 @@ const searchMemory = async (
       ? body.max_items
       : 12;
   const maxItems = Math.min(Math.max(requestedMax, 1), MAX_ITEMS);
+  const projectKey = typeof body.project_key === "string"
+    ? body.project_key.trim()
+    : "";
+  const projectIdProvided = body.project_id !== null &&
+    body.project_id !== undefined;
+  const projectId = projectIdProvided && typeof body.project_id === "string"
+    ? body.project_id.trim()
+    : null;
 
   if (namespace !== "real_life" && namespace !== "au") {
     return respond({ ok: false, error: "namespace_required" }, 400);
@@ -288,32 +300,75 @@ const searchMemory = async (
   if (!query || query.length > MAX_QUERY_LENGTH) {
     return respond({ ok: false, error: "invalid_query" }, 400);
   }
+  if (
+    !projectKey ||
+    !PROJECT_SEARCH_KEY_PATTERN.test(projectKey) ||
+    (projectIdProvided &&
+      (!projectId || !PROJECT_SEARCH_UUID_PATTERN.test(projectId)))
+  ) {
+    return respond({ ok: false, error: "project_identity_invalid" }, 400);
+  }
+
+  let projectQuery = supabase
+    .from("pandora_projects")
+    .select("id,project_key,memory_namespace,lifecycle_status")
+    .eq("memory_namespace", namespace)
+    .eq("project_key", projectKey)
+    .eq("lifecycle_status", "active");
+  if (projectId) projectQuery = projectQuery.eq("id", projectId);
+
+  const { data: boundProject, error: boundProjectError } = await projectQuery
+    .maybeSingle();
+  if (boundProjectError) {
+    console.error(
+      "projectos_memory_project_lookup_failed",
+      boundProjectError.message,
+    );
+    return respond({ ok: false, error: "project_lookup_failed" }, 503);
+  }
+  if (
+    !boundProject ||
+    typeof boundProject.id !== "string" ||
+    !PROJECT_SEARCH_UUID_PATTERN.test(boundProject.id) ||
+    typeof boundProject.project_key !== "string" ||
+    !PROJECT_SEARCH_KEY_PATTERN.test(boundProject.project_key)
+  ) {
+    return respond({ ok: false, error: "project_not_allowed" }, 403);
+  }
+
+  const canonicalProjectId = boundProject.id;
+  const canonicalProjectKey = boundProject.project_key;
+  const { data: projectGrant, error: projectGrantError } = await supabase
+    .from("pandora_project_grants")
+    .select("project_id")
+    .eq("principal_key", PRINCIPAL_KEY)
+    .eq("project_id", canonicalProjectId)
+    .eq("environment", principal.environment)
+    .eq("is_active", true)
+    .eq("can_read", true)
+    .is("revoked_at", null)
+    .maybeSingle();
+  if (projectGrantError) {
+    console.error(
+      "projectos_memory_project_grant_lookup_failed",
+      projectGrantError.message,
+    );
+    return respond({ ok: false, error: "project_grant_lookup_failed" }, 503);
+  }
+  if (!projectGrant?.project_id) {
+    return respond({ ok: false, error: "project_not_allowed" }, 403);
+  }
 
   const terms = safeSearchTerms(query);
   const canonStatuses = requestedCanonStatuses(body.canon_statuses);
-
-  let profileQuery = supabase
-    .from("memory_profiles")
-    .select(
-      "id,namespace,profile_type,subject_key,title,summary,facts,preferences,patterns,risks,open_loops,decisions,evidence_refs,confidence,status,version,created_at,updated_at,supersedes_profile_id,superseded_at",
-    )
-    .eq("user_id", principal.memory_user_id)
-    .eq("namespace", namespace)
-    .order("updated_at", { ascending: false })
-    .limit(maxItems);
-  if (terms.length) {
-    profileQuery = profileQuery.or(
-      orFilter(terms, ["title", "summary", "subject_key"]),
-    );
-  }
-
   let itemQuery = supabase
     .from("memory_items")
     .select(
-      "id,title,body,confidence,source_summary,created_at,updated_at,canon_status,memory_type,strength,metadata",
+      "id,project_id,title,body,confidence,source_summary,created_at,updated_at,canon_status,memory_type,strength,metadata",
     )
     .eq("user_id", principal.memory_user_id)
     .eq("namespace", namespace)
+    .eq("project_id", canonicalProjectId)
     .eq("is_active", true)
     .in("canon_status", canonStatuses)
     .order("updated_at", { ascending: false })
@@ -322,77 +377,16 @@ const searchMemory = async (
     itemQuery = itemQuery.or(orFilter(terms, ["title", "body"]));
   }
 
-  const [
-    profilesResult,
-    loopsResult,
-    eventsResult,
-    itemsResult,
-    packsResult,
-  ] = await Promise.all([
-    profileQuery,
-    supabase
-      .from("memory_open_loops")
-      .select(
-        "id,namespace,loop_type,subject_key,title,description,severity,status,evidence_refs,next_action,created_at,updated_at,resolved_at",
-      )
-      .eq("user_id", principal.memory_user_id)
-      .eq("namespace", namespace)
-      .in("status", ["open", "acknowledged", "deferred"])
-      .order("severity", { ascending: false })
-      .limit(maxItems),
-    supabase
-      .from("memory_events")
-      .select(
-        "id,source,source_ref,extracted_summary,importance,sensitivity,status,created_at,updated_at,confidence_score,retrieval_weight,retrieval_count,positive_feedback_count,negative_feedback_count,superseded_by_memory_id",
-      )
-      .eq("user_id", principal.memory_user_id)
-      .eq("namespace", namespace)
-      .order("created_at", { ascending: false })
-      .limit(maxItems),
-    itemQuery,
-    supabase
-      .from("memory_context_packs")
-      .select(
-        "id,namespace,pack_type,title,summary,key_points,active_projects,people_map,decisions,risks,open_loops,generated_from_event_ids,status,created_at,updated_at",
-      )
-      .eq("user_id", principal.memory_user_id)
-      .eq("namespace", namespace)
-      .eq("status", "active")
-      .order("updated_at", { ascending: false })
-      .limit(20),
-  ]);
-
-  const firstError = [
-    profilesResult,
-    loopsResult,
-    eventsResult,
-    itemsResult,
-    packsResult,
-  ].find((result) => result.error)?.error;
-  if (firstError) {
+  const itemsResult = await itemQuery;
+  if (itemsResult.error) {
     console.error("projectos_memory_search_failed", {
-      code: firstError.code,
-      message: firstError.message,
+      code: itemsResult.error.code,
+      message: itemsResult.error.message,
     });
     return respond({ ok: false, error: "memory_query_failed" }, 503);
   }
 
-  const profiles = (profilesResult.data ?? []) as JsonRecord[];
-  const openLoops = (loopsResult.data ?? []) as JsonRecord[];
-  const recentEvents = (eventsResult.data ?? []) as JsonRecord[];
   const items = (itemsResult.data ?? []) as JsonRecord[];
-  const packs = (packsResult.data ?? []) as JsonRecord[];
-  const dailyContextPack =
-    packs.find((pack: JsonRecord) => pack.pack_type === "daily") ?? null;
-  const latestContextPack =
-    packs.find((pack: JsonRecord) => pack.pack_type === "master") ??
-    dailyContextPack ??
-    packs[0] ??
-    null;
-  const hydratedContextPack = latestContextPack && isRecord(latestContextPack)
-    ? { ...latestContextPack, daily_context_pack: dailyContextPack }
-    : latestContextPack;
-
   const semanticMatches = items.map((item: JsonRecord) => ({
     id: item.id,
     source: "memory_item",
@@ -402,7 +396,6 @@ const searchMemory = async (
     created_at: item.created_at,
     updated_at: item.updated_at,
   }));
-
   const canonicalRecords = items.map((item: JsonRecord) => ({
     id: item.id,
     namespace,
@@ -420,35 +413,7 @@ const searchMemory = async (
   }));
   const approvedCount = canonicalRecords.filter((item) => item.approved).length;
 
-  const adaptiveProfile = profiles.filter((profile: JsonRecord) =>
-    ["adaptive", "user", "preference"].some((value) =>
-      String(profile.profile_type).toLowerCase().includes(value)
-    )
-  );
-  const styleProfile = profiles.filter((profile: JsonRecord) =>
-    String(profile.profile_type).toLowerCase().includes("style")
-  );
-  const projectContext = profiles.filter((profile: JsonRecord) =>
-    ["project", "business", "decision"].some((value) =>
-      String(profile.profile_type).toLowerCase().includes(value)
-    )
-  );
-  const peopleContext = profiles.filter((profile: JsonRecord) =>
-    ["person", "people", "relationship"].some((value) =>
-      String(profile.profile_type).toLowerCase().includes(value)
-    )
-  );
-  const riskWarnings = [
-    ...profiles.filter(
-      (profile: JsonRecord) =>
-        Array.isArray(profile.risks) && profile.risks.length > 0,
-    ),
-    ...openLoops.filter(
-      (loop: JsonRecord) => Number(loop.severity ?? 0) >= 7,
-    ),
-  ];
-
-  const queryHash = await sha256(`${namespace}:${query}`);
+  const queryHash = await sha256(`${namespace}:${canonicalProjectId}:${query}`);
   const { error: logError } = await supabase
     .from("memory_retrieval_logs")
     .insert({
@@ -458,16 +423,19 @@ const searchMemory = async (
       metadata: {
         principal: PRINCIPAL_KEY,
         source: "projectos",
-        returned_profiles: profiles.length,
-        returned_open_loops: openLoops.length,
-        returned_events: recentEvents.length,
+        project_id: canonicalProjectId,
+        project_key: canonicalProjectKey,
+        returned_profiles: 0,
+        returned_open_loops: 0,
+        returned_events: 0,
         returned_items: semanticMatches.length,
         returned_approved_items: approvedCount,
-        returned_context_pack: Boolean(latestContextPack),
-        context_pack_type: latestContextPack?.pack_type ?? null,
-        returned_daily_context_pack: Boolean(dailyContextPack),
+        returned_context_pack: false,
+        context_pack_type: null,
+        returned_daily_context_pack: false,
         search_terms: terms.length,
         canon_statuses: canonStatuses,
+        unscoped_components_omitted: true,
       },
     });
   if (logError) {
@@ -477,34 +445,41 @@ const searchMemory = async (
     });
   }
 
+  const warnings = warningsFor({
+    approvedCount,
+    returnedCount: canonicalRecords.length,
+    profileCount: 0,
+    eventCount: 0,
+    terms,
+    contextPack: null,
+  });
+  warnings.push(
+    "Project isolation omitted profiles, open loops, events, and context packs because those records do not carry enforceable first-class project identity.",
+  );
+
   return respond({
     ok: true,
     namespace,
+    project_id: canonicalProjectId,
+    project_key: canonicalProjectKey,
     current_task: currentTask,
-    adaptive_profile: adaptiveProfile,
-    style_profile: styleProfile,
-    project_context: projectContext,
-    people_context: peopleContext,
-    risk_warnings: riskWarnings,
-    open_loops: openLoops,
-    latest_context_pack: hydratedContextPack,
-    daily_context_pack: dailyContextPack,
-    recent_events: recentEvents,
+    adaptive_profile: [],
+    style_profile: [],
+    project_context: [],
+    people_context: [],
+    risk_warnings: [],
+    open_loops: [],
+    latest_context_pack: null,
+    daily_context_pack: null,
+    recent_events: [],
     semantic_matches: semanticMatches,
     canonical_records: canonicalRecords,
     approved_record_count: approvedCount,
     requested_canon_statuses: canonStatuses,
-    retrieval_mode: "keyword_recency_context_pack",
+    retrieval_mode: "project_scoped_keyword_recency",
     retrieval_reasoning_summary:
-      "ProjectOS received namespace-isolated, service-principal-owned approved Memory records, current open loops, and the preferred active master or daily context pack using bounded per-term matching and recency ordering.",
-    warnings: warningsFor({
-      approvedCount,
-      returnedCount: canonicalRecords.length,
-      profileCount: profiles.length,
-      eventCount: recentEvents.length,
-      terms,
-      contextPack: hydratedContextPack,
-    }),
+      "ProjectOS received only exact-project, service-principal-authorized Memory items using project grant enforcement, bounded per-term matching, and recency ordering. Unscoped component types were omitted fail-closed.",
+    warnings,
   });
 };
 
