@@ -1,0 +1,74 @@
+
+name: Memory Hardening Readiness Gate
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/**"
+      - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - "scripts/verify_memory_hardening_readiness.py"
+      - "scripts/verify_projectos_bridge_project_scope.py"
+      - ".github/workflows/projectos-bridge-project-isolation.yml"
+      - ".github/workflows/machine-gateway-namespace-isolation.yml"
+      - ".github/workflows/memory-hardening-readiness.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/**"
+      - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - "scripts/verify_memory_hardening_readiness.py"
+      - "scripts/verify_projectos_bridge_project_scope.py"
+      - ".github/workflows/projectos-bridge-project-isolation.yml"
+      - ".github/workflows/machine-gateway-namespace-isolation.yml"
+      - ".github/workflows/memory-hardening-readiness.yml"
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  hardening-readiness:
+    name: Prove Memory hardening readiness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+          persist-credentials: false
+      - name: Set up Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.4.3
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Assert exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Verify lifecycle and custom-auth authorities
+        run: python3 scripts/verify_memory_hardening_readiness.py
+      - name: Re-prove ProjectOS exact-project source scope
+        run: python3 scripts/verify_projectos_bridge_project_scope.py
+      - name: Install exact machine-gateway dependencies
+        run: npm ci --ignore-scripts --prefix supabase/functions/pandora-machine-gateway
+      - name: Re-prove machine-gateway namespace isolation
+        run: >-
+          deno test
+          --config supabase/functions/pandora-machine-gateway/deno.json
+          --allow-read=supabase/functions/pandora-machine-gateway/index.ts
+          supabase/functions/pandora-machine-gateway/memory-search-policy_test.ts
+          supabase/functions/pandora-machine-gateway/memory-search-postgrest_test.ts
+      - name: Type-check machine gateway
+        run: >-
+          deno check
+          --config supabase/functions/pandora-machine-gateway/deno.json
+          supabase/functions/pandora-machine-gateway/index.ts
+      - name: Scan for literal secrets
+        run: bash scripts/check_no_literal_secrets.sh
