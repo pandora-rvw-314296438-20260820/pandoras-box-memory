@@ -64,6 +64,16 @@ For every affected object, record:
 9. exact provider readback;
 10. source/runtime identity used for verification.
 
+## Explicit non-actions for this milestone
+
+- no production RLS mutation;
+- no production grant or revoke;
+- no Auth or extension mutation;
+- no Edge deployment or deletion;
+- no Vercel production mutation;
+- no Memory data or canonical-state mutation;
+- no migration execution.
+
 ## Production boundary
 
 At this milestone, canonical Memory `main` is `9da819876037aa6427e745189f7b3949747b3bef`. Memory production Vercel remains deployment `dpl_BEexxMqWK6LYmzvbGHb9emd8HAX4` sourced from `ae5aeb6a8a98582df9b4905381d3cff3298cc887`. PR #12 is independently recovering migration lineage and is not modified by this lane.
