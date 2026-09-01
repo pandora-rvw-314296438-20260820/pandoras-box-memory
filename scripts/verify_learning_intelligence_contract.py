@@ -53,6 +53,11 @@ required_learning = [
     '.from("memory_capture_candidates")',
     '.from("memory_review_queue_items")',
     "canonical_memory_written: false",
+    "ROUTINE_AGGREGATE_WINDOW_HOURS = 6",
+    "projectos_selective_review_v2",
+    "projectos_routine_operation_summary",
+    "scoring_version: \"projectos-learning-v2\"",
+    "(risk === \"write\" && !resultFingerprint)",
 ]
 for marker in required_learning:
     if marker not in learning:
@@ -62,6 +67,8 @@ for forbidden in [
     "canonical_memory_written: true",
     "raw_excerpt: rawBody",
     "requires_review: false",
+    "scoring_version: \"projectos-learning-v1\"",
+    "usefulness_score: outcomeStatus === \"failed\" ? 0.9 : 0.72",
 ]:
     if forbidden in learning:
         raise SystemExit(f"unsafe learning source marker present: {forbidden}")

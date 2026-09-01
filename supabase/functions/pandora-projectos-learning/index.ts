@@ -7,6 +7,7 @@ const NAMESPACE = "real_life";
 const SOURCE = "projectos-post-task";
 const MAX_BODY_BYTES = 32 * 1024;
 const MAX_CLOCK_SKEW_MS = 5 * 60_000;
+const ROUTINE_AGGREGATE_WINDOW_HOURS = 6;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const HASH_PATTERN = /^[0-9a-f]{64}$/i;
 const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9._:/-]{1,180}$/;
@@ -286,6 +287,159 @@ Deno.serve(async (request: Request) => {
     return json(401, { ok: false, error: "invalid_signature" });
   }
 
+  // Routine successful reads/writes are operational telemetry, not durable
+  // Memory facts. Keep them out of the human review queue and retain only a
+  // bounded aggregate marker. Durable lessons continue through the dedicated
+  // evidence-candidate path, while failures/destructive/ambiguous outcomes
+  // remain review-gated here.
+  const reviewRequired =
+    outcomeStatus === "failed" ||
+    risk === "destructive" ||
+    errorFingerprint !== null ||
+    (risk === "write" && !resultFingerprint);
+
+  if (!reviewRequired) {
+    const completedDate = new Date(completedAt);
+    completedDate.setUTCMinutes(0, 0, 0);
+    completedDate.setUTCHours(
+      Math.floor(completedDate.getUTCHours() / ROUTINE_AGGREGATE_WINDOW_HOURS) *
+        ROUTINE_AGGREGATE_WINDOW_HOURS,
+    );
+    const aggregateWindowStart = completedDate.toISOString();
+    const aggregateKey = await sha256(
+      [aggregateWindowStart, projectKey, tool, risk].join("\n"),
+    );
+    const aggregateSourceRef = `projectos-summary:${aggregateKey}`;
+    const aggregateTitle = `ProjectOS routine ${risk} activity: ${tool}`.slice(0, 240);
+    const aggregateSummary = [
+      `Routine successful ${risk} activity for ${projectKey} via ${tool}`,
+      `was observed during the ${ROUTINE_AGGREGATE_WINDOW_HOURS}-hour window beginning ${aggregateWindowStart}.`,
+      "Individual operation details remain authoritative in ProjectOS; Pandora Memory retains only this bounded privacy-safe summary marker.",
+    ].join(" ").slice(0, 1800);
+
+    let digestId: string | null = null;
+    let digestCreated = false;
+    const { data: existingDigest, error: existingDigestError } = await admin
+      .from("memory_session_digests")
+      .select("id")
+      .eq("user_id", memoryUserId)
+      .eq("namespace", NAMESPACE)
+      .eq("source", SOURCE)
+      .eq("source_ref", aggregateSourceRef)
+      .maybeSingle();
+
+    if (existingDigestError) {
+      console.error("projectos_aggregate_lookup_failed", existingDigestError.message);
+      return json(500, { ok: false, error: "aggregate_lookup_failed" });
+    }
+
+    digestId = existingDigest?.id ?? null;
+    if (!digestId) {
+      const { data: insertedDigest, error: digestInsertError } = await admin
+        .from("memory_session_digests")
+        .insert({
+          user_id: memoryUserId,
+          namespace: NAMESPACE,
+          source: SOURCE,
+          source_ref: aggregateSourceRef,
+          title: aggregateTitle,
+          summary: aggregateSummary,
+          durable_updates: [{
+            type: "projectos_routine_operation_summary",
+            projectKey,
+            tool,
+            risk,
+            outcomeStatus: "completed",
+            windowStart: aggregateWindowStart,
+            windowHours: ROUTINE_AGGREGATE_WINDOW_HOURS,
+            reviewRequired: false,
+            authoritativeEventSource: "projectos",
+            privacyPolicy: "metadata_only_v1",
+          }],
+          decisions: [],
+          open_loops: [],
+          risks: [],
+          people: [],
+          projects: [projectKey],
+          style_updates: [],
+          candidate_ids: [],
+          captured_event_ids: [],
+          profile_ids: [],
+        })
+        .select("id")
+        .maybeSingle();
+
+      if (digestInsertError && digestInsertError.code !== "23505") {
+        console.error("projectos_aggregate_insert_failed", digestInsertError.message);
+        return json(500, { ok: false, error: "aggregate_insert_failed" });
+      }
+
+      if (insertedDigest?.id) {
+        digestId = insertedDigest.id;
+        digestCreated = true;
+      } else {
+        const { data: racedDigest, error: racedDigestError } = await admin
+          .from("memory_session_digests")
+          .select("id")
+          .eq("user_id", memoryUserId)
+          .eq("namespace", NAMESPACE)
+          .eq("source", SOURCE)
+          .eq("source_ref", aggregateSourceRef)
+          .maybeSingle();
+        if (racedDigestError || !racedDigest?.id) {
+          return json(500, { ok: false, error: "aggregate_recovery_failed" });
+        }
+        digestId = racedDigest.id;
+      }
+    }
+
+    if (digestCreated && digestId) {
+      const { error: auditInsertError } = await admin.from("audit_logs").insert({
+        user_id: memoryUserId,
+        namespace: NAMESPACE,
+        action: "projectos_post_task_learning_aggregate_created",
+        table_name: "memory_session_digests",
+        record_id: digestId,
+        before_snapshot: null,
+        after_snapshot: {
+          digestId,
+          aggregateSourceRef,
+          projectKey,
+          tool,
+          risk,
+          aggregateWindowStart,
+          reviewRequired: false,
+          canonicalMemoryWritten: false,
+        },
+        metadata: {
+          integration_key: INTEGRATION_KEY,
+          product_key: PRODUCT_KEY,
+          privacy_policy: "metadata_only_v1",
+          authoritative_event_source: "projectos",
+          aggregate_window_hours: ROUTINE_AGGREGATE_WINDOW_HOURS,
+        },
+      });
+      if (auditInsertError) {
+        console.error("projectos_aggregate_audit_failed", auditInsertError.message);
+      }
+    }
+
+    return json(digestCreated ? 202 : 200, {
+      ok: true,
+      status: digestCreated
+        ? "aggregated_summary_created"
+        : "aggregated_existing_summary",
+      source_ref: aggregateSourceRef,
+      candidate_id: null,
+      review_item_id: null,
+      digest_id: digestId,
+      review_required: false,
+      canonical_memory_written: false,
+      authoritative_event_source: "projectos",
+      privacy_policy: "metadata_only_v1",
+    });
+  }
+
   const sourceRef = `projectos-plan:${sourceEventId}`;
   const title = `ProjectOS ${outcomeStatus}: ${tool}`.slice(0, 240);
   const summary = [
@@ -297,6 +451,13 @@ Deno.serve(async (request: Request) => {
   ].join(" ").slice(0, 1800);
   const requestHash = await sha256(rawBody);
   const fingerprint = await sha256(`${sourceRef}\n${summary}`);
+  const riskSignal =
+    outcomeStatus === "failed" || risk === "destructive" || errorFingerprint !== null;
+  const reviewRisk = outcomeStatus === "failed"
+    ? "A ProjectOS operation failed; investigate using authoritative provider evidence."
+    : risk === "destructive"
+    ? "A destructive ProjectOS operation completed; verify exact provider state before promoting any durable lesson."
+    : "A ProjectOS write completed without a result fingerprint; verify authoritative provider evidence before promotion.";
 
   let candidateId: string | null = null;
   let candidateCreated = false;
@@ -324,23 +485,21 @@ Deno.serve(async (request: Request) => {
       source_ref: sourceRef,
       raw_excerpt: null,
       redacted_excerpt: summary,
-      memory_type: outcomeStatus === "failed" ? "risk_signal" : "business_fact",
+      memory_type: riskSignal ? "risk_signal" : "business_fact",
       title,
       summary,
-      importance: outcomeStatus === "failed" ? 8 : 6,
+      importance: outcomeStatus === "failed" ? 8 : risk === "destructive" ? 7 : 6,
       sensitivity: "low",
       confidence: 0.92,
       should_capture: true,
       requires_review: true,
       status: "pending",
       reason:
-        "Post-task operational learning is review-gated. This candidate cannot become canonical without an authenticated human decision.",
+        "Post-task learning is review-gated for failures, destructive operations, and ambiguous successful writes. This candidate cannot become canonical without an authenticated human decision.",
       people: [],
       projects: [projectKey],
-      risks: outcomeStatus === "failed"
-        ? ["A ProjectOS operation failed; investigate using authoritative provider evidence."]
-        : [],
-      tags: ["projectos", "post_task_learning", outcomeStatus, risk],
+      risks: [reviewRisk],
+      tags: ["projectos", "post_task_learning", outcomeStatus, risk, "review_required"],
       metadata: {
         schema_version: 1,
         source_event_id: sourceEventId,
@@ -359,18 +518,19 @@ Deno.serve(async (request: Request) => {
         result_fingerprint: resultFingerprint,
         error_fingerprint: errorFingerprint,
         privacy_policy: "metadata_only_v1",
+        review_policy: "projectos_selective_review_v2",
         imported_raw_arguments: false,
         imported_raw_results: false,
         imported_raw_errors: false,
         imported_personal_identifiers: false,
         imported_secrets: false,
       },
-      usefulness_score: outcomeStatus === "failed" ? 0.9 : 0.72,
+      usefulness_score: outcomeStatus === "failed" ? 0.9 : 0.78,
       confidence_score: 0.92,
       freshness_score: 1,
-      retrieval_weight: outcomeStatus === "failed" ? 0.9 : 0.72,
+      retrieval_weight: outcomeStatus === "failed" ? 0.9 : 0.78,
       stale_status: "active",
-      scoring_version: "projectos-learning-v1",
+      scoring_version: "projectos-learning-v2",
       scored_at: new Date().toISOString(),
     };
 
@@ -459,6 +619,7 @@ Deno.serve(async (request: Request) => {
           tool,
           risk,
           outcomeStatus,
+          reviewPolicy: "projectos_selective_review_v2",
         },
         audit_metadata: {
           schemaVersion: 1,
@@ -538,22 +699,25 @@ Deno.serve(async (request: Request) => {
           completedAt,
           contextStatus,
           reviewRequired: true,
+          reviewPolicy: "projectos_selective_review_v2",
         }],
         decisions: [],
-        open_loops: outcomeStatus === "failed"
-          ? [{
-            type: "investigation_required",
-            title: `Investigate failed ProjectOS operation ${tool}`,
-            sourceRef,
-          }]
-          : [],
-        risks: outcomeStatus === "failed"
-          ? [{
-            type: "operation_failure",
-            tool,
-            sourceRef,
-          }]
-          : [],
+        open_loops: [{
+          type: "provider_evidence_review_required",
+          title: outcomeStatus === "failed"
+            ? `Investigate failed ProjectOS operation ${tool}`
+            : `Verify review-gated ProjectOS operation ${tool}`,
+          sourceRef,
+        }],
+        risks: [{
+          type: outcomeStatus === "failed"
+            ? "operation_failure"
+            : risk === "destructive"
+            ? "destructive_operation_review"
+            : "ambiguous_write_review",
+          tool,
+          sourceRef,
+        }],
         people: [],
         projects: [projectKey],
         style_updates: [],
@@ -619,6 +783,7 @@ Deno.serve(async (request: Request) => {
         product_key: PRODUCT_KEY,
         project_key: projectKey,
         privacy_policy: "metadata_only_v1",
+        review_policy: "projectos_selective_review_v2",
         append_only: true,
       },
     });
@@ -637,6 +802,7 @@ Deno.serve(async (request: Request) => {
     digest_id: digestId,
     review_required: true,
     canonical_memory_written: false,
+    review_policy: "projectos_selective_review_v2",
     privacy_policy: "metadata_only_v1",
   });
 });
