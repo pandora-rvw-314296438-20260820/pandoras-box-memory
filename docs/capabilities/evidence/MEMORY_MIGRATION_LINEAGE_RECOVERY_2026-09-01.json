@@ -183,6 +183,46 @@
                 "statementCount": 12
             },
             {
+                "bytes": 909,
+                "sha256": "69e3b7d1f5e5c8dc34d39e154b05c93546f0cc29374d3e5337491f76a4aa51fb",
+                "version": "20260628050000",
+                "filename": "20260628050000_phase_5b_memory_feedback_events.sql",
+                "gitBlobSha1": "8a406012fb1255f0128d0f0bd15f4ea069ea9908",
+                "statementCount": 4
+            },
+            {
+                "bytes": 2383,
+                "sha256": "65b2e883eb4c01e8a9ebc6a436a00dbdaff8ab7f1eeda0c5585c1b09a578f49f",
+                "version": "20260628070000",
+                "filename": "20260628070000_env_broker.sql",
+                "gitBlobSha1": "34361433f5bcc7a06b4584a209d8b99ff647a0d9",
+                "statementCount": 9
+            },
+            {
+                "bytes": 1498,
+                "sha256": "6c82437b0f5c1be349a4de1eee3552e014ebe125892b630fe2b88070b1bfa0c0",
+                "version": "20260704114354",
+                "filename": "20260704114354_adaptive_log_rls_policies.sql",
+                "gitBlobSha1": "680c130b471d96c6bde83a141aea1e578defbf54",
+                "statementCount": 8
+            },
+            {
+                "bytes": 851,
+                "sha256": "8b425b863c9ee18221b7de12ebbfc02050c07740c5a476f1cd6ec6c7d2e2a737",
+                "version": "20260715200029",
+                "filename": "20260715200029_adaptive_profile_versioning_columns.sql",
+                "gitBlobSha1": "42b81088edaed29b34d71b03b658527ee7ed1f84",
+                "statementCount": 3
+            },
+            {
+                "bytes": 320,
+                "sha256": "23ecb6d99804dbb12d4a91a4d3c4002bf2a873dcc11998b6a34c39ea3c43c2d2",
+                "version": "20260715200108",
+                "filename": "20260715200108_pandora_operator_action_runner_statuses.sql",
+                "gitBlobSha1": "ea774d785de2c950e7ea2ee370f9493ad7fbc746",
+                "statementCount": 2
+            },
+            {
                 "bytes": 1185,
                 "sha256": "e162083467db55d869eedd30a1b673fcb5805dc630323935e9cba0624ee92634",
                 "version": "20260731111340",
@@ -285,46 +325,6 @@
                 "filename": "20260807090642_projectos_memory_daily_pack_private_execution_boundary.sql",
                 "gitBlobSha1": "8a41184615363ed34f35c2d05cb71072931a2d51",
                 "statementCount": 1
-            },
-            {
-                "bytes": 909,
-                "sha256": "69e3b7d1f5e5c8dc34d39e154b05c93546f0cc29374d3e5337491f76a4aa51fb",
-                "version": "20260628050000",
-                "filename": "20260628050000_phase_5b_memory_feedback_events.sql",
-                "gitBlobSha1": "8a406012fb1255f0128d0f0bd15f4ea069ea9908",
-                "statementCount": 4
-            },
-            {
-                "bytes": 2383,
-                "sha256": "65b2e883eb4c01e8a9ebc6a436a00dbdaff8ab7f1eeda0c5585c1b09a578f49f",
-                "version": "20260628070000",
-                "filename": "20260628070000_env_broker.sql",
-                "gitBlobSha1": "34361433f5bcc7a06b4584a209d8b99ff647a0d9",
-                "statementCount": 9
-            },
-            {
-                "bytes": 1498,
-                "sha256": "6c82437b0f5c1be349a4de1eee3552e014ebe125892b630fe2b88070b1bfa0c0",
-                "version": "20260704114354",
-                "filename": "20260704114354_adaptive_log_rls_policies.sql",
-                "gitBlobSha1": "680c130b471d96c6bde83a141aea1e578defbf54",
-                "statementCount": 8
-            },
-            {
-                "bytes": 851,
-                "sha256": "8b425b863c9ee18221b7de12ebbfc02050c07740c5a476f1cd6ec6c7d2e2a737",
-                "version": "20260715200029",
-                "filename": "20260715200029_adaptive_profile_versioning_columns.sql",
-                "gitBlobSha1": "42b81088edaed29b34d71b03b658527ee7ed1f84",
-                "statementCount": 3
-            },
-            {
-                "bytes": 320,
-                "sha256": "23ecb6d99804dbb12d4a91a4d3c4002bf2a873dcc11998b6a34c39ea3c43c2d2",
-                "version": "20260715200108",
-                "filename": "20260715200108_pandora_operator_action_runner_statuses.sql",
-                "gitBlobSha1": "ea774d785de2c950e7ea2ee370f9493ad7fbc746",
-                "statementCount": 2
             }
         ],
         "serialization": "single statement adds one terminal newline; multi-statement migrations preserve statement order with explicit semicolon/newline terminators",
