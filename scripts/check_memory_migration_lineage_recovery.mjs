@@ -48,6 +48,15 @@ for (const filename of actualFiles) {
 if (postVault.length !== evidence.postVaultExactSource?.appliedFiles) {
   fail(`post-Vault exact source count mismatch: ${postVault.length}`);
 }
+if (evidence.postVaultExactSource?.providerConcatenationManifestBytes !== 4340 || evidence.postVaultExactSource?.providerConcatenationManifestSha256 !== "03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81") {
+  fail("provider statement-concatenation proof changed; refresh provider evidence");
+}
+if (evidence.postVaultExactSource?.multiStatementFiles !== 4 || evidence.postVaultExactSource?.replayableSource !== true) {
+  fail("replayable post-Vault source topology changed");
+}
+if (evidence.postVaultExactSource?.serialization !== "provider statements preserved in-order; multi-statement migrations add explicit semicolon/newline terminators; single-statement migrations preserve provider statement bytes plus one terminal newline") {
+  fail("post-Vault serialization contract changed");
+}
 const manifest = postVault
   .sort((a, b) => a.path.localeCompare(b.path))
   .map((row) => `${row.path}|${row.bytes}|${row.sha256}`)
