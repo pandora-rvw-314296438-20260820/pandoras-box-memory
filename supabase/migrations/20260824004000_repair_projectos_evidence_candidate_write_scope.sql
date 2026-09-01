@@ -6,7 +6,13 @@
 -- or canonical Memory. It only permits the existing production workload identity
 -- to propose evidence for its one existing allowlisted project.
 
-beginset local lock_timeout = '5s'set local statement_timeout = '30s'lock table public.pandora_service_principals in share row exclusive modelock table public.pandora_projects in share modelock table public.pandora_project_grants in share modedo $activation_guard$
+begin;
+set local lock_timeout = '5s';
+set local statement_timeout = '30s';
+lock table public.pandora_service_principals in share row exclusive mode;
+lock table public.pandora_projects in share mode;
+lock table public.pandora_project_grants in share mode;
+do $activation_guard$
 declare
   v_principal public.pandora_service_principals%rowtype;
   v_project public.pandora_projects%rowtype;
@@ -85,8 +91,10 @@ begin
     raise exception 'projectos evidence activation blocked: additional proposal grants exist';
   end if;
 end;
-$activation_guard$alter table public.pandora_service_principals
-  drop constraint if exists pandora_service_principals_scopes_checkalter table public.pandora_service_principals
+$activation_guard$;
+alter table public.pandora_service_principals
+  drop constraint if exists pandora_service_principals_scopes_check;
+alter table public.pandora_service_principals
   add constraint pandora_service_principals_scopes_check
   check (
     scopes <@ array[
@@ -94,10 +102,12 @@ $activation_guard$alter table public.pandora_service_principals
       'memory:read'::text,
       'memory:write'::text
     ]
-  )update public.pandora_service_principals
+  );
+update public.pandora_service_principals
 set scopes = array['memory:health', 'memory:read', 'memory:write']::text[],
     updated_at = now()
-where principal_key = 'projectos-mcpmaster-production'do $activation_assertion$
+where principal_key = 'projectos-mcpmaster-production';
+do $activation_assertion$
 declare
   v_scopes text[];
   v_count integer;
@@ -131,6 +141,8 @@ begin
     raise exception 'projectos evidence activation failed: exact grant readback mismatch';
   end if;
 end;
-$activation_assertion$comment on constraint pandora_service_principals_scopes_check
+$activation_assertion$;
+comment on constraint pandora_service_principals_scopes_check
   on public.pandora_service_principals
-  is 'Allowlisted Memory workload scopes. memory:write is review-gated candidate proposal only; it does not authorize canonical promotion.'commit
+  is 'Allowlisted Memory workload scopes. memory:write is review-gated candidate proposal only; it does not authorize canonical promotion.';
+commit;
