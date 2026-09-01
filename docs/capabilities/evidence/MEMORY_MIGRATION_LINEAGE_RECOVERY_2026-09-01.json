@@ -10,9 +10,8 @@
     },
     "observedAt": "2026-09-01T07:35:49Z",
     "pendingSource": [
-        "20260901041000_rebind_projectos_vercel_oidc_identity.sql"
     ],
-    "schemaVersion": "1.1",
+    "schemaVersion": "1.2",
     "sourceSnapshot": {
         "baseSha": "9da819876037aa6427e745189f7b3949747b3bef",
         "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory"
@@ -62,11 +61,39 @@
         "providerConcatenationManifestBytes": 4340,
         "providerConcatenationManifestSha256": "03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81"
     },
+    "legacyRecoveryBoundary": {
+        "policy": "credential-bearing historical SQL is never copied verbatim; provider version/name/statement-count/hash evidence is retained and sanitized source requires separate adjudication",
+        "quarantinedCount": 8,
+        "fullManifestBytes": 7076,
+        "candidateSafeCount": 44,
+        "fullManifestSha256": "60495c54adefd13bf72a1107c8a36141940e265f429b8e347b60fad4eb3ddb8e",
+        "legacyAppliedCount": 52,
+        "quarantinedVersions": [
+            "20260623006600",
+            "20260801163126",
+            "20260803111852",
+            "20260807082820",
+            "20260807084620",
+            "20260807085215",
+            "20260807085935",
+            "20260807090844"
+        ],
+        "quarantineManifestBytes": 1048,
+        "quarantineManifestSha256": "3ea4b7bff97cc3edbc68ba5067c1dff4b4f7768c05e9520f93ba013a6ee8bfa5"
+    },
+    "supersededPendingSource": {
+        "bytes": 1800,
+        "reason": "byte-identical duplicate of already-applied provider migration; removed to prevent second auto-application during Git migration convergence",
+        "removedFilename": "20260901041000_rebind_projectos_vercel_oidc_identity.sql",
+        "sharedGitBlobSha": "a8657001cb445da1e725d8e502f7b07d7dcf970c",
+        "duplicateOfAppliedVersion": "20260831205808",
+        "liveLedgerContainsRemovedVersion": false
+    },
     "sourceStateAfterRecovery": {
-        "migrationFiles": 34,
+        "migrationFiles": 33,
         "exactAppliedFiles": 33,
         "missingAppliedFiles": 52,
-        "pendingUnappliedFiles": 1
+        "pendingUnappliedFiles": 0
     },
     "sourceStateBeforeRecovery": {
         "migrationFiles": 5,
