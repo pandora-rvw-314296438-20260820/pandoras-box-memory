@@ -1,11 +1,10 @@
 {
-  "schemaVersion": "1.0",
-  "observedAt": "2026-09-01T14:10:00+08:00",
+  "schemaVersion": "1.1",
+  "observedAt": "2026-09-01T15:09:33+08:00",
   "memoryProjectRef": "ivmvufhcsezyhczzondn",
   "sourceSnapshot": {
     "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
-    "sha": "aa9294fe3d23f7dec515c4d559450422382d2768",
-    "tree": "790c4160131c8f2fb99feea43bfca667200a9643"
+    "baseSha": "9da819876037aa6427e745189f7b3949747b3bef"
   },
   "liveMigrationLedger": {
     "appliedCount": 85,
@@ -21,18 +20,55 @@
     "pendingUnappliedFiles": 1
   },
   "knownExactApplied": [
-    {"version":"20260808170034","filename":"20260808170034_migrate_pandora_integration_credentials_to_vault.sql","bytes":2008,"sha256":"09ae441264df866c17492c75d0a3b0562fc5d595d2237a9c9b8f47fbbff46789"},
-    {"version":"20260808181824","filename":"20260808181824_add_machine_gateway_authorization_registry.sql","bytes":4829,"sha256":"2f5e5731fc3bcd6c7ae2fd89f62b3b50eab95e2327d3d743b191115890cd5a8f"},
-    {"version":"20260808183717","filename":"20260808183717_add_gateway_service_action_registry.sql","bytes":4549,"sha256":"4bbe03187243c6c749b34c4fd22197f572b3491cb723f9c668ee6acf28d935da"},
-    {"version":"20260808190813","filename":"20260808190813_add_gateway_workload_oidc.sql","bytes":4583,"sha256":"918ab4c000f37dada70b45e0f94bc2cfc81619f9e800daca6e698c14fa7d1c22"}
+    {
+      "version": "20260808170034",
+      "filename": "20260808170034_migrate_pandora_integration_credentials_to_vault.sql",
+      "bytes": 2008,
+      "sha256": "09ae441264df866c17492c75d0a3b0562fc5d595d2237a9c9b8f47fbbff46789"
+    },
+    {
+      "version": "20260808181824",
+      "filename": "20260808181824_add_machine_gateway_authorization_registry.sql",
+      "bytes": 4829,
+      "sha256": "2f5e5731fc3bcd6c7ae2fd89f62b3b50eab95e2327d3d743b191115890cd5a8f"
+    },
+    {
+      "version": "20260808183717",
+      "filename": "20260808183717_add_gateway_service_action_registry.sql",
+      "bytes": 4549,
+      "sha256": "4bbe03187243c6c749b34c4fd22197f572b3491cb723f9c668ee6acf28d935da"
+    },
+    {
+      "version": "20260808190813",
+      "filename": "20260808190813_add_gateway_workload_oidc.sql",
+      "bytes": 4583,
+      "sha256": "918ab4c000f37dada70b45e0f94bc2cfc81619f9e800daca6e698c14fa7d1c22"
+    }
   ],
-  "pendingSource": ["20260901041000_rebind_projectos_vercel_oidc_identity.sql"],
+  "postVaultExactSource": {
+    "firstVersion": "20260808220117",
+    "lastVersion": "20260831211258",
+    "appliedFiles": 29,
+    "manifestBytes": 4340,
+    "manifestSha256": "03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81",
+    "serialization": "schema_migrations.statements[] concatenated in-order with one terminal newline"
+  },
+  "sourceStateAfterRecovery": {
+    "migrationFiles": 34,
+    "exactAppliedFiles": 33,
+    "missingAppliedFiles": 52,
+    "pendingUnappliedFiles": 1
+  },
+  "pendingSource": [
+    "20260901041000_rebind_projectos_vercel_oidc_identity.sql"
+  ],
   "recovery": {
     "authority": "supabase_migrations.schema_migrations.statements[]",
-    "repairedVersion": "20260808190813",
-    "sourceBytesBefore": 0,
+    "repairedCorruptedVersion": "20260808190813",
+    "recoveredPostVaultFiles": 29,
+    "remainingLegacyFiles": 52,
+    "legacyRecoveryPolicy": "recover only from trusted provider evidence with secret review and exact content verification",
     "productionSchemaMutation": false,
-    "productionReplayAuthorized": false,
-    "remainingHistoricalFiles": 81
+    "productionReplayAuthorized": false
   }
 }
