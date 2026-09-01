@@ -23,6 +23,7 @@ permissions:
 
 env:
   EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
 
 jobs:
   project-isolation:
@@ -55,14 +56,26 @@ jobs:
           cache: npm
 
       - name: Prove project-scope source contract
-        run: python3 scripts/verify_projectos_bridge_project_scope.py
+        run: >-
+          python3 scripts/verify_projectos_bridge_project_scope.py
+          --emit-format-fragment "${RUNNER_TEMP}/projectos-bridge-project-scope.ts"
 
-      - name: Check formatting
+      - name: Check changed-scope formatting
         run: >-
           deno fmt --check
-          supabase/functions/pandora-projectos-bridge/index.ts
+          "${RUNNER_TEMP}/projectos-bridge-project-scope.ts"
           supabase/functions/pandora-projectos-bridge/deno.json
           app/api/projectos/memory/search/route.ts
+
+      - name: Reject whitespace errors in the PR diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          comparison_base="$BASE_SHA"
+          if [[ ! "$comparison_base" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "${comparison_base}^{commit}" 2>/dev/null; then
+            comparison_base="$(git rev-parse HEAD^)"
+          fi
+          git diff --check "${comparison_base}"...HEAD
 
       - name: Type-check the Edge Function
         run: >-

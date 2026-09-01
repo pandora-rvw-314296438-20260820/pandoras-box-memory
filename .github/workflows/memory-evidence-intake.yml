@@ -6,8 +6,6 @@ on:
     paths:
       - 'app/api/projectos/memory/evidence-candidates/**'
       - 'supabase/functions/pandora-projectos-bridge/**'
-      - 'supabase/migrations/20260820113000_enable_projectos_evidence_candidate_write_scope.sql'
-      - 'supabase/recovery/20260820_disable_projectos_evidence_candidate_write_scope.sql'
       - 'recovery/evidence/memory-evidence-intake-activation-release-manifest.md'
       - 'scripts/check_memory_evidence_intake.mjs'
       - 'scripts/check_memory_evidence_activation.mjs'
@@ -15,13 +13,10 @@ on:
       - '.github/workflows/memory-evidence-intake.yml'
   push:
     branches:
-      - feature/projectos-memory-evidence-intake
-      - fix/memory-evidence-intake-activation-20260820
+      - main
     paths:
       - 'app/api/projectos/memory/evidence-candidates/**'
       - 'supabase/functions/pandora-projectos-bridge/**'
-      - 'supabase/migrations/20260820113000_enable_projectos_evidence_candidate_write_scope.sql'
-      - 'supabase/recovery/20260820_disable_projectos_evidence_candidate_write_scope.sql'
       - 'recovery/evidence/memory-evidence-intake-activation-release-manifest.md'
       - 'scripts/check_memory_evidence_intake.mjs'
       - 'scripts/check_memory_evidence_activation.mjs'
@@ -42,30 +37,28 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: ${{ env.EXPECTED_SHA }}
+          persist-credentials: false
 
       - name: Verify exact source checkout
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
       - name: Set up Node 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
           cache: npm
           cache-dependency-path: package-lock.json
 
-      # npm ci installs the exact committed lockfile tree and fails if
-      # package.json and package-lock.json have drifted apart, so the audit and
-      # build evidence below is tied to a reproducible dependency set.
       - name: Verify lockfile is committed
         run: git ls-files --error-unmatch package-lock.json
 
       - name: Install exact locked dependencies
-        run: npm ci --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Verify governed evidence source contract
         run: node scripts/check_memory_evidence_intake.mjs
 
-      - name: Verify activation and rollback contract
+      - name: Verify current activation and rollback contract
         run: node scripts/check_memory_evidence_activation.mjs
 
       - name: Exercise evidence intake behavior

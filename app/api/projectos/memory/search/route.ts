@@ -20,7 +20,9 @@ const ALLOWED_KEYS = new Set([
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "invalid_json" }, {
+      status: 400,
+    });
   }
 
   const payload = Object.fromEntries(

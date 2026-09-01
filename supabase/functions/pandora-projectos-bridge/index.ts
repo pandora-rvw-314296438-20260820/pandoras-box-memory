@@ -282,7 +282,8 @@ const searchMemory = async (
   const projectKey = typeof body.project_key === "string"
     ? body.project_key.trim()
     : "";
-  const projectIdProvided = body.project_id !== null && body.project_id !== undefined;
+  const projectIdProvided = body.project_id !== null &&
+    body.project_id !== undefined;
   const projectId = projectIdProvided && typeof body.project_id === "string"
     ? body.project_id.trim()
     : null;
@@ -302,7 +303,8 @@ const searchMemory = async (
   if (
     !projectKey ||
     !PROJECT_SEARCH_KEY_PATTERN.test(projectKey) ||
-    (projectIdProvided && (!projectId || !PROJECT_SEARCH_UUID_PATTERN.test(projectId)))
+    (projectIdProvided &&
+      (!projectId || !PROJECT_SEARCH_UUID_PATTERN.test(projectId)))
   ) {
     return respond({ ok: false, error: "project_identity_invalid" }, 400);
   }
@@ -315,9 +317,13 @@ const searchMemory = async (
     .eq("lifecycle_status", "active");
   if (projectId) projectQuery = projectQuery.eq("id", projectId);
 
-  const { data: boundProject, error: boundProjectError } = await projectQuery.maybeSingle();
+  const { data: boundProject, error: boundProjectError } = await projectQuery
+    .maybeSingle();
   if (boundProjectError) {
-    console.error("projectos_memory_project_lookup_failed", boundProjectError.message);
+    console.error(
+      "projectos_memory_project_lookup_failed",
+      boundProjectError.message,
+    );
     return respond({ ok: false, error: "project_lookup_failed" }, 503);
   }
   if (
@@ -343,7 +349,10 @@ const searchMemory = async (
     .is("revoked_at", null)
     .maybeSingle();
   if (projectGrantError) {
-    console.error("projectos_memory_project_grant_lookup_failed", projectGrantError.message);
+    console.error(
+      "projectos_memory_project_grant_lookup_failed",
+      projectGrantError.message,
+    );
     return respond({ ok: false, error: "project_grant_lookup_failed" }, 503);
   }
   if (!projectGrant?.project_id) {

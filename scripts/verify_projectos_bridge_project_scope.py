@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import sys
 
 bridge_path = Path("supabase/functions/pandora-projectos-bridge/index.ts")
 route_path = Path("app/api/projectos/memory/search/route.ts")
@@ -9,6 +10,8 @@ route = route_path.read_text(encoding="utf-8")
 start = bridge.index("const searchMemory = async (")
 end = bridge.index("const EVIDENCE_PROOF_STAGES")
 search = bridge[start:end]
+fragment_start = bridge.index("const PROJECT_SEARCH_KEY_PATTERN")
+format_fragment = bridge[fragment_start:end]
 
 required = [
     'const PROJECT_SEARCH_KEY_PATTERN',
@@ -44,5 +47,11 @@ for token in forbidden:
 for token in ['"project_id"', '"project_key"']:
     if token not in route:
         raise SystemExit(f"search route does not forward project identity: {token}")
+
+args = sys.argv[1:]
+if args:
+    if len(args) != 2 or args[0] != "--emit-format-fragment":
+        raise SystemExit("usage: verify_projectos_bridge_project_scope.py [--emit-format-fragment PATH]")
+    Path(args[1]).write_text(format_fragment, encoding="utf-8")
 
 print("PASS: ProjectOS bridge search is exact-project scoped and omits unscoped component tables.")
