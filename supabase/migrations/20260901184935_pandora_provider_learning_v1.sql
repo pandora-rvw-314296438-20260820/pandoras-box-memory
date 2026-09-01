@@ -122,7 +122,7 @@ begin
   if nullif(trim(p_provider),'') is null or length(p_provider)>120 or nullif(trim(p_model),'') is null or length(p_model)>180 or nullif(trim(p_task),'') is null or length(p_task)>180 then raise exception 'invalid model call identity' using errcode='22023'; end if;
   if p_input_char_count is not null and p_input_char_count<0 then raise exception 'invalid input char count' using errcode='22023'; end if;
   if octet_length(v_metadata::text)>16384 then raise exception 'model call metadata too large' using errcode='22023'; end if;
-  if v_metadata::text ~* '\"(authorization|api[_-]?key|secret(_value)?|raw[_-]?(request|response)|prompt|request[_-]?body|response[_-]?body)\"[[:space:]]*:' or v_metadata::text ~* 'bearer[[:space:]]+[a-z0-9._~+/-]{8,}' then raise exception 'sensitive model call metadata rejected' using errcode='22023'; end if;
+  if v_metadata::text ~* '"(authorization|api[_-]?key|secret(_value)?|raw[_-]?(request|response)|prompt|request[_-]?body|response[_-]?body)"[[:space:]]*:' or v_metadata::text ~* 'bearer[[:space:]]+[a-z0-9._~+/-]{8,}' then raise exception 'sensitive model call metadata rejected' using errcode='22023'; end if;
   insert into public.memory_model_call_logs(user_id,namespace,provider,model,task,input_char_count,redacted,metadata)
   values(v_user_id,p_namespace,lower(trim(p_provider)),trim(p_model),trim(p_task),p_input_char_count,true,v_metadata||jsonb_build_object('projectId',p_project_id,'metadataPolicy','redacted_operational_v1')) returning id into v_id;
   return v_id;
