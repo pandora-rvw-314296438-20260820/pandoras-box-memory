@@ -1,0 +1,93 @@
+name: Learning Intelligence Contract Gate
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/pandora-projectos-learning/**"
+      - "docs/capabilities/evidence/LEARNING_INTELLIGENCE_CONTRACT_2026-09-01.md"
+      - "scripts/verify_learning_intelligence_contract.py"
+      - "scripts/check_memory_evidence_intake.mjs"
+      - "scripts/check_memory_canon_promotion_gate.mjs"
+      - "scripts/check_no_literal_secrets.sh"
+      - ".github/workflows/learning-intelligence-contract.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/functions/pandora-projectos-learning/**"
+      - "docs/capabilities/evidence/LEARNING_INTELLIGENCE_CONTRACT_2026-09-01.md"
+      - "scripts/verify_learning_intelligence_contract.py"
+      - "scripts/check_memory_evidence_intake.mjs"
+      - "scripts/check_memory_canon_promotion_gate.mjs"
+      - "scripts/check_no_literal_secrets.sh"
+      - ".github/workflows/learning-intelligence-contract.yml"
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+  BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+
+jobs:
+  learning-intelligence-contract:
+    name: Prove learning intelligence safety contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out exact candidate head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Assert exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.4.3
+
+      - name: Verify learning intelligence contract
+        run: python3 scripts/verify_learning_intelligence_contract.py
+
+      - name: Verify exact-project retrieval invariant remains present
+        run: python3 scripts/verify_projectos_bridge_project_scope.py
+
+      - name: Type-check learning Edge source
+        run: >-
+          deno check
+          --node-modules-dir=auto
+          supabase/functions/pandora-projectos-learning/index.ts
+
+      - name: Check learning Edge formatting when source changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          comparison_base="$BASE_SHA"
+          if [[ ! "$comparison_base" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "${comparison_base}^{commit}" 2>/dev/null; then
+            comparison_base="$(git rev-parse HEAD^)"
+          fi
+          if git diff --quiet "${comparison_base}"...HEAD -- supabase/functions/pandora-projectos-learning/index.ts; then
+            echo "Learning Edge source unchanged; preserving existing formatting debt outside this PR."
+          else
+            deno fmt --check supabase/functions/pandora-projectos-learning/index.ts
+          fi
+
+      - name: Reject whitespace errors in candidate diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          comparison_base="$BASE_SHA"
+          if [[ ! "$comparison_base" =~ ^[0-9a-f]{40}$ ]] || ! git cat-file -e "${comparison_base}^{commit}" 2>/dev/null; then
+            comparison_base="$(git rev-parse HEAD^)"
+          fi
+          git diff --check "${comparison_base}"...HEAD
+
+      - name: Reject literal secrets
+        run: bash scripts/check_no_literal_secrets.sh

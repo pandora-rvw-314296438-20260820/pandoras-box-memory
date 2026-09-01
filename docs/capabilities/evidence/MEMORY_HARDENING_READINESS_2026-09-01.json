@@ -1,0 +1,54 @@
+
+{
+  "schemaVersion": "1.0",
+  "observedAt": "2026-09-01T14:50:00+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "baseline": {
+    "sha": "9da819876037aa6427e745189f7b3949747b3bef",
+    "tree": "a4f95b3a6b488a328a08fb2b55178f35fc26154a"
+  },
+  "production": {
+    "deploymentId": "dpl_BEexxMqWK6LYmzvbGHb9emd8HAX4",
+    "sourceSha": "ae5aeb6a8a98582df9b4905381d3cff3298cc887",
+    "state": "READY",
+    "currentMainDeployed": false
+  },
+  "canonicalEdgeAuthorities": [
+    {
+      "slug": "pandora-machine-gateway",
+      "purpose": "authenticated machine access with OAuth or workload OIDC, capability grants and namespace resource isolation"
+    },
+    {
+      "slug": "pandora-projectos-bridge",
+      "purpose": "ProjectOS Memory health, exact-project search and governed evidence intake under Vercel OIDC"
+    },
+    {
+      "slug": "pandora-projectos-learning",
+      "purpose": "privacy-safe ProjectOS outcome learning into existing candidate and review governance"
+    }
+  ],
+  "memoryRetiredSourceForbiddenSlugs": [
+    "pandora-evo-task28-closure-write-20260901",
+    "flutterflow-web-deploy-preflight",
+    "flutterflow-live-site-check",
+    "flutterflow-error-diagnostic"
+  ],
+  "primaryObservedRetiredSlugs": [
+    "pandora-github-vault-retry-probe-20260901",
+    "pandora-memory-prod-retrigger-20260901",
+    "pandora-evo-task28-github-supabase-write-20260901"
+  ],
+  "forbiddenParallelAuthorityNames": [
+    "learning_gateway_v2",
+    "memory_learning_v2",
+    "playbook_gateway",
+    "memory_episodes"
+  ],
+  "safetyBoundary": {
+    "productionMutationAuthorized": false,
+    "edgeDeletionAuthorized": false,
+    "schemaMutationAuthorized": false,
+    "crossProjectGeneralizationAuthorized": false,
+    "sourceOnlyGate": true
+  }
+}

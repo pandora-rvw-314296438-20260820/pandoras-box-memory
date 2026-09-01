@@ -1,0 +1,5 @@
+-- Historical migration identity recovered from live Supabase ledger.
+-- Version: 20260807055209
+-- Name: temporary_fxpass_snapshot_export_gate
+-- Security disposition: sanitized historical anchor; credential/provider literals intentionally omitted.
+-- This version is already applied in production. Do not reconstruct or replay omitted secret material.

@@ -1,0 +1,5 @@
+-- Historical migration identity recovered from live Supabase ledger.
+-- Version: 20260807085935
+-- Name: projectos_native_hydration_gate_evidence
+-- Security disposition: sanitized historical anchor; credential/provider literals intentionally omitted.
+-- This version is already applied in production. Do not reconstruct or replay omitted secret material.

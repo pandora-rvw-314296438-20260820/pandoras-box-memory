@@ -1,0 +1,33 @@
+-- Pandora Memory Engine: future transactional memory ingest RPC boundary draft.
+--
+-- This migration intentionally does NOT create an executable production write path.
+-- The public /api/memory/ingest route remains production-disabled and must not call this draft.
+-- No seed data, fake rows, broad grants, service-role bypass, pgvector, model calls, or retrieval hooks
+-- are introduced here.
+--
+-- Future RPC name: public.memory_ingest_apply_transaction
+-- Expected behavior when a later migration activates it:
+--   * Execute source, memory item, memory patch, audit log, and idempotency finalization inserts
+--     atomically inside one database transaction.
+--   * Finalize idempotency last so failed inserts rollback without marking a request completed.
+--   * Enforce authenticated ownership from server repository context/auth claims only; never trust a
+--     client-supplied user_id/userId.
+--   * Enforce namespace isolation on every row. real_life rows stay real_life scoped; au/story rows
+--     stay fictional and must never become real-life evidence.
+--   * Append-only only: no UPDATE, DELETE, UPSERT, REPLACE, or silent overwrite behavior.
+--   * Preserve RLS/ownership checks; do not grant broad unsafe execute permissions.
+--
+-- Placeholder only: this block is commented out until schema-specific ownership and RLS behavior are
+-- finalized and tested with mocked clients first.
+--
+-- create or replace function public.memory_ingest_apply_transaction(request jsonb)
+-- returns jsonb
+-- language plpgsql
+-- security invoker
+-- as $$
+-- begin
+--   raise exception 'memory_ingest_apply_transaction is a disabled draft and is not activated';
+-- end;
+-- $$;
+--
+-- revoke all on function public.memory_ingest_apply_transaction(jsonb) from public;
