@@ -10,6 +10,8 @@ on:
       - "scripts/check_memory_evidence_intake.mjs"
       - "scripts/check_memory_canon_promotion_gate.mjs"
       - "scripts/check_no_literal_secrets.sh"
+      - "scripts/verify_provider_learning_contract.py"
+      - "supabase/migrations/20260901184935_pandora_provider_learning_v1.sql"
       - ".github/workflows/learning-intelligence-contract.yml"
   push:
     branches:
@@ -22,6 +24,8 @@ on:
       - "scripts/check_memory_evidence_intake.mjs"
       - "scripts/check_memory_canon_promotion_gate.mjs"
       - "scripts/check_no_literal_secrets.sh"
+      - "scripts/verify_provider_learning_contract.py"
+      - "supabase/migrations/20260901184935_pandora_provider_learning_v1.sql"
       - ".github/workflows/learning-intelligence-contract.yml"
 
 permissions:
@@ -93,6 +97,9 @@ jobs:
             comparison_base="$(git rev-parse HEAD^)"
           fi
           git diff --check "${comparison_base}"...HEAD
+
+      - name: Verify provider-learning source contract
+        run: python3 scripts/verify_provider_learning_contract.py
 
       - name: Reject literal secrets
         run: bash scripts/check_no_literal_secrets.sh
