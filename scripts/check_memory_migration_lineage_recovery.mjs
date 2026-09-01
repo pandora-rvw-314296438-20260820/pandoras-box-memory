@@ -10,14 +10,22 @@ const fail = (message) => { throw new Error(message); };
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const pathFor = (filename) => `supabase/migrations/${filename}`;
 
-if (evidence.schemaVersion !== "1.1") fail("unexpected lineage evidence schema");
+if (evidence.schemaVersion !== "1.2") fail("unexpected lineage evidence schema");
 if (evidence.memoryProjectRef !== "ivmvufhcsezyhczzondn") fail("unexpected Memory project ref");
 if (evidence.liveMigrationLedger?.appliedCount !== 85) fail("live applied migration count changed; refresh provider evidence");
 if (evidence.sourceStateBeforeRecovery?.missingAppliedFiles !== 81) fail("pre-recovery migration debt changed");
 if (evidence.sourceStateAfterRecovery?.exactAppliedFiles !== 33) fail("expected 33 exact applied migration sources");
 if (evidence.sourceStateAfterRecovery?.missingAppliedFiles !== 52) fail("expected 52 quarantined legacy migration gaps");
 if (!Array.isArray(evidence.knownExactApplied) || evidence.knownExactApplied.length !== 4) fail("known exact applied source set must contain four migrations");
-if (!Array.isArray(evidence.pendingSource) || evidence.pendingSource.length !== 1) fail("pending source set changed");
+if (!Array.isArray(evidence.pendingSource) || evidence.pendingSource.length !== 0) fail("pending source set changed");
+const legacy = evidence.legacyRecoveryBoundary;
+if (legacy?.legacyAppliedCount !== 52 || legacy?.candidateSafeCount !== 44 || legacy?.quarantinedCount !== 8) fail("legacy recovery partition changed");
+if (legacy?.fullManifestBytes !== 7076 || legacy?.fullManifestSha256 !== "60495c54adefd13bf72a1107c8a36141940e265f429b8e347b60fad4eb3ddb8e") fail("legacy provider manifest changed");
+if (legacy?.quarantineManifestBytes !== 1048 || legacy?.quarantineManifestSha256 !== "3ea4b7bff97cc3edbc68ba5067c1dff4b4f7768c05e9520f93ba013a6ee8bfa5") fail("legacy quarantine manifest changed");
+const expectedQuarantine = ["20260623006600","20260801163126","20260803111852","20260807082820","20260807084620","20260807085215","20260807085935","20260807090844"];
+if (JSON.stringify(legacy?.quarantinedVersions) !== JSON.stringify(expectedQuarantine)) fail("legacy quarantine identities changed");
+const superseded = evidence.supersededPendingSource;
+if (superseded?.removedFilename !== "20260901041000_rebind_projectos_vercel_oidc_identity.sql" || superseded?.duplicateOfAppliedVersion !== "20260831205808" || superseded?.sharedGitBlobSha !== "a8657001cb445da1e725d8e502f7b07d7dcf970c" || superseded?.bytes !== 1800 || superseded?.liveLedgerContainsRemovedVersion !== false) fail("superseded pending migration proof changed");
 
 const expectedFiles = new Set();
 const seenVersions = new Set();
@@ -96,5 +104,10 @@ console.log(JSON.stringify({
   postVaultExactFiles: postVault.length,
   postVaultManifestSha256: evidence.postVaultExactSource.manifestSha256,
   legacyFilesRemaining: evidence.recovery.remainingLegacyFiles,
+  legacyCandidateSafe: legacy.candidateSafeCount,
+  legacyQuarantined: legacy.quarantinedCount,
+  legacyManifestSha256: legacy.fullManifestSha256,
+  quarantineManifestSha256: legacy.quarantineManifestSha256,
+  supersededPendingSource: superseded.removedFilename,
   pendingSource: evidence.pendingSource,
 }, null, 2));
