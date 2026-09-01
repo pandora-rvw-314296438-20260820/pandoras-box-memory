@@ -1,113 +1,125 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const evidence = JSON.parse(readFileSync(resolve(root, "docs/capabilities/evidence/MEMORY_MIGRATION_LINEAGE_RECOVERY_2026-09-01.json"), "utf8"));
-const migrationsDir = resolve(root, "supabase/migrations");
-const fail = (message) => { throw new Error(message); };
-const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
-const pathFor = (filename) => `supabase/migrations/${filename}`;
-
-if (evidence.schemaVersion !== "1.2") fail("unexpected lineage evidence schema");
-if (evidence.memoryProjectRef !== "ivmvufhcsezyhczzondn") fail("unexpected Memory project ref");
-if (evidence.liveMigrationLedger?.appliedCount !== 85) fail("live applied migration count changed; refresh provider evidence");
-if (evidence.sourceStateBeforeRecovery?.missingAppliedFiles !== 81) fail("pre-recovery migration debt changed");
-if (evidence.sourceStateAfterRecovery?.exactAppliedFiles !== 33) fail("expected 33 exact applied migration sources");
-if (evidence.sourceStateAfterRecovery?.missingAppliedFiles !== 52) fail("expected 52 quarantined legacy migration gaps");
-if (!Array.isArray(evidence.knownExactApplied) || evidence.knownExactApplied.length !== 4) fail("known exact applied source set must contain four migrations");
-if (!Array.isArray(evidence.pendingSource) || evidence.pendingSource.length !== 0) fail("pending source set changed");
-const legacy = evidence.legacyRecoveryBoundary;
-if (legacy?.legacyAppliedCount !== 52 || legacy?.candidateSafeCount !== 44 || legacy?.quarantinedCount !== 8) fail("legacy recovery partition changed");
-if (legacy?.fullManifestBytes !== 7076 || legacy?.fullManifestSha256 !== "60495c54adefd13bf72a1107c8a36141940e265f429b8e347b60fad4eb3ddb8e") fail("legacy provider manifest changed");
-if (legacy?.quarantineManifestBytes !== 1048 || legacy?.quarantineManifestSha256 !== "3ea4b7bff97cc3edbc68ba5067c1dff4b4f7768c05e9520f93ba013a6ee8bfa5") fail("legacy quarantine manifest changed");
-const expectedQuarantine = ["20260623006600","20260801163126","20260803111852","20260807082820","20260807084620","20260807085215","20260807085935","20260807090844"];
-if (JSON.stringify(legacy?.quarantinedVersions) !== JSON.stringify(expectedQuarantine)) fail("legacy quarantine identities changed");
-const superseded = evidence.supersededPendingSource;
-if (superseded?.removedFilename !== "20260901041000_rebind_projectos_vercel_oidc_identity.sql" || superseded?.duplicateOfAppliedVersion !== "20260831205808" || superseded?.sharedGitBlobSha !== "a8657001cb445da1e725d8e502f7b07d7dcf970c" || superseded?.bytes !== 1800 || superseded?.liveLedgerContainsRemovedVersion !== false) fail("superseded pending migration proof changed");
-
-const expectedFiles = new Set();
-const seenVersions = new Set();
-for (const row of evidence.knownExactApplied) {
-  if (!/^\d{14}$/.test(row.version) || seenVersions.has(row.version)) fail(`invalid or duplicate version ${row.version}`);
-  seenVersions.add(row.version);
-  expectedFiles.add(row.filename);
-  const bytes = readFileSync(resolve(migrationsDir, row.filename));
-  if (bytes.length !== row.bytes) fail(`byte-size mismatch for ${row.filename}`);
-  if (digest(bytes) !== row.sha256) fail(`sha256 mismatch for ${row.filename}`);
+const migrationDir = resolve(root, "supabase/migrations");
+const evidencePath = resolve(root, "docs/capabilities/evidence/MEMORY_MIGRATION_LINEAGE_RECOVERY_2026-09-01.json");
+const evidence = JSON.parse(readFileSync(evidencePath, "utf8"));
+function fail(message) { throw new Error(message); }
+function assert(condition, message) { if (!condition) fail(message); }
+function sha256(bytes) { return createHash("sha256").update(bytes).digest("hex"); }
+function gitBlobSha1(bytes) { return createHash("sha1").update(Buffer.concat([Buffer.from(`blob ${bytes.length}\0`), bytes])).digest("hex"); }
+function migrationName(row) {
+  const prefix = `${row.version}_`;
+  assert(row.filename.startsWith(prefix) && row.filename.endsWith(".sql"), `legacy filename/version mismatch: ${row.filename}`);
+  return row.filename.slice(prefix.length, -4);
 }
 
-const actualFiles = readdirSync(migrationsDir).filter((name) => name.endsWith(".sql")).sort();
+assert(evidence.schemaVersion === "1.3", "unexpected evidence schema version");
+assert(evidence.memoryProjectRef === "ivmvufhcsezyhczzondn", "Memory project ref changed");
+assert(evidence.liveMigrationLedger.appliedCount === 85, "live applied count must remain 85");
+assert(evidence.liveMigrationLedger.latestVersion === "20260831211258", "latest live migration changed");
+const migrationTree = execFileSync("git", ["rev-parse", "HEAD:supabase/migrations"], { cwd: root, encoding: "utf8" }).trim();
+assert(migrationTree === evidence.sourceSnapshot.migrationTreeSha, `migration tree mismatch: ${migrationTree}`);
+execFileSync("git", ["merge-base", "--is-ancestor", evidence.sourceSnapshot.sourceRecoveryCommitSha, "HEAD"], { cwd: root, stdio: "ignore" });
+
+const actualFiles = readdirSync(migrationDir).filter((name) => name.endsWith(".sql")).sort();
+assert(actualFiles.length === 50, `expected 50 migration files, got ${actualFiles.length}`);
+assert(evidence.sourceStateAfterRecovery.migrationFiles === 50, "evidence migration file count stale");
+assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 50, "exact applied source count stale");
+assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 35, "missing applied count stale");
+assert(evidence.sourceStateAfterRecovery.pendingUnappliedFiles === 0, "pending source must remain zero");
+assert(evidence.liveMigrationLedger.appliedCount === evidence.sourceStateAfterRecovery.exactAppliedFiles + evidence.sourceStateAfterRecovery.missingAppliedFiles, "applied/source arithmetic mismatch");
+const expectedFiles = new Set();
+assert(evidence.knownExactApplied.length === 4, "known exact migration count changed");
+for (const item of evidence.knownExactApplied) {
+  const bytes = readFileSync(resolve(migrationDir, item.filename));
+  assert(bytes.length === item.bytes, `byte mismatch: ${item.filename}`);
+  assert(sha256(bytes) === item.sha256, `sha256 mismatch: ${item.filename}`);
+  expectedFiles.add(item.filename);
+}
+
+const boundary = evidence.legacyRecoveryBoundary;
+assert(boundary.legacyAppliedCount === 52, "legacy applied count changed");
+assert(boundary.candidateSafeCount === 40, "safe legacy count must be 40");
+assert(boundary.quarantinedCount === 12, "quarantined legacy count must be 12");
+assert(boundary.recoveredCandidateSafeCount === 17, "recovered legacy-safe count must be 17");
+assert(boundary.remainingCandidateSafeCount === 23, "remaining legacy-safe count must be 23");
+assert(boundary.candidateSafeCount + boundary.quarantinedCount === boundary.legacyAppliedCount, "legacy partition arithmetic mismatch");
+assert(boundary.recoveredCandidateSafeCount + boundary.remainingCandidateSafeCount === boundary.candidateSafeCount, "safe recovery arithmetic mismatch");
+assert(boundary.fullManifestBytes === 6328, "legacy full manifest bytes changed");
+assert(boundary.fullManifestSha256 === "cd39ac8230a3644f3ff028471fb2b2874cd0050a8a4513d02f26d5ef6de73e6a", "legacy full manifest digest changed");
+assert(boundary.safeManifestBytes === 4778, "safe manifest bytes changed");
+assert(boundary.safeManifestSha256 === "c12bfeadb8753524d22020d7d4d82c0d5f1d6b4b1fc4ebff6e880a9d552a07f6", "safe manifest digest changed");
+assert(boundary.quarantineManifestBytes === 1549, "quarantine manifest bytes changed");
+assert(boundary.quarantineManifestSha256 === "9452c5cd5971011da16ff9c23510286f7e8e4fb62db1601f337bc4700476eb1c", "quarantine manifest digest changed");
+assert(boundary.recoveredManifestBytes === 2071, "recovered manifest bytes changed");
+assert(boundary.recoveredManifestSha256 === "68e94c67574e95d9a99e798d4cde30f183412b38c62cc80a50bcefcaab6e75f3", "recovered manifest digest changed");
+assert(boundary.remainingSafeManifestBytes === 2706, "remaining-safe manifest bytes changed");
+assert(boundary.remainingSafeManifestSha256 === "0c5214251a38387d99e5e4c2411c851d492317b6ea858331691c45de7377db33", "remaining-safe manifest digest changed");
+const expectedQuarantine = ["20260623006600","20260627040000","20260731111248","20260801163126","20260803111852","20260807055209","20260807081540","20260807082820","20260807084620","20260807085215","20260807085935","20260807090844"];
+assert(JSON.stringify(boundary.quarantinedVersions) === JSON.stringify(expectedQuarantine), "quarantine version set changed");
+assert(boundary.recoveredSafe.length === 17, "recovered legacy row count changed");
+const recoveredVersions = new Set();
+const recoveredManifestRows = [];
+for (const row of boundary.recoveredSafe) {
+  assert(!recoveredVersions.has(row.version), `duplicate recovered legacy version: ${row.version}`);
+  assert(!expectedQuarantine.includes(row.version), `quarantined version materialized: ${row.version}`);
+  recoveredVersions.add(row.version);
+  const bytes = readFileSync(resolve(migrationDir, row.filename));
+  assert(bytes.length === row.bytes, `legacy byte mismatch: ${row.filename}`);
+  const digest = sha256(bytes);
+  assert(digest === row.sha256, `legacy sha256 mismatch: ${row.filename}`);
+  assert(gitBlobSha1(bytes) === row.gitBlobSha1, `legacy git blob mismatch: ${row.filename}`);
+  recoveredManifestRows.push(`${row.version}|${migrationName(row)}|${row.statementCount}|${bytes.length}|${digest}`);
+  expectedFiles.add(row.filename);
+}
+const recoveredManifest = recoveredManifestRows.join("\n");
+assert(Buffer.byteLength(recoveredManifest) === boundary.recoveredManifestBytes, "recovered provider manifest byte mismatch");
+assert(sha256(Buffer.from(recoveredManifest)) === boundary.recoveredManifestSha256, "recovered provider manifest digest mismatch");
+for (const version of expectedQuarantine) {
+  assert(!actualFiles.some((filename) => filename.startsWith(`${version}_`)), `quarantined migration source is present: ${version}`);
+}
+
+const lastKnownExact = evidence.knownExactApplied.at(-1).version;
 const postVault = [];
 for (const filename of actualFiles) {
-  const match = filename.match(/^(\d{14})_(.+)\.sql$/);
-  if (!match) fail(`invalid migration filename ${filename}`);
-  const [, version] = match;
-  if (seenVersions.has(version)) continue;
-  if (version > evidence.knownExactApplied.at(-1).version && version < "20260901000000") {
-    seenVersions.add(version);
-    expectedFiles.add(filename);
-    const bytes = readFileSync(resolve(migrationsDir, filename));
-    postVault.push({ path: pathFor(filename), bytes: bytes.length, sha256: digest(bytes) });
-  }
+  const version = filename.split("_", 1)[0];
+  if (version > lastKnownExact && version < "20260901000000") postVault.push(filename);
 }
-
-if (postVault.length !== evidence.postVaultExactSource?.appliedFiles) {
-  fail(`post-Vault exact source count mismatch: ${postVault.length}`);
-}
-if (evidence.postVaultExactSource?.providerConcatenationManifestBytes !== 4340 || evidence.postVaultExactSource?.providerConcatenationManifestSha256 !== "03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81") {
-  fail("provider statement-concatenation proof changed; refresh provider evidence");
-}
-if (evidence.postVaultExactSource?.multiStatementFiles !== 4 || evidence.postVaultExactSource?.replayableSource !== true) {
-  fail("replayable post-Vault source topology changed");
-}
-if (evidence.postVaultExactSource?.serialization !== "provider statements preserved in-order; multi-statement migrations add explicit semicolon/newline terminators; single-statement migrations preserve provider statement bytes plus one terminal newline") {
-  fail("post-Vault serialization contract changed");
-}
-const manifest = postVault
-  .sort((a, b) => a.path.localeCompare(b.path))
-  .map((row) => `${row.path}|${row.bytes}|${row.sha256}`)
-  .join("\n");
-if (Buffer.byteLength(manifest) !== evidence.postVaultExactSource.manifestBytes) {
-  fail("post-Vault manifest byte count mismatch");
-}
-if (digest(Buffer.from(manifest)) !== evidence.postVaultExactSource.manifestSha256) {
-  fail("post-Vault migration manifest SHA-256 mismatch");
-}
-
-for (const filename of evidence.pendingSource) {
-  const match = filename.match(/^(\d{14})_/);
-  if (!match || seenVersions.has(match[1])) fail(`invalid or duplicate pending migration ${filename}`);
-  seenVersions.add(match[1]);
+assert(postVault.length === 29, `expected 29 post-Vault exact files, got ${postVault.length}`);
+assert(evidence.postVaultExactSource.appliedFiles === 29, "post-Vault evidence count stale");
+const postVaultManifestRows = [];
+const providerConcatRows = [];
+let multiStatementFiles = 0;
+for (const filename of postVault) {
+  const bytes = readFileSync(resolve(migrationDir, filename));
+  const digest = sha256(bytes);
+  postVaultManifestRows.push(`${filename}|${bytes.length}|${digest}\n`);
+  const text = bytes.toString("utf8");
+  if (text.includes(";\n")) multiStatementFiles += 1;
+  const providerConcat = Buffer.from(text.replace(/;\n/g, "\n"));
+  providerConcatRows.push(`${filename}|provider-concatenation|${providerConcat.length}|${sha256(providerConcat)}\n`);
   expectedFiles.add(filename);
 }
-
-const expectedSorted = [...expectedFiles].sort();
-if (JSON.stringify(actualFiles) !== JSON.stringify(expectedSorted)) {
-  fail(`migration source set changed without refreshed live-lineage evidence: ${JSON.stringify(actualFiles)}`);
-}
-if (actualFiles.length !== evidence.sourceStateAfterRecovery.migrationFiles) {
-  fail("migration source file count mismatch");
-}
-if (evidence.liveMigrationLedger.appliedCount - evidence.sourceStateAfterRecovery.exactAppliedFiles !== evidence.recovery.remainingLegacyFiles) {
-  fail("legacy recovery debt arithmetic mismatch");
-}
-if (evidence.recovery.productionSchemaMutation !== false || evidence.recovery.productionReplayAuthorized !== false) {
-  fail("recovery evidence must not authorize production mutation/replay");
-}
-
-console.log(JSON.stringify({
-  ok: true,
-  liveApplied: evidence.liveMigrationLedger.appliedCount,
-  exactAppliedSource: evidence.sourceStateAfterRecovery.exactAppliedFiles,
-  postVaultExactFiles: postVault.length,
-  postVaultManifestSha256: evidence.postVaultExactSource.manifestSha256,
-  legacyFilesRemaining: evidence.recovery.remainingLegacyFiles,
-  legacyCandidateSafe: legacy.candidateSafeCount,
-  legacyQuarantined: legacy.quarantinedCount,
-  legacyManifestSha256: legacy.fullManifestSha256,
-  quarantineManifestSha256: legacy.quarantineManifestSha256,
-  supersededPendingSource: superseded.removedFilename,
-  pendingSource: evidence.pendingSource,
-}, null, 2));
+const postVaultManifest = postVaultManifestRows.join("");
+assert(Buffer.byteLength(postVaultManifest) === evidence.postVaultExactSource.manifestBytes, "post-Vault manifest byte mismatch");
+assert(sha256(Buffer.from(postVaultManifest)) === evidence.postVaultExactSource.manifestSha256, "post-Vault manifest digest mismatch");
+const providerConcatManifest = providerConcatRows.join("");
+assert(Buffer.byteLength(providerConcatManifest) === evidence.postVaultExactSource.providerConcatenationManifestBytes, "provider-concatenation manifest byte mismatch");
+assert(sha256(Buffer.from(providerConcatManifest)) === evidence.postVaultExactSource.providerConcatenationManifestSha256, "provider-concatenation manifest digest mismatch");
+assert(multiStatementFiles === evidence.postVaultExactSource.multiStatementFiles, "post-Vault multi-statement count changed");
+assert(expectedFiles.size === 50, `expected source set has ${expectedFiles.size} files`);
+assert(JSON.stringify([...expectedFiles].sort()) === JSON.stringify(actualFiles), "migration tree contains an unexpected or missing SQL file");
+assert(evidence.pendingSource.length === 0, "pending unapplied migration source must remain absent");
+assert(evidence.recovery.recoveredPostVaultFiles === 29, "recovered post-Vault count stale");
+assert(evidence.recovery.recoveredLegacySafeFiles === 17, "legacy recovery count stale");
+assert(evidence.recovery.remainingLegacyFiles === 35, "remaining legacy count stale");
+assert(evidence.recovery.remainingCandidateSafeFiles === 23, "remaining safe count stale");
+assert(evidence.recovery.quarantinedLegacyFiles === 12, "quarantined count stale");
+assert(evidence.recovery.productionSchemaMutation === false, "production mutation must remain false");
+assert(evidence.recovery.productionReplayAuthorized === false, "production replay must remain unauthorized");
+process.stdout.write("Memory migration lineage checkpoint valid: 50/85 exact source; legacy boundary 40 safe / 12 quarantined; 17 safe restored / 23 safe pending.\n");

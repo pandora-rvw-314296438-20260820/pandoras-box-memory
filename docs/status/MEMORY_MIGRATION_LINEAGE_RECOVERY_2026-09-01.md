@@ -1,47 +1,62 @@
-# Memory migration lineage recovery — 2026-09-01
+# Memory Migration Lineage Recovery — 2026-09-01
 
-## Purpose
+## Checkpoint
 
-Restore deterministic source authority for the live Memory database without replaying or mutating production schema.
+This checkpoint restores a conservative-safe legacy migration tranche from the live Memory Supabase migration ledger into the canonical `pandoras-box-memory` recovery branch without replaying or mutating production.
 
-## Verified baseline
+- Memory Supabase project: `ivmvufhcsezyhczzondn`
+- Live applied migrations: **85**
+- Exact/replayable migration source now present: **50/85**
+- Applied source still absent: **35/85**
+- Pending unapplied migration files: **0**
+- Source recovery commit: `8bd12ba62c98ec16407877446c8730a4c3385370`
+- Source recovery tree: `72127a7dc0e639a0569c9fa604715a406a7b906a`
+- Exact migration subtree: `daa54ba4c1c8c49ce75122978692f161a9f9d1dc`
+- Base `main` at source checkpoint: `9da819876037aa6427e745189f7b3949747b3bef`
+- Production schema mutation: **false**
+- Production replay authorized: **false**
 
-- Memory Supabase: `ivmvufhcsezyhczzondn`
-- Source baseline: `aa9294fe3d23f7dec515c4d559450422382d2768`
-- Source tree: `790c4160131c8f2fb99feea43bfca667200a9643`
-- Live applied migration identities: **85**
-- Source migration files before this checkpoint: **5**
-- Exact applied files before repair: **3**
-- Corrupted applied source files before repair: **1**
-- Applied migrations absent from source: **81**
-- Source-only pending migration: `20260901041000_rebind_projectos_vercel_oidc_identity.sql`
+## Conservative legacy boundary
 
-## Repair in this checkpoint
+The 52 pre-Vault applied migrations are frozen under the stronger conservative provider classification:
 
-`20260808190813_add_gateway_workload_oidc.sql` existed as a zero-byte file in canonical source even though the live migration ledger records a 4,583-byte applied migration. This checkpoint reconstructs that file only from `supabase_migrations.schema_migrations.statements[]`.
+- candidate-safe: **40**
+- quarantined: **12**
+- candidate-safe restored in this checkpoint: **17**
+- candidate-safe still pending: **23**
 
-Expected repaired SHA-256: `918ab4c000f37dada70b45e0f94bc2cfc81619f9e800daca6e698c14fa7d1c22`.
+Provider-bound manifest evidence:
 
-The live ledger was compacted to a version/name/bytes/SHA manifest of 10,379 bytes with SHA-256 `fcfaaa292e0c3ff6700b5a542fbb456ff17d39cd4bf59e0ab164725b737d052b`. The compact manifest itself is provider evidence used to derive this checkpoint; the checked-in JSON records the authority, counts and exact source hashes required for CI.
+- full legacy manifest: `cd39ac8230a3644f3ff028471fb2b2874cd0050a8a4513d02f26d5ef6de73e6a`
+- safe manifest: `c12bfeadb8753524d22020d7d4d82c0d5f1d6b4b1fc4ebff6e880a9d552a07f6`
+- quarantine manifest: `9452c5cd5971011da16ff9c23510286f7e8e4fb62db1601f337bc4700476eb1c`
+- restored-safe manifest: `68e94c67574e95d9a99e798d4cde30f183412b38c62cc80a50bcefcaab6e75f3`
+- remaining-safe manifest: `0c5214251a38387d99e5e4c2411c851d492317b6ea858331691c45de7377db33`
 
-## Safety boundary
+The 12 quarantined versions remain absent from Git source:
 
-This is a **source-only recovery**. It does not execute SQL against production, mark unapplied migrations as applied, alter the live ledger, or authorize replay. The remaining 81 historical SQL files must be reconstructed only from the corresponding live `schema_migrations.statements[]` rows and independently hash-checked before source parity can be declared.
+`20260623006600`, `20260627040000`, `20260731111248`, `20260801163126`,
+`20260803111852`, `20260807055209`, `20260807081540`, `20260807082820`,
+`20260807084620`, `20260807085215`, `20260807085935`, `20260807090844`.
 
-The dedicated CI gate intentionally freezes the current five-file migration source set. Any addition/removal/change must refresh live provider evidence first, preventing silent migration-source drift.
+No quarantined SQL body is recorded in this evidence artifact.
 
-## Full parity acceptance
+## What the gate proves
 
-Full migration-source parity requires all 85 applied migrations to exist in canonical source with exact version/name/content hashes, zero applied migrations missing from source, the pending source migration explicitly adjudicated, and fresh Supabase readback after merge. Until then, migration lineage is **recovery-controlled**, not fully source-reproducible.
+The dedicated lineage gate independently verifies:
 
-## 2026-09-01 follow-up milestone — post-Vault replayability and legacy quarantine
+1. the exact `supabase/migrations` Git tree;
+2. all four previously known exact migrations;
+3. all 17 newly restored legacy files by byte count, SHA-256, and Git blob SHA-1;
+4. the provider-derived restored-safe manifest;
+5. absence of every quarantined version;
+6. the existing 29-file post-Vault replayable manifest;
+7. the exact 50-file source set with no pending duplicate;
+8. arithmetic `50 exact + 35 absent = 85 applied`;
+9. that production mutation and replay remain disabled.
 
-The recovery branch now contains 33 applied migration sources. The 29 post-Vault recovered files are provider-derived and replayable. Four multi-statement ledger rows required deterministic statement terminators during source serialization; their replayable file hashes are separately bound from the original provider statement-concatenation proof.
+## Remaining open loop
 
-Post-Vault replayable manifest: 29 files, 4,340 manifest bytes, SHA-256 `3ec0292900d8f1337d99b7ff1bb346576ea73cf6c528101dad84c8f25333c6a0`. Original provider statement-concatenation manifest remains preserved as `03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81`.
+The next migration-lineage action is to restore the remaining **23 conservative-safe** legacy migrations in bounded, byte-verified Git tranches. After that, the **12 quarantined** migrations require sanitized adjudication before any source reconstruction is considered.
 
-The remaining 52 applied legacy migrations were classified provider-side without exporting credential values. The frozen boundary is 44 candidate-safe and 8 quarantined. Full legacy manifest SHA-256: `60495c54adefd13bf72a1107c8a36141940e265f429b8e347b60fad4eb3ddb8e`; quarantine manifest SHA-256: `3ea4b7bff97cc3edbc68ba5067c1dff4b4f7768c05e9520f93ba013a6ee8bfa5`. Quarantined SQL must not be copied verbatim into source.
-
-The source-only migration `20260901041000_rebind_projectos_vercel_oidc_identity.sql` was proven byte-identical to already-applied migration `20260831205808` (shared Git blob `a8657001cb445da1e725d8e502f7b07d7dcf970c`, 1,800 bytes) and absent from the live migration ledger. It was removed from the recovery branch to prevent a second application when Supabase Git migration convergence is restored.
-
-No production schema mutation, migration replay, migration-ledger repair, Vercel mutation, or credential export occurred in this milestone. Supabase Git `main` remains fail-closed with `MIGRATIONS_FAILED` until the remaining historical source gap is safely resolved.
+This checkpoint does not claim Memory production source/runtime parity, deployment parity, or Phase 2 closed-loop production verification.
