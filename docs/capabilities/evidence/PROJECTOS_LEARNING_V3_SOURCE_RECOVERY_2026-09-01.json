@@ -1,0 +1,37 @@
+{
+    "scope": "projectos-learning-live-v3-source-recovery",
+    "capturedAt": "2026-09-01T22:37:00+08:00",
+    "nonActions": [
+        "no production Edge deploy",
+        "no schema/data mutation",
+        "no canonical Memory write",
+        "no secret materialization"
+    ],
+    "baseMainSha": "2c1805f4357c38be47014480c0101ef3d9a5e904",
+    "liveRuntime": {
+        "slug": "pandora-projectos-learning",
+        "version": 3,
+        "verifyJwt": false,
+        "ezbrSha256": "2ddb478f3645c356971545ca088e7c5336eece89cde6bdecd0f08b087c3cdd6c",
+        "projectRef": "ivmvufhcsezyhczzondn"
+    },
+    "baseMainTree": "4b5c8a42810b0211ae14268ef466c357b4393b3e",
+    "schemaVersion": 1,
+    "canonicalBefore": {
+        "bytes": 20528,
+        "sha256": "f12e08e1ed43f0730b0d19567a74cdaef86bdc5fa55637865647d6abb8df26e4"
+    },
+    "recoveredSource": {
+        "bytes": 27048,
+        "sha256": "5d0cb12e09a22fb5affba685cd984651995f533a5bfcf060199d29de12d2e311"
+    },
+    "requiredSemantics": [
+        "metadata_only_v1",
+        "ROUTINE_AGGREGATE_WINDOW_HOURS=6",
+        "projectos_selective_review_v2",
+        "routine-success aggregation",
+        "failure/destructive/ambiguous-write review gate",
+        "canonical_memory_written=false"
+    ],
+    "sourceRecoveryMethod": "asserted deterministic transform of current canonical source using live-v3 provider readback semantics; all splice points fail closed"
+}
