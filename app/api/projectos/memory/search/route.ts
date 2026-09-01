@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_KEYS = new Set([
   "namespace",
+  "project_id",
+  "project_key",
   "query",
   "current_task",
   "max_items",
