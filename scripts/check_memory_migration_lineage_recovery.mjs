@@ -8,12 +8,15 @@ const evidence = JSON.parse(readFileSync(resolve(root, "docs/capabilities/eviden
 const migrationsDir = resolve(root, "supabase/migrations");
 const fail = (message) => { throw new Error(message); };
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
+const pathFor = (filename) => `supabase/migrations/${filename}`;
 
-if (evidence.schemaVersion !== "1.0") fail("unexpected lineage evidence schema");
+if (evidence.schemaVersion !== "1.1") fail("unexpected lineage evidence schema");
 if (evidence.memoryProjectRef !== "ivmvufhcsezyhczzondn") fail("unexpected Memory project ref");
 if (evidence.liveMigrationLedger?.appliedCount !== 85) fail("live applied migration count changed; refresh provider evidence");
-if (evidence.sourceStateBeforeRecovery?.missingAppliedFiles !== 81) fail("expected historical migration debt changed");
-if (!Array.isArray(evidence.knownExactApplied) || evidence.knownExactApplied.length !== 4) fail("exact applied source set must contain four migrations");
+if (evidence.sourceStateBeforeRecovery?.missingAppliedFiles !== 81) fail("pre-recovery migration debt changed");
+if (evidence.sourceStateAfterRecovery?.exactAppliedFiles !== 33) fail("expected 33 exact applied migration sources");
+if (evidence.sourceStateAfterRecovery?.missingAppliedFiles !== 52) fail("expected 52 quarantined legacy migration gaps");
+if (!Array.isArray(evidence.knownExactApplied) || evidence.knownExactApplied.length !== 4) fail("known exact applied source set must contain four migrations");
 if (!Array.isArray(evidence.pendingSource) || evidence.pendingSource.length !== 1) fail("pending source set changed");
 
 const expectedFiles = new Set();
@@ -26,16 +29,52 @@ for (const row of evidence.knownExactApplied) {
   if (bytes.length !== row.bytes) fail(`byte-size mismatch for ${row.filename}`);
   if (digest(bytes) !== row.sha256) fail(`sha256 mismatch for ${row.filename}`);
 }
-for (const filename of evidence.pendingSource) expectedFiles.add(filename);
 
 const actualFiles = readdirSync(migrationsDir).filter((name) => name.endsWith(".sql")).sort();
+const postVault = [];
+for (const filename of actualFiles) {
+  const match = filename.match(/^(\d{14})_(.+)\.sql$/);
+  if (!match) fail(`invalid migration filename ${filename}`);
+  const [, version] = match;
+  if (seenVersions.has(version)) continue;
+  if (version > evidence.knownExactApplied.at(-1).version && version < "20260901000000") {
+    seenVersions.add(version);
+    expectedFiles.add(filename);
+    const bytes = readFileSync(resolve(migrationsDir, filename));
+    postVault.push({ path: pathFor(filename), bytes: bytes.length, sha256: digest(bytes) });
+  }
+}
+
+if (postVault.length !== evidence.postVaultExactSource?.appliedFiles) {
+  fail(`post-Vault exact source count mismatch: ${postVault.length}`);
+}
+const manifest = postVault
+  .sort((a, b) => a.path.localeCompare(b.path))
+  .map((row) => `${row.path}|${row.bytes}|${row.sha256}`)
+  .join("\n");
+if (Buffer.byteLength(manifest) !== evidence.postVaultExactSource.manifestBytes) {
+  fail("post-Vault manifest byte count mismatch");
+}
+if (digest(Buffer.from(manifest)) !== evidence.postVaultExactSource.manifestSha256) {
+  fail("post-Vault migration manifest SHA-256 mismatch");
+}
+
+for (const filename of evidence.pendingSource) {
+  const match = filename.match(/^(\d{14})_/);
+  if (!match || seenVersions.has(match[1])) fail(`invalid or duplicate pending migration ${filename}`);
+  seenVersions.add(match[1]);
+  expectedFiles.add(filename);
+}
+
 const expectedSorted = [...expectedFiles].sort();
 if (JSON.stringify(actualFiles) !== JSON.stringify(expectedSorted)) {
   fail(`migration source set changed without refreshed live-lineage evidence: ${JSON.stringify(actualFiles)}`);
 }
-
-if (evidence.liveMigrationLedger.appliedCount - evidence.knownExactApplied.length !== evidence.recovery.remainingHistoricalFiles) {
-  fail("historical recovery debt arithmetic mismatch");
+if (actualFiles.length !== evidence.sourceStateAfterRecovery.migrationFiles) {
+  fail("migration source file count mismatch");
+}
+if (evidence.liveMigrationLedger.appliedCount - evidence.sourceStateAfterRecovery.exactAppliedFiles !== evidence.recovery.remainingLegacyFiles) {
+  fail("legacy recovery debt arithmetic mismatch");
 }
 if (evidence.recovery.productionSchemaMutation !== false || evidence.recovery.productionReplayAuthorized !== false) {
   fail("recovery evidence must not authorize production mutation/replay");
@@ -44,7 +83,9 @@ if (evidence.recovery.productionSchemaMutation !== false || evidence.recovery.pr
 console.log(JSON.stringify({
   ok: true,
   liveApplied: evidence.liveMigrationLedger.appliedCount,
-  exactAppliedSource: evidence.knownExactApplied.length,
-  historicalFilesRemaining: evidence.recovery.remainingHistoricalFiles,
+  exactAppliedSource: evidence.sourceStateAfterRecovery.exactAppliedFiles,
+  postVaultExactFiles: postVault.length,
+  postVaultManifestSha256: evidence.postVaultExactSource.manifestSha256,
+  legacyFilesRemaining: evidence.recovery.remainingLegacyFiles,
   pendingSource: evidence.pendingSource,
 }, null, 2));
