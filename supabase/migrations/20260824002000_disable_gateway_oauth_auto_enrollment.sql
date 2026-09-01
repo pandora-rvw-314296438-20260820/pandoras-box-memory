@@ -74,5 +74,6 @@ BEGIN
       ELSE 'missing_grant'
     END;
 END;
-$$COMMENT ON FUNCTION public.gateway_authorize_oauth(uuid, text, text, text, text, text)
-IS 'Fail-closed OAuth authorization. Identity and grants must be explicitly pre-provisioned; authorization never creates or reactivates them.'
+$$;
+COMMENT ON FUNCTION public.gateway_authorize_oauth(uuid, text, text, text, text, text)
+IS 'Fail-closed OAuth authorization. Identity and grants must be explicitly pre-provisioned; authorization never creates or reactivates them.';
