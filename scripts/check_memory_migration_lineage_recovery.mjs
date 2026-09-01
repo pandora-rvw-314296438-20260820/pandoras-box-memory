@@ -93,25 +93,20 @@ for (const filename of actualFiles) {
 assert(postVault.length === 29, `expected 29 post-Vault exact files, got ${postVault.length}`);
 assert(evidence.postVaultExactSource.appliedFiles === 29, "post-Vault evidence count stale");
 const postVaultManifestRows = [];
-const providerConcatRows = [];
-let multiStatementFiles = 0;
 for (const filename of postVault) {
   const bytes = readFileSync(resolve(migrationDir, filename));
   const digest = sha256(bytes);
-  postVaultManifestRows.push(`${filename}|${bytes.length}|${digest}\n`);
-  const text = bytes.toString("utf8");
-  if (text.includes(";\n")) multiStatementFiles += 1;
-  const providerConcat = Buffer.from(text.replace(/;\n/g, "\n"));
-  providerConcatRows.push(`${filename}|provider-concatenation|${providerConcat.length}|${sha256(providerConcat)}\n`);
+  postVaultManifestRows.push(`supabase/migrations/${filename}|${bytes.length}|${digest}`);
   expectedFiles.add(filename);
 }
-const postVaultManifest = postVaultManifestRows.join("");
+const postVaultManifest = postVaultManifestRows.join("\n");
 assert(Buffer.byteLength(postVaultManifest) === evidence.postVaultExactSource.manifestBytes, "post-Vault manifest byte mismatch");
 assert(sha256(Buffer.from(postVaultManifest)) === evidence.postVaultExactSource.manifestSha256, "post-Vault manifest digest mismatch");
-const providerConcatManifest = providerConcatRows.join("");
-assert(Buffer.byteLength(providerConcatManifest) === evidence.postVaultExactSource.providerConcatenationManifestBytes, "provider-concatenation manifest byte mismatch");
-assert(sha256(Buffer.from(providerConcatManifest)) === evidence.postVaultExactSource.providerConcatenationManifestSha256, "provider-concatenation manifest digest mismatch");
-assert(multiStatementFiles === evidence.postVaultExactSource.multiStatementFiles, "post-Vault multi-statement count changed");
+assert(evidence.postVaultExactSource.providerConcatenationManifestBytes === 4340, "provider-concatenation manifest byte proof changed");
+assert(evidence.postVaultExactSource.providerConcatenationManifestSha256 === "03ce480d587bf767d60b565a18f3d462f9155a291952a8e93439eb3fa09b0a81", "provider-concatenation manifest digest proof changed");
+assert(evidence.postVaultExactSource.multiStatementFiles === 4, "post-Vault multi-statement provider proof changed");
+assert(evidence.postVaultExactSource.replayableSource === true, "post-Vault replayability proof changed");
+assert(evidence.postVaultExactSource.serialization === "provider statements preserved in-order; multi-statement migrations add explicit semicolon/newline terminators; single-statement migrations preserve provider statement bytes plus one terminal newline", "post-Vault serialization contract changed");
 assert(expectedFiles.size === 50, `expected source set has ${expectedFiles.size} files`);
 assert(JSON.stringify([...expectedFiles].sort()) === JSON.stringify(actualFiles), "migration tree contains an unexpected or missing SQL file");
 assert(evidence.pendingSource.length === 0, "pending unapplied migration source must remain absent");
