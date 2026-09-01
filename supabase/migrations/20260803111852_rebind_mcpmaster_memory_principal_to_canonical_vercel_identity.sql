@@ -1,0 +1,5 @@
+-- Historical migration identity recovered from live Supabase ledger.
+-- Version: 20260803111852
+-- Name: rebind_mcpmaster_memory_principal_to_canonical_vercel_identity
+-- Security disposition: sanitized historical anchor; credential/provider literals intentionally omitted.
+-- This version is already applied in production. Do not reconstruct or replay omitted secret material.
