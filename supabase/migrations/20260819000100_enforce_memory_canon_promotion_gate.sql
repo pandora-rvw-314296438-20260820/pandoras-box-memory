@@ -18,8 +18,6 @@ WITH CHECK (
   AND superseded_at IS NULL
   AND revoked_at IS NULL
   AND revocation_reason IS NULL
-  AND revoked_at IS NULL
-  AND revocation_reason IS NULL
   AND is_active IS TRUE
 )CREATE OR REPLACE FUNCTION public.save_validated_memory_candidate_transaction(
   p_namespace public.pandora_namespace,
