@@ -1,0 +1,65 @@
+name: Memory Lifecycle Contract Gate
+
+on:
+  pull_request:
+    paths:
+      - "docs/capabilities/evidence/MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01.md"
+      - "docs/capabilities/evidence/MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01.json"
+      - "scripts/verify_memory_lifecycle_contract.py"
+      - "supabase/functions/pandora-projectos-bridge/**"
+      - "supabase/migrations/**"
+      - ".github/workflows/memory-lifecycle-contract-gate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/capabilities/evidence/MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01.md"
+      - "docs/capabilities/evidence/MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01.json"
+      - "scripts/verify_memory_lifecycle_contract.py"
+      - "supabase/functions/pandora-projectos-bridge/**"
+      - "supabase/migrations/**"
+      - ".github/workflows/memory-lifecycle-contract-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve exact candidate
+        id: candidate
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+            echo "base=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "base=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.candidate.outputs.head }}
+          fetch-depth: 0
+
+      - name: Assert exact checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ steps.candidate.outputs.head }}"
+
+      - name: Run lifecycle resolver self-tests and contract gate
+        shell: bash
+        run: |
+          python3 scripts/verify_memory_lifecycle_contract.py \
+            --self-test \
+            --base-sha "${{ steps.candidate.outputs.base }}"
+
+      - name: Re-run exact-project bridge source isolation
+        shell: bash
+        run: python3 scripts/verify_projectos_bridge_project_scope.py
+
+      - name: Reject literal secrets
+        shell: bash
+        run: bash scripts/check_no_literal_secrets.sh
