@@ -24,7 +24,7 @@ The recovered `check_memory_evidence_activation.mjs` previously assumed that the
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `aa34e54caf22980f1a6fe7950037139853af87ae9b175adb0aa929795edac790`
+- Candidate bridge raw SHA-256: `6ae5f00523a656be01175b82d651f9b2cc05585f513293801c17522fc62b884a`
 - Task 5 source change is project-isolated Memory search only.
 - Search requires explicit canonical project identity plus an active `can_read` project grant.
 - Search returns exact-project `memory_items` only and omits namespace-wide profiles, open loops, events, and context packs when those tables cannot prove project ownership.
