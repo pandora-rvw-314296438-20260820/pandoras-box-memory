@@ -134,9 +134,13 @@ BEGIN
 
   RETURN NEW;
 END;
-$$REVOKE ALL ON FUNCTION public.ensure_projectos_evidence_review_atomic() FROM PUBLICDROP TRIGGER IF EXISTS trg_projectos_evidence_review_atomic
-  ON public.memory_capture_candidatesCREATE TRIGGER trg_projectos_evidence_review_atomic
+$$;
+REVOKE ALL ON FUNCTION public.ensure_projectos_evidence_review_atomic() FROM PUBLIC;
+DROP TRIGGER IF EXISTS trg_projectos_evidence_review_atomic
+  ON public.memory_capture_candidates;
+CREATE TRIGGER trg_projectos_evidence_review_atomic
 AFTER INSERT ON public.memory_capture_candidates
 FOR EACH ROW
-EXECUTE FUNCTION public.ensure_projectos_evidence_review_atomic()COMMENT ON FUNCTION public.ensure_projectos_evidence_review_atomic()
-IS 'H06 fail-closed invariant: a governed ProjectOS evidence candidate cannot commit without its pending-review queue row in the same database transaction.'
+EXECUTE FUNCTION public.ensure_projectos_evidence_review_atomic();
+COMMENT ON FUNCTION public.ensure_projectos_evidence_review_atomic()
+IS 'H06 fail-closed invariant: a governed ProjectOS evidence candidate cannot commit without its pending-review queue row in the same database transaction.';
