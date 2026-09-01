@@ -85,10 +85,13 @@ function validBody(projectKey = "mcpmaster-pandoras-box", overrides = {}) {
     title: "Pandora evidence",
     summary: "Bounded review-gated evidence candidate.",
     proof_stage: "tested",
+    evidence_kind: "verified_build",
     claim: "Source has been tested but is not deployed or production verified.",
     evidence_refs: [
-      { type: "github_source", ref: `banataosystems/Pandoras-box@${SHA40}` },
-      { type: "sha256", ref: SHA256, sha256: SHA256 },
+      { type: "build_job", ref: "build-job-verified-0001" },
+      { type: "project_version", ref: "project-version-verified-0001" },
+      { type: "verification_run", ref: "verification-run-pass-0001" },
+      { type: "artifact_digest", ref: SHA256, sha256: SHA256 },
     ],
     provenance: {
       source_type: "github_exact_head",
@@ -234,7 +237,7 @@ async function json(response) {
     [validBody(undefined, { claim: "-----BEGIN PRIVATE KEY-----" }), "private_key_material"],
     [validBody(undefined, { provenance: { ...validBody().provenance, source_locator: "owner%40example.com" } }), "direct_identifier_email"],
     [validBody(undefined, { provenance: { ...validBody().provenance, source_locator: "owner＠example.com" } }), "direct_identifier_email"],
-    [validBody(undefined, { evidence_refs: [{ type: "github_source", ref: "phone%3A%20%2B63%20917%20123%204567" }] }), "direct_identifier_phone"],
+    [validBody(undefined, { evidence_refs: [...validBody().evidence_refs, { type: "note", ref: "phone%3A%20%2B63%20917%20123%204567" }] }), "direct_identifier_phone"],
   ];
   for (const [body, reason] of attacks) {
     const db = new FakeAdmin();

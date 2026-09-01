@@ -490,6 +490,35 @@ const EVIDENCE_PROOF_STAGES = new Set([
   "deployed",
   "production_verified",
 ]);
+const EVIDENCE_KINDS = new Set([
+  "verified_build",
+  "verified_preview",
+  "verified_publish",
+  "verified_repair",
+  "repeated_failure",
+]);
+const EVIDENCE_KIND_PROOF_STAGES: Record<string, Set<string>> = {
+  verified_build: new Set(["tested", "deployed", "production_verified"]),
+  verified_preview: new Set(["deployed", "production_verified"]),
+  verified_publish: new Set(["production_verified"]),
+  verified_repair: new Set(["tested", "deployed", "production_verified"]),
+  repeated_failure: new Set(["tested", "deployed", "production_verified"]),
+};
+const EVIDENCE_KIND_REQUIRED_TYPES: Record<string, string[]> = {
+  verified_build: ["build_job", "project_version", "verification_run"],
+  verified_preview: ["project_version", "preview_deployment", "verification_run"],
+  verified_publish: ["project_version", "production_deployment", "verification_run"],
+  verified_repair: ["repair_attempt", "project_version", "verification_run"],
+  repeated_failure: ["failure_fingerprint", "failure_run"],
+};
+const evidenceKindRefsValid = (kind: string, refs: JsonRecord[]): boolean => {
+  const required = EVIDENCE_KIND_REQUIRED_TYPES[kind];
+  if (!required) return false;
+  const types = new Set(refs.map((ref) => typeof ref.type === "string" ? ref.type : ""));
+  if (!required.every((type) => types.has(type))) return false;
+  if (kind === "repeated_failure") return refs.length >= 2;
+  return refs.some((ref) => typeof ref.sha256 === "string" && EVIDENCE_SHA256_PATTERN.test(ref.sha256));
+};
 const EVIDENCE_SOURCE = "projectos-post-task";
 const EVIDENCE_CANDIDATE_TYPE = "projectos_outcome";
 const EVIDENCE_INTAKE_KIND = "projectos_evidence_candidate_v1";
@@ -710,6 +739,7 @@ type EvidenceSnapshot = {
   sourceRef: string;
   summary: string;
   proofStage: string;
+  evidenceKind: string;
   claim: string;
   evidenceRefs: unknown;
   provenance: unknown;
@@ -731,6 +761,7 @@ const storedEvidenceSnapshot = (
   if (!metadata) return null;
   const summary = typeof candidate.summary === "string" ? candidate.summary : null;
   const proofStage = typeof metadata.proof_stage === "string" ? metadata.proof_stage : null;
+  const evidenceKind = typeof metadata.evidence_kind === "string" ? metadata.evidence_kind : null;
   const claim = typeof metadata.claim === "string" ? metadata.claim : null;
   const projectId = typeof metadata.project_id === "string" ? metadata.project_id : null;
   const projectKey = typeof metadata.project_key === "string" ? metadata.project_key : null;
@@ -739,7 +770,7 @@ const storedEvidenceSnapshot = (
     : null;
   const fingerprint = typeof metadata.fingerprint === "string" ? metadata.fingerprint : null;
   if (
-    !summary || !proofStage || !claim || !projectId || !projectKey ||
+    !summary || !proofStage || !evidenceKind || !EVIDENCE_KINDS.has(evidenceKind) || !claim || !projectId || !projectKey ||
     !idempotencyKey || !fingerprint || metadata.evidence_refs === undefined ||
     metadata.provenance === undefined
   ) {
@@ -750,6 +781,7 @@ const storedEvidenceSnapshot = (
     sourceRef,
     summary,
     proofStage,
+    evidenceKind,
     claim,
     evidenceRefs: metadata.evidence_refs,
     provenance: metadata.provenance,
@@ -804,6 +836,7 @@ const ensureEvidenceReviewItem = async (
         intakeKind: EVIDENCE_INTAKE_KIND,
         sourceRef: snapshot.sourceRef,
         proofStage: snapshot.proofStage,
+        evidenceKind: snapshot.evidenceKind,
         claim: snapshot.claim,
         evidenceRefs: snapshot.evidenceRefs,
         provenance: snapshot.provenance,
@@ -829,6 +862,7 @@ const ensureEvidenceReviewItem = async (
         projectId: snapshot.canonicalProjectId,
         projectKey: snapshot.canonicalProjectKey,
         proofStage: snapshot.proofStage,
+        evidenceKind: snapshot.evidenceKind,
       },
       audit_metadata: {
         schemaVersion: 1,
@@ -889,6 +923,7 @@ const submitEvidenceCandidate = async (
     "title",
     "summary",
     "proof_stage",
+    "evidence_kind",
     "claim",
     "evidence_refs",
     "provenance",
@@ -920,6 +955,7 @@ const submitEvidenceCandidate = async (
   const title = boundedEvidenceText(body.title, 200);
   const summary = boundedEvidenceText(body.summary, 1800);
   const proofStage = boundedEvidenceText(body.proof_stage, 64);
+  const evidenceKind = boundedEvidenceText(body.evidence_kind, 64);
   const claim = boundedEvidenceText(body.claim, 1000);
   const idempotencyKey = boundedEvidenceText(body.idempotency_key, 160);
   const evidenceRefs = parseEvidenceRefs(body.evidence_refs);
@@ -929,10 +965,14 @@ const submitEvidenceCandidate = async (
     !summary ||
     !proofStage ||
     !EVIDENCE_PROOF_STAGES.has(proofStage) ||
+    !evidenceKind ||
+    !EVIDENCE_KINDS.has(evidenceKind) ||
+    !EVIDENCE_KIND_PROOF_STAGES[evidenceKind]?.has(proofStage) ||
     !claim ||
     !idempotencyKey ||
     !EVIDENCE_IDEMPOTENCY_PATTERN.test(idempotencyKey) ||
     !evidenceRefs ||
+    !evidenceKindRefsValid(evidenceKind, evidenceRefs) ||
     !provenance
   ) {
     return respond({ ok: false, error: "evidence_candidate_invalid" }, 400);
@@ -945,6 +985,7 @@ const submitEvidenceCandidate = async (
     title,
     summary,
     proof_stage: proofStage,
+    evidence_kind: evidenceKind,
     claim,
     evidence_refs: evidenceRefs,
     provenance,
@@ -1011,6 +1052,7 @@ const submitEvidenceCandidate = async (
     title,
     summary,
     proof_stage: proofStage,
+    evidence_kind: evidenceKind,
     claim,
     evidence_refs: evidenceRefs,
     provenance,
@@ -1023,6 +1065,7 @@ const submitEvidenceCandidate = async (
     sourceRef,
     summary,
     proofStage,
+    evidenceKind,
     claim,
     evidenceRefs,
     provenance,
@@ -1085,13 +1128,14 @@ const submitEvidenceCandidate = async (
       people: [],
       projects: [projectReference],
       risks: [],
-      tags: ["projectos", "evidence_candidate", proofStage],
+      tags: ["projectos", "evidence_candidate", evidenceKind, proofStage],
       metadata: {
         schema_version: 1,
         intake_kind: EVIDENCE_INTAKE_KIND,
         project_id: canonicalProjectId,
         project_key: canonicalProjectKey,
         proof_stage: proofStage,
+        evidence_kind: evidenceKind,
         claim,
         evidence_refs: evidenceRefs,
         provenance,
@@ -1185,6 +1229,7 @@ const submitEvidenceCandidate = async (
     project_id: canonicalProjectId,
     project_key: canonicalProjectKey,
     proof_stage: proofStage,
+    evidence_kind: evidenceKind,
     deduplicated: !(candidateCreated || reviewCreated),
     created_at: candidateCreated || reviewCreated ? now : null,
     canonical_memory_written: false,

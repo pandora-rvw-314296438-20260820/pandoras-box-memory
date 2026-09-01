@@ -15,6 +15,59 @@ const SAFE_TOKEN_PATTERN = /^[A-Za-z0-9._:/-]{1,180}$/;
 const OUTCOME_STATUSES = new Set(["completed", "failed"]);
 const RISKS = new Set(["read", "write", "destructive"]);
 const CONTEXT_STATUSES = new Set(["available", "empty"]);
+const VISIBLE_LEARNING_KIND = "visible_creation_evidence_v1";
+const VISIBLE_SOURCE = "projectos-visible-creation";
+const VISIBLE_MEMORY_PROJECT_ID = "7c686cbd-d968-49d5-86cc-918f5e777bd2";
+const VISIBLE_MEMORY_PROJECT_KEY = "mcpmaster-pandoras-box";
+const VISIBLE_PRINCIPAL_KEY = "projectos-mcpmaster-production";
+const VISIBLE_EVIDENCE_KINDS = new Set([
+  "verified_build",
+  "verified_preview",
+  "verified_publish",
+  "verified_repair",
+  "repeated_failure",
+]);
+const VISIBLE_EVIDENCE_PROOF_STAGES: Record<string, Set<string>> = {
+  verified_build: new Set(["tested", "deployed", "production_verified"]),
+  verified_preview: new Set(["deployed", "production_verified"]),
+  verified_publish: new Set(["production_verified"]),
+  verified_repair: new Set(["tested", "deployed", "production_verified"]),
+  repeated_failure: new Set(["tested", "deployed", "production_verified"]),
+};
+const VISIBLE_ALLOWED_KEYS = new Set([
+  "schema_version",
+  "product_key",
+  "source_event_id",
+  "source_request_id",
+  "organization_id",
+  "intake_id",
+  "project_id",
+  "project_key",
+  "tool",
+  "risk",
+  "outcome_status",
+  "duration_ms",
+  "completed_at",
+  "context_status",
+  "context_hash",
+  "result_fingerprint",
+  "error_fingerprint",
+  "privacy_policy",
+  "learning_kind",
+  "evidence_kind",
+  "proof_stage",
+  "visible_project_id",
+  "project_version_id",
+  "build_job_id",
+  "verification_run_id",
+  "deployment_id",
+  "publish_receipt_id",
+  "source_sha256",
+  "artifact_sha256",
+  "failure_fingerprint",
+  "recurrence_count",
+  "repair_action_hash",
+]);
 
 type JsonRecord = Record<string, unknown>;
 
@@ -157,6 +210,400 @@ const signatureBasis = (input: {
     input.errorFingerprint ?? "",
   ].join("\n");
 
+type VisibleEvidence = {
+  evidenceKind: string;
+  proofStage: string;
+  visibleProjectId: string;
+  projectVersionId: string | null;
+  buildJobId: string | null;
+  verificationRunId: string | null;
+  deploymentId: string | null;
+  publishReceiptId: string | null;
+  sourceSha256: string | null;
+  artifactSha256: string | null;
+  failureFingerprint: string | null;
+  recurrenceCount: number | null;
+  repairActionHash: string | null;
+};
+
+const visibleEvidenceBasis = (value: VisibleEvidence): string =>
+  [
+    "visible-creation-evidence-v1",
+    value.evidenceKind,
+    value.proofStage,
+    value.visibleProjectId,
+    value.projectVersionId ?? "",
+    value.buildJobId ?? "",
+    value.verificationRunId ?? "",
+    value.deploymentId ?? "",
+    value.publishReceiptId ?? "",
+    value.sourceSha256 ?? "",
+    value.artifactSha256 ?? "",
+    value.failureFingerprint ?? "",
+    value.recurrenceCount === null ? "" : String(value.recurrenceCount),
+    value.repairActionHash ?? "",
+  ].join("\n");
+
+const parseVisibleEvidence = (payload: JsonRecord): VisibleEvidence | null => {
+  if (Object.keys(payload).some((key) => !VISIBLE_ALLOWED_KEYS.has(key))) {
+    return null;
+  }
+  if (payload.learning_kind !== VISIBLE_LEARNING_KIND) return null;
+  const evidenceKind = safeToken(payload.evidence_kind, 64);
+  const proofStage = safeToken(payload.proof_stage, 64);
+  const visibleProjectId = uuid(payload.visible_project_id);
+  const projectVersionId = optionalUuid(payload.project_version_id);
+  const buildJobId = optionalUuid(payload.build_job_id);
+  const verificationRunId = optionalUuid(payload.verification_run_id);
+  const deploymentId = optionalUuid(payload.deployment_id);
+  const publishReceiptId = optionalUuid(payload.publish_receipt_id);
+  const sourceSha256 = hash(payload.source_sha256);
+  const artifactSha256 = hash(payload.artifact_sha256);
+  const failureFingerprint = hash(payload.failure_fingerprint);
+  const recurrenceCount =
+    payload.recurrence_count === null || payload.recurrence_count === undefined
+      ? null
+      : integer(payload.recurrence_count, 2, 1_000_000);
+  const repairActionHash = hash(payload.repair_action_hash);
+  if (
+    !evidenceKind || !VISIBLE_EVIDENCE_KINDS.has(evidenceKind) || !proofStage ||
+    !VISIBLE_EVIDENCE_PROOF_STAGES[evidenceKind]?.has(proofStage) ||
+    !visibleProjectId
+  ) return null;
+  const value: VisibleEvidence = {
+    evidenceKind,
+    proofStage,
+    visibleProjectId,
+    projectVersionId,
+    buildJobId,
+    verificationRunId,
+    deploymentId,
+    publishReceiptId,
+    sourceSha256,
+    artifactSha256,
+    failureFingerprint,
+    recurrenceCount,
+    repairActionHash,
+  };
+  if (
+    evidenceKind === "verified_build" &&
+    (!buildJobId || !projectVersionId || !verificationRunId || !sourceSha256 ||
+      !artifactSha256)
+  ) return null;
+  if (
+    evidenceKind === "verified_preview" &&
+    (!projectVersionId || !verificationRunId || !deploymentId ||
+      !sourceSha256 || !artifactSha256)
+  ) return null;
+  if (
+    evidenceKind === "verified_publish" &&
+    (!projectVersionId || !verificationRunId || !deploymentId ||
+      !publishReceiptId || !sourceSha256 || !artifactSha256)
+  ) return null;
+  if (
+    evidenceKind === "verified_repair" &&
+    (!buildJobId || !projectVersionId || !verificationRunId || !sourceSha256 ||
+      !artifactSha256 || !failureFingerprint || !repairActionHash)
+  ) return null;
+  if (
+    evidenceKind === "repeated_failure" &&
+    (!buildJobId || !failureFingerprint || recurrenceCount === null)
+  ) return null;
+  return value;
+};
+
+const visibleEvidenceRefs = (
+  value: VisibleEvidence,
+  sourceEventId: string,
+): string[] => {
+  const refs = [
+    `source_event:${sourceEventId}`,
+    `visible_project:${value.visibleProjectId}`,
+  ];
+  if (value.buildJobId) refs.push(`build_job:${value.buildJobId}`);
+  if (value.projectVersionId) {
+    refs.push(`project_version:${value.projectVersionId}`);
+  }
+  if (value.verificationRunId) {
+    refs.push(`verification_run:${value.verificationRunId}`);
+  }
+  if (value.deploymentId) refs.push(`deployment:${value.deploymentId}`);
+  if (value.publishReceiptId) {
+    refs.push(`publish_receipt:${value.publishReceiptId}`);
+  }
+  if (value.sourceSha256) refs.push(`source_sha256:${value.sourceSha256}`);
+  if (value.artifactSha256) {
+    refs.push(`artifact_sha256:${value.artifactSha256}`);
+  }
+  if (value.failureFingerprint) {
+    refs.push(`failure_fingerprint:${value.failureFingerprint}`);
+  }
+  if (value.repairActionHash) {
+    refs.push(`repair_action:${value.repairActionHash}`);
+  }
+  return refs;
+};
+
+const persistVisibleEvidence = async (
+  admin: ReturnType<typeof createClient<any>>,
+  memoryUserId: string,
+  sourceEventId: string,
+  contextHash: string,
+  completedAt: string,
+  value: VisibleEvidence,
+): Promise<Response> => {
+  const { data: project, error: projectError } = await admin
+    .from("pandora_projects")
+    .select("id,project_key,memory_namespace,lifecycle_status")
+    .eq("id", VISIBLE_MEMORY_PROJECT_ID)
+    .eq("project_key", VISIBLE_MEMORY_PROJECT_KEY)
+    .eq("memory_namespace", NAMESPACE)
+    .eq("lifecycle_status", "active")
+    .maybeSingle();
+  if (projectError) {
+    return json(500, { ok: false, error: "visible_project_lookup_failed" });
+  }
+  if (!project?.id) {
+    return json(403, { ok: false, error: "visible_project_not_allowed" });
+  }
+
+  const { data: grant, error: grantError } = await admin
+    .from("pandora_project_grants")
+    .select("project_id")
+    .eq("principal_key", VISIBLE_PRINCIPAL_KEY)
+    .eq("project_id", VISIBLE_MEMORY_PROJECT_ID)
+    .eq("environment", "production")
+    .eq("is_active", true)
+    .eq("can_propose", true)
+    .is("revoked_at", null)
+    .maybeSingle();
+  if (grantError) {
+    return json(500, {
+      ok: false,
+      error: "visible_project_grant_lookup_failed",
+    });
+  }
+  if (!grant?.project_id) {
+    return json(403, { ok: false, error: "visible_project_not_allowed" });
+  }
+
+  const sourceRef =
+    `visible-creation:${value.visibleProjectId}:${value.evidenceKind}:${sourceEventId}`;
+  const title = value.evidenceKind === "repeated_failure"
+    ? "Visible Creation repeated failure evidence"
+    : `Visible Creation ${value.evidenceKind.replaceAll("_", " ")} evidence`;
+  const summary = value.evidenceKind === "repeated_failure"
+    ? `A bounded failure fingerprint recurred ${value.recurrenceCount} times for Visible Creation project ${value.visibleProjectId}. Review is required before any durable learning promotion.`
+    : `Verified ${
+      value.evidenceKind.replaceAll("_", " ")
+    } evidence for Visible Creation project ${value.visibleProjectId} is bound to authoritative identifiers and cryptographic digests. Review is required before any durable learning promotion.`;
+  const refs = visibleEvidenceRefs(value, sourceEventId);
+  const metadata = {
+    schema_version: 1,
+    intake_kind: VISIBLE_LEARNING_KIND,
+    evidence_kind: value.evidenceKind,
+    proof_stage: value.proofStage,
+    visible_project_id: value.visibleProjectId,
+    project_version_id: value.projectVersionId,
+    build_job_id: value.buildJobId,
+    verification_run_id: value.verificationRunId,
+    deployment_id: value.deploymentId,
+    publish_receipt_id: value.publishReceiptId,
+    source_sha256: value.sourceSha256,
+    artifact_sha256: value.artifactSha256,
+    failure_fingerprint: value.failureFingerprint,
+    recurrence_count: value.recurrenceCount,
+    repair_action_hash: value.repairActionHash,
+    fingerprint: contextHash,
+    privacy_policy: "metadata_only_v2_fail_closed",
+    imported_raw_arguments: false,
+    imported_raw_results: false,
+    imported_raw_errors: false,
+    canonical_memory_written: false,
+  };
+
+  const { data: existing, error: existingError } = await admin
+    .from("memory_capture_candidates")
+    .select("id,metadata")
+    .eq("user_id", memoryUserId)
+    .eq("namespace", NAMESPACE)
+    .eq("source", VISIBLE_SOURCE)
+    .eq("source_ref", sourceRef)
+    .maybeSingle();
+  if (existingError) {
+    return json(500, { ok: false, error: "visible_candidate_lookup_failed" });
+  }
+  if (existing?.id && record(existing.metadata).fingerprint !== contextHash) {
+    return json(409, { ok: false, error: "idempotency_conflict" });
+  }
+
+  let candidateId = existing?.id ?? null;
+  let candidateCreated = false;
+  if (!candidateId) {
+    const sourceRunIds = value.verificationRunId
+      ? [value.verificationRunId]
+      : [sourceEventId];
+    const { data: inserted, error: insertError } = await admin
+      .from("memory_capture_candidates")
+      .insert({
+        user_id: memoryUserId,
+        namespace: NAMESPACE,
+        source: VISIBLE_SOURCE,
+        source_ref: sourceRef,
+        raw_excerpt: null,
+        redacted_excerpt: summary,
+        memory_type: value.evidenceKind === "repeated_failure"
+          ? "risk_signal"
+          : "business_fact",
+        title,
+        summary,
+        importance: value.evidenceKind === "verified_publish" ? 9 : 8,
+        sensitivity: "low",
+        confidence: 0.98,
+        should_capture: true,
+        requires_review: true,
+        status: "pending",
+        reason:
+          "Visible Creation lifecycle evidence is review-gated and cannot become canonical without an authenticated human decision.",
+        people: [],
+        projects: [VISIBLE_MEMORY_PROJECT_KEY],
+        risks: value.evidenceKind === "repeated_failure"
+          ? ["repeated_failure_requires_review"]
+          : [],
+        tags: [
+          "projectos",
+          "visible_creation",
+          value.evidenceKind,
+          value.proofStage,
+        ],
+        metadata,
+        usefulness_score: 0.9,
+        confidence_score: 0.98,
+        freshness_score: 1,
+        retrieval_weight: 0.9,
+        stale_status: "active",
+        scoring_version: "visible-creation-evidence-v1",
+        scored_at: completedAt,
+        project_id: VISIBLE_MEMORY_PROJECT_ID,
+        record_type: "memory_candidate",
+        source_run_ids: sourceRunIds,
+        evidence_refs: refs,
+        evidence_window_start: completedAt,
+        evidence_window_end: completedAt,
+        sample_count: value.recurrenceCount ?? 1,
+        verification_pass_count: value.evidenceKind === "repeated_failure"
+          ? 0
+          : 1,
+        negative_outcome_count: value.evidenceKind === "repeated_failure"
+          ? value.recurrenceCount
+          : 0,
+        execution_status: value.evidenceKind === "repeated_failure"
+          ? "failed"
+          : "completed",
+        verification_status: value.evidenceKind === "repeated_failure"
+          ? "FAIL"
+          : "PASS",
+        downstream_outcome_status: value.evidenceKind,
+        source_system: "pandora-visible-creation",
+      })
+      .select("id")
+      .maybeSingle();
+    if (insertError || !inserted?.id) {
+      return json(500, { ok: false, error: "visible_candidate_insert_failed" });
+    }
+    candidateId = inserted.id;
+    candidateCreated = true;
+  }
+
+  const { data: existingReview, error: reviewLookupError } = await admin
+    .from("memory_review_queue_items")
+    .select("id")
+    .eq("user_id", memoryUserId)
+    .eq("namespace", NAMESPACE)
+    .eq("candidate_type", "projectos_outcome")
+    .eq("source_ref", sourceRef)
+    .maybeSingle();
+  if (reviewLookupError) {
+    return json(500, { ok: false, error: "visible_review_lookup_failed" });
+  }
+  let reviewItemId = existingReview?.id ?? null;
+  let reviewCreated = false;
+  if (!reviewItemId) {
+    const { data: insertedReview, error: reviewInsertError } = await admin
+      .from("memory_review_queue_items")
+      .insert({
+        user_id: memoryUserId,
+        namespace: NAMESPACE,
+        status: "pending_review",
+        candidate_type: "projectos_outcome",
+        normalized_text: summary,
+        evidence_snapshot: {
+          hasEvidence: true,
+          sourceRef,
+          candidateId,
+          evidenceKind: value.evidenceKind,
+          proofStage: value.proofStage,
+          refs,
+        },
+        sensitivity_snapshot: {
+          classification: "low",
+          containsSecrets: false,
+          containsPersonalData: false,
+          containsRawArguments: false,
+          containsRawResults: false,
+          containsRawErrors: false,
+        },
+        namespace_snapshot: {
+          sourceNamespace: NAMESPACE,
+          targetNamespace: NAMESPACE,
+          namespaceMatch: true,
+        },
+        source_metadata: {
+          source: VISIBLE_SOURCE,
+          sourceRef,
+          projectId: VISIBLE_MEMORY_PROJECT_ID,
+          projectKey: VISIBLE_MEMORY_PROJECT_KEY,
+          visibleProjectId: value.visibleProjectId,
+          evidenceKind: value.evidenceKind,
+        },
+        audit_metadata: {
+          schemaVersion: 1,
+          candidateId,
+          appendOnly: true,
+          reviewRequired: true,
+          fingerprint: contextHash,
+        },
+        append_only: true,
+        proposed_operation: "append",
+        requires_review: true,
+        source_ref: sourceRef,
+        request_hash: contextHash,
+        fingerprint: contextHash,
+        persistence_execution_metadata: {},
+      })
+      .select("id")
+      .maybeSingle();
+    if (reviewInsertError || !insertedReview?.id) {
+      return json(500, { ok: false, error: "visible_review_insert_failed" });
+    }
+    reviewItemId = insertedReview.id;
+    reviewCreated = true;
+  }
+
+  return json(candidateCreated || reviewCreated ? 202 : 200, {
+    ok: true,
+    status: "pending_review",
+    candidate_id: candidateId,
+    review_item_id: reviewItemId,
+    evidence_kind: value.evidenceKind,
+    proof_stage: value.proofStage,
+    visible_project_id: value.visibleProjectId,
+    deduplicated: !(candidateCreated || reviewCreated),
+    canonical_memory_written: false,
+    privacy_policy: "metadata_only_v2_fail_closed",
+  });
+};
+
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") {
     return json(405, { ok: false, error: "method_not_allowed" });
@@ -295,6 +742,55 @@ Deno.serve(async (request: Request) => {
   const expectedSignature = await hmacHex(secret, `${timestamp}.${basis}`);
   if (!constantTimeEqual(expectedSignature, suppliedSignature)) {
     return json(401, { ok: false, error: "invalid_signature" });
+  }
+
+  if (payload.learning_kind !== undefined) {
+    if (payload.learning_kind !== VISIBLE_LEARNING_KIND) {
+      return json(400, { ok: false, error: "unsupported_learning_kind" });
+    }
+    const visible = parseVisibleEvidence(payload);
+    if (
+      !visible || projectId !== VISIBLE_MEMORY_PROJECT_ID ||
+      projectKey !== VISIBLE_MEMORY_PROJECT_KEY ||
+      contextStatus !== "available" || risk !== "write"
+    ) {
+      return json(400, {
+        ok: false,
+        error: "invalid_visible_creation_evidence",
+      });
+    }
+    const expectedContextHash = await sha256(visibleEvidenceBasis(visible));
+    if (!constantTimeEqual(expectedContextHash, contextHash)) {
+      return json(400, { ok: false, error: "visible_evidence_hash_mismatch" });
+    }
+    if (visible.evidenceKind === "repeated_failure") {
+      if (
+        outcomeStatus !== "failed" ||
+        errorFingerprint !== visible.failureFingerprint ||
+        resultFingerprint !== null
+      ) {
+        return json(400, {
+          ok: false,
+          error: "visible_failure_binding_invalid",
+        });
+      }
+    } else if (
+      outcomeStatus !== "completed" ||
+      resultFingerprint !== visible.sourceSha256 || errorFingerprint !== null
+    ) {
+      return json(400, {
+        ok: false,
+        error: "visible_verified_binding_invalid",
+      });
+    }
+    return await persistVisibleEvidence(
+      admin,
+      memoryUserId,
+      sourceEventId,
+      contextHash,
+      completedAt,
+      visible,
+    );
   }
 
   // Routine successful reads/writes are operational telemetry, not durable

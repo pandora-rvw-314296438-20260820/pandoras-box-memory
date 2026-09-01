@@ -6,6 +6,7 @@ on:
       - "supabase/functions/pandora-projectos-learning/**"
       - "docs/capabilities/evidence/LEARNING_INTELLIGENCE_CONTRACT_2026-09-01.md"
       - "scripts/verify_learning_intelligence_contract.py"
+      - "scripts/verify_visible_creation_learning_evidence.py"
       - "scripts/check_memory_evidence_intake.mjs"
       - "scripts/check_memory_canon_promotion_gate.mjs"
       - "scripts/check_no_literal_secrets.sh"
@@ -17,6 +18,7 @@ on:
       - "supabase/functions/pandora-projectos-learning/**"
       - "docs/capabilities/evidence/LEARNING_INTELLIGENCE_CONTRACT_2026-09-01.md"
       - "scripts/verify_learning_intelligence_contract.py"
+      - "scripts/verify_visible_creation_learning_evidence.py"
       - "scripts/check_memory_evidence_intake.mjs"
       - "scripts/check_memory_canon_promotion_gate.mjs"
       - "scripts/check_no_literal_secrets.sh"
@@ -55,6 +57,9 @@ jobs:
 
       - name: Verify learning intelligence contract
         run: python3 scripts/verify_learning_intelligence_contract.py
+
+      - name: Verify Visible Creation lifecycle evidence contract
+        run: python3 scripts/verify_visible_creation_learning_evidence.py
 
       - name: Verify exact-project retrieval invariant remains present
         run: python3 scripts/verify_projectos_bridge_project_scope.py

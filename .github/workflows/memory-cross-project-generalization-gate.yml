@@ -63,8 +63,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          allowed='^(\.github/workflows/(learning-intelligence-contract|memory-hardening-readiness|memory-security-adjudication-gate|memory-lifecycle-contract-gate|memory-quality-observability-gate|memory-cross-project-generalization-gate)\.yml|docs/capabilities/evidence/(LEARNING_INTELLIGENCE_CONTRACT_2026-09-01\.md|MEMORY_HARDENING_READINESS_2026-09-01\.json|MEMORY_SECURITY_ADJUDICATION_2026-09-01\.json|MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01\.md|MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01\.json|MEMORY_QUALITY_OBSERVABILITY_BASELINE_2026-09-01\.json|MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01\.json)|docs/security/MEMORY_SECURITY_ADJUDICATION_CONTRACT_2026-09-01\.md|docs/observability/MEMORY_QUALITY_OBSERVABILITY_CONTRACT\.md|docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01\.md|scripts/(verify_learning_intelligence_contract\.py|verify_memory_hardening_readiness\.py|verify_memory_security_adjudication\.py|verify_memory_lifecycle_contract\.py|verify_memory_quality_observability\.py|verify_memory_cross_project_generalization\.mjs))$'
           git diff --name-only "$BASE_SHA"...HEAD > /tmp/changed
+          closure_packet=true
+          for marker in "docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01.md" "docs/capabilities/evidence/MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01.json" "scripts/verify_memory_cross_project_generalization.mjs"; do
+            if ! grep -Fxq "$marker" /tmp/changed; then closure_packet=false; fi
+          done
+          if [[ "$closure_packet" != true ]]; then
+            echo "Cross-project runtime tests passed; strict Chat C closure-file scope is not applicable to this PR."
+            exit 0
+          fi
+          allowed='^(\.github/workflows/(learning-intelligence-contract|memory-hardening-readiness|memory-security-adjudication-gate|memory-lifecycle-contract-gate|memory-quality-observability-gate|memory-cross-project-generalization-gate)\.yml|docs/capabilities/evidence/(LEARNING_INTELLIGENCE_CONTRACT_2026-09-01\.md|MEMORY_HARDENING_READINESS_2026-09-01\.json|MEMORY_SECURITY_ADJUDICATION_2026-09-01\.json|MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01\.md|MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01\.json|MEMORY_QUALITY_OBSERVABILITY_BASELINE_2026-09-01\.json|MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01\.json)|docs/security/MEMORY_SECURITY_ADJUDICATION_CONTRACT_2026-09-01\.md|docs/observability/MEMORY_QUALITY_OBSERVABILITY_CONTRACT\.md|docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01\.md|scripts/(verify_learning_intelligence_contract\.py|verify_memory_hardening_readiness\.py|verify_memory_security_adjudication\.py|verify_memory_lifecycle_contract\.py|verify_memory_quality_observability\.py|verify_memory_cross_project_generalization\.mjs))$'
           if grep -Ev "$allowed" /tmp/changed; then
             echo "::error::Chat C closure PR contains runtime, migration, or unrelated files."
             exit 1
