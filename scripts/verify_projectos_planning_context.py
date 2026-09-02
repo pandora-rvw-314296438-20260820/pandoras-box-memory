@@ -13,15 +13,17 @@ def require(path: Path, markers: list[str]) -> None:
     if missing:
         raise SystemExit(f"{path.relative_to(ROOT)} missing required markers: {missing}")
 
-
 require(EDGE, [
     'const PURPOSE = "projectos-planning-context-v1";',
-    'const MEMORY_PROJECT_ID = "7c686cbd-d968-49d5-86cc-918f5e777bd2";',
-    'const MEMORY_PROJECT_KEY = "mcpmaster-pandoras-box";',
+    'const PRINCIPAL_KEY = "projectos-mcpmaster-production";',
     'const MAX_ITEMS = 6;',
     'const APPROVED_CANON = ["hard_canon", "soft_canon"]',
     'admin.rpc("pandora_integration_credential"',
     'admin.rpc("memory_claim_projectos_planning_nonce_v1"',
+    '.from("pandora_projects")',
+    '.from("pandora_project_grants")',
+    '.eq("principal_key", PRINCIPAL_KEY)',
+    '.eq("can_read", true)',
     '.from("memory_items")',
     '.select("id,title,source_summary,confidence,canon_status,memory_type,updated_at")',
     '.from("memory_retrieval_logs")',
@@ -32,7 +34,6 @@ require(EDGE, [
     'planning_request_replayed',
     'invalid_signature',
 ])
-
 require(MIGRATION, [
     'create table if not exists private.memory_projectos_planning_nonces',
     'request_id uuid primary key',
@@ -40,22 +41,16 @@ require(MIGRATION, [
     'on conflict (request_id) do nothing',
     'grant execute on function public.memory_claim_projectos_planning_nonce_v1',
 ])
-
 require(EVIDENCE, [
     '"slug": "pandora-projectos-planning-context"',
     '"crossProjectGeneralizationAuthorized": false',
     '"sourceOnlyGate": true',
 ])
-
 source = EDGE.read_text(encoding="utf-8")
 for forbidden in (
-    'request.headers.get("authorization")',
-    '"authorization"',
-    '.select("id,title,body',
-    'canonical_records',
-    'memory_capture_candidates',
+    'request.headers.get("authorization")', '"authorization"', '.select("id,title,body',
+    'canonical_records', 'memory_capture_candidates',
 ):
     if forbidden in source:
         raise SystemExit(f"planning Edge violates bounded HMAC-only read contract: {forbidden}")
-
 print("ProjectOS HMAC planning context contract verified.")
