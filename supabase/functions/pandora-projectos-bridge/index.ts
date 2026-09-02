@@ -411,15 +411,21 @@ const searchMemory = async (
     created_at: item.created_at,
     updated_at: item.updated_at,
   }));
-  const approvedRecords = canonicalRecords.filter((item) => item.approved);\n  const approvedCount = approvedRecords.length;\n  const approvedMemoryItemIds = approvedRecords\n    .map((item) => typeof item.id === "string" ? item.id : "")\n    .filter((id) => EVIDENCE_UUID_PATTERN.test(id));
+  const approvedRecords = canonicalRecords.filter((item) => item.approved);
+  const approvedCount = approvedRecords.length;
+  const approvedMemoryItemIds = approvedRecords
+    .map((item) => typeof item.id === "string" ? item.id : "")
+    .filter((id) => EVIDENCE_UUID_PATTERN.test(id));
 
   const queryHash = await sha256(`${namespace}:${canonicalProjectId}:${query}`);
-  const { error: logError } = await supabase
+  const { data: retrievalLog, error: logError } = await supabase
     .from("memory_retrieval_logs")
     .insert({
       user_id: principal.memory_user_id,
       namespace,
       query_hash: queryHash,
+      project_id: canonicalProjectId,
+      memory_item_ids: approvedMemoryItemIds,
       metadata: {
         principal: PRINCIPAL_KEY,
         source: "projectos",
@@ -437,7 +443,9 @@ const searchMemory = async (
         canon_statuses: canonStatuses,
         unscoped_components_omitted: true,
       },
-    });
+    })
+    .select("id")
+    .maybeSingle();
   if (logError) {
     console.error("projectos_memory_retrieval_log_failed", {
       code: logError.code,
@@ -462,6 +470,8 @@ const searchMemory = async (
     namespace,
     project_id: canonicalProjectId,
     project_key: canonicalProjectKey,
+    retrieval_log_id: typeof retrievalLog?.id === "string" ? retrievalLog.id : null,
+    approved_memory_item_ids: approvedMemoryItemIds,
     current_task: currentTask,
     adaptive_profile: [],
     style_profile: [],
