@@ -1,0 +1,37 @@
+name: Planning Memory Contract Gate
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/pandora-projectos-planning/**"
+      - "supabase/migrations/20260903032500_projectos_planning_memory_nonce_v1.sql"
+      - "scripts/verify_planning_memory_contract.py"
+      - ".github/workflows/planning-memory-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/pandora-projectos-planning/**"
+      - "supabase/migrations/20260903032500_projectos_planning_memory_nonce_v1.sql"
+      - "scripts/verify_planning_memory_contract.py"
+      - ".github/workflows/planning-memory-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  planning-memory-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.4.3
+      - run: python3 scripts/verify_planning_memory_contract.py
+      - run: deno check --node-modules-dir=auto supabase/functions/pandora-projectos-planning/index.ts
+      - run: deno fmt --check supabase/functions/pandora-projectos-planning/index.ts
+      - run: git diff --check "${{ github.event.pull_request.base.sha }}"...HEAD
+      - run: bash scripts/check_no_literal_secrets.sh
