@@ -23,6 +23,10 @@
       "purpose": "ProjectOS Memory health, exact-project search and governed evidence intake under Vercel OIDC"
     },
     {
+      "slug": "pandora-projectos-decision-lineage",
+      "purpose": "HMAC-bound project-scoped decision influence and verified outcome correlation using the existing Memory decision RPC authority"
+    },
+    {
       "slug": "pandora-projectos-learning",
       "purpose": "privacy-safe ProjectOS outcome learning into existing candidate and review governance"
     }
