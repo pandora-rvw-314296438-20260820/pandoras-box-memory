@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "task": 10,
+  "title": "Exact-project candidate dedupe and review prioritization",
+  "authority": {
+    "candidateTable": "public.memory_capture_candidates",
+    "reviewTable": "public.memory_review_queue_items",
+    "projectRegistry": "public.pandora_projects"
+  },
+  "source": {
+    "baseCommit": "e40af4d532c7788f5d20176ca7e041b053ebe8f3",
+    "migration": "supabase/migrations/20260902224500_memory_project_review_priority_v1.sql",
+    "migrationGitBlobSha1": "8c0857e94ca5e0af151d1a8d79d83c7779d7ba9a",
+    "contractVerifier": "scripts/verify_project_review_priority_contract.py"
+  },
+  "contract": {
+    "projectScope": "candidate.project_id must equal requested project and review source_metadata.projectId",
+    "mutation": false,
+    "legacyUnscopedFallback": false,
+    "dedupeKey": "family_key + fingerprint",
+    "outcomeTransitionsPreserved": true,
+    "staleness": "derived from candidate created_at at read time",
+    "drillThrough": "candidate_ids + review_item_ids and group-members function",
+    "executionRole": "service_role"
+  },
+  "liveBaseline": {
+    "projectId": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+    "projectKey": "mcpmaster-pandoras-box",
+    "pendingCandidateCount": 3508,
+    "legacyUnscopedCandidateCount": 3505,
+    "unscoredCandidateCount": 32
+  },
+  "security": {
+    "rawCandidateRewrite": false,
+    "reviewDecisionMutation": false,
+    "canonicalPromotion": false,
+    "credentialsIncluded": false
+  }
+}
