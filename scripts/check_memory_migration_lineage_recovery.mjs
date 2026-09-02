@@ -42,7 +42,9 @@ assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e
 const reviewPriorityBytes = readFileSync(resolve(migrationDir, programFiles[2]));
 assert(gitBlobSha1(reviewPriorityBytes) === "40313cfd1fbc15c938d0fb846d0f4217090cb274", "Task10 review-priority source blob mismatch");
 const contextPackBytes = readFileSync(resolve(migrationDir, programFiles[3]));
-assert(gitBlobSha1(contextPackBytes) === "3a66818f4d3cc41334bc4ffe611b27250745a3", "Tasks14/16 context-pack source blob mismatch");\nconst contextPackRepairBytes = readFileSync(resolve(migrationDir, programFiles[4]));\nassert(gitBlobSha1(contextPackRepairBytes) === "ab08a60f7421affee665f066a33c09b25cf715e0", "Tasks14/16 context-pack repair source blob mismatch");
+assert(gitBlobSha1(contextPackBytes) === "3a66818f4d3b7cc41334bc4ffe611b27250745a3", "Tasks14/16 context-pack source blob mismatch");
+const contextPackRepairBytes = readFileSync(resolve(migrationDir, programFiles[4]));
+assert(gitBlobSha1(contextPackRepairBytes) === "ab08a60f7421affee665f066a33c09b25cf715e0", "Tasks14/16 context-pack repair source blob mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
