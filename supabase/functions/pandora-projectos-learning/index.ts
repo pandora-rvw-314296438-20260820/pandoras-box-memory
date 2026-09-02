@@ -595,12 +595,15 @@ const persistVisibleEvidence = async (
   return json(candidateCreated || reviewCreated ? 202 : 200, {
     ok: true,
     status: "pending_review",
+    source_event_id: sourceEventId,
+    source_ref: sourceRef,
     candidate_id: candidateId,
     review_item_id: reviewItemId,
     evidence_kind: value.evidenceKind,
     proof_stage: value.proofStage,
     visible_project_id: value.visibleProjectId,
     deduplicated: !(candidateCreated || reviewCreated),
+    review_required: true,
     canonical_memory_written: false,
     privacy_policy: "metadata_only_v2_fail_closed",
   });
