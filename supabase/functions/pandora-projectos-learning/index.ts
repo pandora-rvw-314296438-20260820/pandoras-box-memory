@@ -602,6 +602,8 @@ const persistVisibleEvidence = async (
     visible_project_id: value.visibleProjectId,
     deduplicated: !(candidateCreated || reviewCreated),
     canonical_memory_written: false,
+    review_required: true,
+    source_event_id: sourceEventId,
     privacy_policy: "metadata_only_v2_fail_closed",
   });
 };
