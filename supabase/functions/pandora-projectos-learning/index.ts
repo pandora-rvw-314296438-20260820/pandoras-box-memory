@@ -499,11 +499,13 @@ const persistVisibleEvidence = async (
           : 0,
         execution_status: value.evidenceKind === "repeated_failure"
           ? "failed"
-          : "completed",
+          : "succeeded",
         verification_status: value.evidenceKind === "repeated_failure"
-          ? "FAIL"
-          : "PASS",
-        downstream_outcome_status: value.evidenceKind === "repeated_failure"\n          ? "failed"\n          : "succeeded",
+          ? "fail"
+          : "pass",
+        downstream_outcome_status: value.evidenceKind === "repeated_failure"
+          ? "failed"
+          : "succeeded",
         source_system: "pandora-visible-creation",
       })
       .select("id")
