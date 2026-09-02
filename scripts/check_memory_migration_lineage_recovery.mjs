@@ -38,7 +38,10 @@ const providerLearningBytes = readFileSync(resolve(migrationDir, programFiles[0]
 assert(gitBlobSha1(providerLearningBytes) === "1a2f28224b313585dc3f55675785277eb22863c6", "provider-learning live/source blob mismatch");
 const decisionUsefulnessBytes = readFileSync(resolve(migrationDir, programFiles[1]));
 assert(gitBlobSha1(decisionUsefulnessBytes) === "61af2ec934724ba726c9f8c1ae7744194426f778", "decision-usefulness source blob mismatch");
-assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");\nconst planningNonceBytes = readFileSync(resolve(migrationDir, programFiles[2]));\nassert(gitBlobSha1(planningNonceBytes) === "2eeeb43119a21c040ea6f063639748a912cca66e", "planning-nonce source blob mismatch");\nassert(sha256(planningNonceBytes) === "de0d61fbde3f7aad26ca532042084e3b2434ee1d4d6f52666d99ba39cb763854", "planning-nonce source sha256 mismatch");
+assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");
+const planningNonceBytes = readFileSync(resolve(migrationDir, programFiles[2]));
+assert(gitBlobSha1(planningNonceBytes) === "2eeeb43119a21c040ea6f063639748a912cca66e", "planning-nonce source blob mismatch");
+assert(sha256(planningNonceBytes) === "de0d61fbde3f7aad26ca532042084e3b2434ee1d4d6f52666d99ba39cb763854", "planning-nonce source sha256 mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
