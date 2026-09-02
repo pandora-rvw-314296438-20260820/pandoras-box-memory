@@ -25,7 +25,7 @@ The lifecycle payload contains only bounded enums, UUIDs, timestamps, counters a
   - Git blob: `83afdfe047796ee1e5bc4be0d975a39b9623994e`
   - Raw SHA-256: `92faeacdfd4b5a63f1594e3f7542911c06a2f9bc738abdcc3ecb6feb74ad05b8`
 - `supabase/functions/pandora-projectos-learning/index.ts`
-  - Git blob: `c0089b13e5489802fb8985fda4b57f0d5fcac57f`
-  - Raw SHA-256: `9e5e62ede8cf07330797f4855ae223fc78592b88daad51b0a13d378b3a6c0204`
+  - Git blob: `353398ce7b6702417761adf67fa5abbebead69a5`
+  - Raw SHA-256: `4cc39af61668b698d40f780f387af02f08d0cf48ae5998b046d4bfb5036ea98c`
 
 Acceptance remains fail-closed until exact-head CI passes, PR #22 merges, the changed Edge functions are deployed from merged source, and live readback confirms the deployed contract.
