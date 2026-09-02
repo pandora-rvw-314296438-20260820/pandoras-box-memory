@@ -598,6 +598,8 @@ const persistVisibleEvidence = async (
     evidence_kind: value.evidenceKind,
     proof_stage: value.proofStage,
     visible_project_id: value.visibleProjectId,
+    source_event_id: sourceEventId,
+    review_required: true,
     deduplicated: !(candidateCreated || reviewCreated),
     canonical_memory_written: false,
     privacy_policy: "metadata_only_v2_fail_closed",
