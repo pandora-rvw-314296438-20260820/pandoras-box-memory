@@ -50,7 +50,7 @@ require(EVIDENCE, [
 ])
 
 source = EDGE.read_text(encoding="utf-8")
-for forbidden in ("raw_excerpt", "memory_capture_candidates", "memory_items).copy():
+for forbidden in ("raw_excerpt", "memory_capture_candidates", "memory_items"):
     if forbidden in source:
         raise SystemExit(f"decision-lineage Edge must not become a parallel Memory store: {forbidden}")
 
