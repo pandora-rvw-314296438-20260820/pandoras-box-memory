@@ -1,4 +1,3 @@
-
 {
   "schemaVersion": "1.0",
   "observedAt": "2026-09-01T14:50:00+08:00",
@@ -25,6 +24,10 @@
     {
       "slug": "pandora-projectos-decision-lineage",
       "purpose": "HMAC-bound project-scoped decision influence and verified outcome correlation using the existing Memory decision RPC authority"
+    },
+    {
+      "slug": "pandora-projectos-planning-context",
+      "purpose": "Purpose-separated HMAC exact-project approved planning retrieval with replay protection, bounded summaries and existing retrieval-log provenance"
     },
     {
       "slug": "pandora-projectos-learning",
