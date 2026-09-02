@@ -1,6 +1,6 @@
 # Visible Creation Memory Evidence Contract — 2026-09-02
 
-Status: SOURCE CANDIDATE / REVIEW-GATED. This file is source evidence for PR #29; it is not production deployment proof.
+Status: SOURCE CANDIDATE / REVIEW-GATED. This file is source evidence for PR #30; it is not production deployment proof.
 
 ## Authority and isolation
 
@@ -25,7 +25,7 @@ The lifecycle payload contains only bounded enums, UUIDs, timestamps, counters a
   - Git blob: `83afdfe047796ee1e5bc4be0d975a39b9623994e`
   - Raw SHA-256: `92faeacdfd4b5a63f1594e3f7542911c06a2f9bc738abdcc3ecb6feb74ad05b8`
 - `supabase/functions/pandora-projectos-learning/index.ts`
-  - Git blob: `c0089b13e5489802fb8985fda4b57f0d5fcac57f`
-  - Raw SHA-256: `9e5e62ede8cf07330797f4855ae223fc78592b88daad51b0a13d378b3a6c0204`
+  - Git blob: `26327964e9116979338d8a8f17e93f71296d00fe`
+  - Raw SHA-256: `f2e3621e110e257c049ce8ace4c352ed2ae6ef12a1d554b0da5b535681283331`
 
 Acceptance remains fail-closed until exact-head CI passes, PR #22 merges, the changed Edge functions are deployed from merged source, and live readback confirms the deployed contract.
