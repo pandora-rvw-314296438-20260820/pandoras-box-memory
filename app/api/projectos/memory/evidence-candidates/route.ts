@@ -12,6 +12,7 @@ const ALLOWED_KEYS = new Set([
   "title",
   "summary",
   "proof_stage",
+  "evidence_kind",
   "claim",
   "evidence_refs",
   "provenance",
