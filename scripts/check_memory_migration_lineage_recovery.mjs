@@ -35,7 +35,10 @@ const programFiles = actualFiles.filter((name) => name.split("_", 1)[0] >= "2026
 assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${baselineFiles.length}`);
 assert(JSON.stringify(programFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql"]), `unexpected post-baseline migration set: ${programFiles.join(",")}`);
 const providerLearningBytes = readFileSync(resolve(migrationDir, programFiles[0]));
-assert(gitBlobSha1(providerLearningBytes) === "1a2f28224b313585dc3f55675785277eb22863c6", "provider-learning live/source blob mismatch");\nconst decisionUsefulnessBytes = readFileSync(resolve(migrationDir, programFiles[1]));\nassert(gitBlobSha1(decisionUsefulnessBytes) === "61af2ec934724ba726c9f8c1ae7744194426f778", "decision-usefulness source blob mismatch");\nassert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");
+assert(gitBlobSha1(providerLearningBytes) === "1a2f28224b313585dc3f55675785277eb22863c6", "provider-learning live/source blob mismatch");
+const decisionUsefulnessBytes = readFileSync(resolve(migrationDir, programFiles[1]));
+assert(gitBlobSha1(decisionUsefulnessBytes) === "61af2ec934724ba726c9f8c1ae7744194426f778", "decision-usefulness source blob mismatch");
+assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
