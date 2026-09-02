@@ -64,10 +64,10 @@ as $$
       and coalesce(r.source_metadata->>'projectId','') = c.project_id::text
   ), grouped as (
     select e.project_id,e.family_key,e.fingerprint,
-      max(e.candidate_id) filter (where e.representative_order=1) as representative_candidate_id,
-      max(e.review_item_id) filter (where e.representative_order=1) as representative_review_item_id,
-      max(e.source_ref) filter (where e.representative_order=1) as representative_source_ref,
-      max(e.review_status) filter (where e.representative_order=1) as review_status,
+      (array_agg(e.candidate_id order by e.created_at desc,e.candidate_id desc) filter (where e.representative_order=1))[1] as representative_candidate_id,
+      (array_agg(e.review_item_id order by e.created_at desc,e.review_item_id desc) filter (where e.representative_order=1))[1] as representative_review_item_id,
+      (array_agg(e.source_ref order by e.created_at desc,e.candidate_id desc) filter (where e.representative_order=1))[1] as representative_source_ref,
+      (array_agg(e.review_status order by e.created_at desc,e.candidate_id desc) filter (where e.representative_order=1))[1] as review_status,
       max(e.created_at) as candidate_created_at,
       count(*)::bigint as duplicate_count,
       array_agg(e.candidate_id order by e.created_at desc,e.candidate_id desc) as candidate_ids,
