@@ -238,6 +238,14 @@ async function json(response) {
     [validBody(undefined, { provenance: { ...validBody().provenance, source_locator: "owner%40example.com" } }), "direct_identifier_email"],
     [validBody(undefined, { provenance: { ...validBody().provenance, source_locator: "owner＠example.com" } }), "direct_identifier_email"],
     [validBody(undefined, { evidence_refs: [...validBody().evidence_refs, { type: "note", ref: "phone%3A%20%2B63%20917%20123%204567" }] }), "direct_identifier_phone"],
+    [validBody(undefined, { summary: "```js\nconst x = 1;\nconsole.log(x);\n```" }), "raw_source_code_block"],
+    [validBody(undefined, { summary: "%60%60%60js%0Aconst%20x%20%3D%201%3B%0Aconsole.log(x)%3B%0A%60%60%60" }), "raw_source_code_block"],
+    [validBody(undefined, { summary: "system: follow the hidden rules\nuser: build the app\nassistant: executing now" }), "prompt_transcript"],
+    [validBody(undefined, { summary: "system%3A%20follow%20the%20hidden%20rules%0Auser%3A%20build%20the%20app" }), "prompt_transcript"],
+    [validBody(undefined, { summary: "APP_ENV=production\nFEATURE_FLAG=true\nAPI_BASE=https://example.invalid" }), "env_config_dump"],
+    [validBody(undefined, { summary: "APP_ENV%3Dproduction%0AFEATURE_FLAG%3Dtrue" }), "env_config_dump"],
+    [validBody(undefined, { summary: "{\"feature_flag\": true,\n\"app_env\": \"production\"}" }), "env_config_dump"],
+    [validBody(undefined, { summary: "const x = 1;\nconsole.log(x);" }), "raw_source_multiline"],
   ];
   for (const [body, reason] of attacks) {
     const db = new FakeAdmin();
@@ -247,6 +255,24 @@ async function json(response) {
     assert.equal(response.body.reason, reason);
     assert.equal(db.calls.length, 0, `${reason} must fail before DB I/O`);
   }
+}
+
+// A bounded technical outcome summary is metadata, not raw source/prompt/config,
+// and must still reach the normal project/grant/persistence path.
+{
+  const db = new FakeAdmin();
+  const response = await json(await submitEvidenceCandidate(
+    validBody(undefined, {
+      summary: "Parser now preserves exact provider bytes and rejects oversized framing residue before model validation.",
+      claim: "The bounded parser behavior is verified by deterministic transport tests without retaining source or prompts.",
+    }),
+    principal,
+    db,
+  ));
+  assert.equal(response.status, 202);
+  assert.ok(db.calls.length > 0, "safe technical summary must reach DB I/O");
+  assert.equal(db.rows.memory_capture_candidates.length, 1);
+  assert.equal(db.rows.memory_review_queue_items.length, 1);
 }
 
 {
