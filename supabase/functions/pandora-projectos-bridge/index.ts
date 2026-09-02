@@ -411,7 +411,7 @@ const searchMemory = async (
     created_at: item.created_at,
     updated_at: item.updated_at,
   }));
-  const approvedCount = canonicalRecords.filter((item) => item.approved).length;
+  const approvedRecords = canonicalRecords.filter((item) => item.approved);\n  const approvedCount = approvedRecords.length;\n  const approvedMemoryItemIds = approvedRecords\n    .map((item) => typeof item.id === "string" ? item.id : "")\n    .filter((id) => EVIDENCE_UUID_PATTERN.test(id));
 
   const queryHash = await sha256(`${namespace}:${canonicalProjectId}:${query}`);
   const { error: logError } = await supabase
