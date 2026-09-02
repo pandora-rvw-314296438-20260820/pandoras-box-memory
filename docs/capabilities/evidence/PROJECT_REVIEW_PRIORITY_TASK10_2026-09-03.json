@@ -10,7 +10,7 @@
   "source": {
     "baseCommit": "e40af4d532c7788f5d20176ca7e041b053ebe8f3",
     "migration": "supabase/migrations/20260902224500_memory_project_review_priority_v1.sql",
-    "migrationGitBlobSha1": "8c0857e94ca5e0af151d1a8d79d83c7779d7ba9a",
+    "migrationGitBlobSha1": "40313cfd1fbc15c938d0fb846d0f4217090cb274",
     "contractVerifier": "scripts/verify_project_review_priority_contract.py"
   },
   "contract": {

@@ -17,7 +17,7 @@ required = [
     "derived_stale_status",
     "repeated_failure",
     "candidate_ids",
-    "review_item_ids",
+    "review_item_ids",\n    "array_agg(e.candidate_id order by e.created_at desc,e.candidate_id desc)",
     "revoke all on function",
     "grant execute on function",
     "service_role",
@@ -32,7 +32,7 @@ for forbidden in [
     "update public.memory_review_queue_items",
     "delete from public.memory_review_queue_items",
     "insert into public.memory_items",
-    "memory_context_packs",
+    "memory_context_packs",\n    "max(e.candidate_id)",\n    "max(e.review_item_id)",
 ]:
     if forbidden in sql.lower():
         raise SystemExit(f"Task10 projection must remain read-only/exact-project: {forbidden}")
