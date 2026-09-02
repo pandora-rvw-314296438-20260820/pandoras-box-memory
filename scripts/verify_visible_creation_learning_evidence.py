@@ -44,6 +44,8 @@ for marker in (
     'requires_review: true',
     'status: "pending"',
     'status: "pending_review"',
+    'source_event_id: sourceEventId',
+    'review_required: true',
     'canonical_memory_written: false',
     'privacy_policy: "metadata_only_v2_fail_closed"',
     'resultFingerprint !== visible.sourceSha256',
