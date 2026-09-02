@@ -1247,6 +1247,183 @@ const submitEvidenceCandidate = async (
   }, candidateCreated || reviewCreated ? 202 : 200);
 };
 
+const DECISION_TYPES = new Set(["project_spec", "build", "repair"]);
+const DECISION_OUTCOMES = new Set([
+  "succeeded", "failed", "accepted", "rejected", "regressed", "unknown",
+]);
+
+type DecisionScopeResult =
+  | { ok: true; namespace: string; projectId: string; projectKey: string }
+  | { ok: false; response: Response };
+
+const resolveDecisionScope = async (
+  body: JsonRecord,
+  principal: Principal,
+  admin: AdminClient,
+): Promise<DecisionScopeResult> => {
+  if (!principal.scopes.includes("memory:write")) {
+    return { ok: false, response: respond({ ok: false, error: "scope_not_allowed" }, 403) };
+  }
+  const namespace = boundedEvidenceText(body.namespace, 64);
+  const projectId = boundedEvidenceText(body.project_id, 64);
+  const projectKey = boundedEvidenceText(body.project_key, 96);
+  if (
+    !namespace || !principal.allowed_namespaces.includes(namespace) ||
+    !projectId || !EVIDENCE_UUID_PATTERN.test(projectId) ||
+    !projectKey || !EVIDENCE_PROJECT_KEY_PATTERN.test(projectKey)
+  ) {
+    return { ok: false, response: respond({ ok: false, error: "project_identity_invalid" }, 400) };
+  }
+  const { data: project, error: projectError } = await admin
+    .from("pandora_projects")
+    .select("id,project_key")
+    .eq("id", projectId)
+    .eq("project_key", projectKey)
+    .eq("memory_namespace", namespace)
+    .eq("lifecycle_status", "active")
+    .maybeSingle();
+  if (projectError) {
+    return { ok: false, response: respond({ ok: false, error: "project_lookup_failed" }, 503) };
+  }
+  if (!project?.id || project.id !== projectId || project.project_key !== projectKey) {
+    return { ok: false, response: respond({ ok: false, error: "project_not_allowed" }, 403) };
+  }
+  const { data: grant, error: grantError } = await admin
+    .from("pandora_project_grants")
+    .select("project_id")
+    .eq("principal_key", PRINCIPAL_KEY)
+    .eq("project_id", projectId)
+    .eq("environment", principal.environment)
+    .eq("is_active", true)
+    .eq("can_read", true)
+    .is("revoked_at", null)
+    .maybeSingle();
+  if (grantError) {
+    return { ok: false, response: respond({ ok: false, error: "project_grant_lookup_failed" }, 503) };
+  }
+  if (!grant?.project_id) {
+    return { ok: false, response: respond({ ok: false, error: "project_not_allowed" }, 403) };
+  }
+  return { ok: true, namespace, projectId, projectKey };
+};
+
+const recordDecisionInfluence = async (
+  body: JsonRecord,
+  principal: Principal,
+  admin: AdminClient,
+): Promise<Response> => {
+  const allowed = new Set([
+    "action", "namespace", "project_id", "project_key", "retrieval_log_id",
+    "decision_type", "decision_id", "decision_run_id",
+  ]);
+  if (Object.keys(body).some((key) => !allowed.has(key))) {
+    return respond({ ok: false, error: "unexpected_field" }, 400);
+  }
+  const scope = await resolveDecisionScope(body, principal, admin);
+  if (!scope.ok) return scope.response;
+  const retrievalLogId = boundedEvidenceText(body.retrieval_log_id, 64);
+  const decisionType = boundedEvidenceText(body.decision_type, 32);
+  const decisionId = boundedEvidenceText(body.decision_id, 64);
+  const decisionRunId = body.decision_run_id == null
+    ? null
+    : boundedEvidenceText(body.decision_run_id, 64);
+  if (
+    !retrievalLogId || !EVIDENCE_UUID_PATTERN.test(retrievalLogId) ||
+    !decisionType || !DECISION_TYPES.has(decisionType) ||
+    !decisionId || !EVIDENCE_UUID_PATTERN.test(decisionId) ||
+    (decisionRunId !== null && !EVIDENCE_UUID_PATTERN.test(decisionRunId))
+  ) {
+    return respond({ ok: false, error: "decision_lineage_invalid" }, 400);
+  }
+  const { data, error } = await admin.rpc("memory_bind_decision_context_v1", {
+    p_memory_user_id: principal.memory_user_id,
+    p_namespace: scope.namespace,
+    p_project_id: scope.projectId,
+    p_retrieval_log_id: retrievalLogId,
+    p_decision_type: decisionType,
+    p_decision_id: decisionId,
+    p_decision_run_id: decisionRunId,
+  });
+  if (error) {
+    const code = errorCode(error);
+    return respond(
+      { ok: false, error: code === "23505" ? "decision_lineage_conflict" : code === "P0002" ? "retrieval_not_found" : "decision_lineage_failed" },
+      code === "23505" ? 409 : code === "P0002" ? 404 : 503,
+    );
+  }
+  return respond({
+    ok: true,
+    namespace: scope.namespace,
+    project_id: scope.projectId,
+    project_key: scope.projectKey,
+    lineage: data,
+  });
+};
+
+const recordDecisionOutcome = async (
+  body: JsonRecord,
+  principal: Principal,
+  admin: AdminClient,
+): Promise<Response> => {
+  const allowed = new Set([
+    "action", "namespace", "project_id", "project_key", "retrieval_log_id",
+    "decision_type", "decision_id", "outcome_run_id", "outcome_status",
+    "usefulness_delta", "evidence_ref",
+  ]);
+  if (Object.keys(body).some((key) => !allowed.has(key))) {
+    return respond({ ok: false, error: "unexpected_field" }, 400);
+  }
+  const scope = await resolveDecisionScope(body, principal, admin);
+  if (!scope.ok) return scope.response;
+  const retrievalLogId = boundedEvidenceText(body.retrieval_log_id, 64);
+  const decisionType = boundedEvidenceText(body.decision_type, 32);
+  const decisionId = boundedEvidenceText(body.decision_id, 64);
+  const outcomeRunId = boundedEvidenceText(body.outcome_run_id, 64);
+  const outcomeStatus = boundedEvidenceText(body.outcome_status, 32);
+  const evidenceRef = boundedEvidenceText(body.evidence_ref, 500);
+  const usefulnessDelta = typeof body.usefulness_delta === "number"
+    ? body.usefulness_delta
+    : Number.NaN;
+  if (
+    !retrievalLogId || !EVIDENCE_UUID_PATTERN.test(retrievalLogId) ||
+    !decisionType || !DECISION_TYPES.has(decisionType) ||
+    !decisionId || !EVIDENCE_UUID_PATTERN.test(decisionId) ||
+    !outcomeRunId || !EVIDENCE_UUID_PATTERN.test(outcomeRunId) ||
+    !outcomeStatus || !DECISION_OUTCOMES.has(outcomeStatus) ||
+    !Number.isFinite(usefulnessDelta) || usefulnessDelta < -1 || usefulnessDelta > 1 ||
+    !evidenceRef || evidenceSensitiveReason({ evidence_ref: evidenceRef })
+  ) {
+    return respond({ ok: false, error: "decision_outcome_invalid" }, 400);
+  }
+  const { data, error } = await admin.rpc("memory_record_decision_outcome_v1", {
+    p_memory_user_id: principal.memory_user_id,
+    p_namespace: scope.namespace,
+    p_project_id: scope.projectId,
+    p_retrieval_log_id: retrievalLogId,
+    p_decision_type: decisionType,
+    p_decision_id: decisionId,
+    p_outcome_run_id: outcomeRunId,
+    p_outcome_status: outcomeStatus,
+    p_usefulness_delta: usefulnessDelta,
+    p_evidence_ref: evidenceRef,
+  });
+  if (error) {
+    const code = errorCode(error);
+    return respond(
+      { ok: false, error: code === "23505" ? "outcome_lineage_conflict" : code === "P0002" ? "decision_lineage_not_found" : "decision_outcome_failed" },
+      code === "23505" ? 409 : code === "P0002" ? 404 : 503,
+    );
+  }
+  return respond({
+    ok: true,
+    namespace: scope.namespace,
+    project_id: scope.projectId,
+    project_key: scope.projectKey,
+    outcome: data,
+    canonical_memory_written: false,
+  });
+};
+
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") {
     return respond({ ok: false, error: "method_not_allowed" }, 405);
@@ -1286,6 +1463,12 @@ Deno.serve(async (request: Request) => {
   }
   if (body.action === "submit_evidence_candidate") {
     return submitEvidenceCandidate(body, authorization.principal, supabase);
+  }
+  if (body.action === "record_decision_influence") {
+    return recordDecisionInfluence(body, authorization.principal, supabase);
+  }
+  if (body.action === "record_decision_outcome") {
+    return recordDecisionOutcome(body, authorization.principal, supabase);
   }
   if (body.action === "search") {
     return searchMemory(body, authorization.principal, supabase);
