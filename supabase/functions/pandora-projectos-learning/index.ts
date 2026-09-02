@@ -593,6 +593,8 @@ const persistVisibleEvidence = async (
   return json(candidateCreated || reviewCreated ? 202 : 200, {
     ok: true,
     status: "pending_review",
+    source_event_id: sourceEventId,
+    source_ref: sourceRef,
     candidate_id: candidateId,
     review_item_id: reviewItemId,
     evidence_kind: value.evidenceKind,
