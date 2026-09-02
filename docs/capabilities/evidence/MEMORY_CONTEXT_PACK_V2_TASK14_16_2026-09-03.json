@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "tasks": [14,16],
+  "title": "Exact-project MemoryContextPack v2 and negative-knowledge wiring",
+  "source": {
+    "baseCommit": "3fdfb6508b719564f7b1247fb233106ba58e6cde",
+    "migration": "supabase/migrations/20260902231500_memory_context_pack_v2.sql",
+    "migrationGitBlobSha1": "3a66818f4d3b7cc41334bc4ffe611b27250745a3",
+    "contractVerifier": "scripts/verify_memory_context_pack_v2_contract.py"
+  },
+  "authority": {
+    "project": "public.pandora_projects",
+    "grant": "public.pandora_project_grants",
+    "canonicalMemory": "public.memory_items",
+    "constraints": "public.operating_project_constraints",
+    "decisions": "public.operating_project_decisions",
+    "openLoops": "public.operating_project_open_loops",
+    "conflicts": "public.pandora_memory_conflicts",
+    "legacyContextPacks": "excluded"
+  },
+  "contract": {
+    "namespace": "real_life",
+    "productionGrantRequired": true,
+    "canReadRequired": true,
+    "canonicalStatus": "hard_canon",
+    "maxSerializedBytes": 12288,
+    "minimumRequestedBudget": 8192,
+    "negativeKnowledgeTaxonomy": ["security_constraint","guardrail","known_bad_path","superseded_path","failure_pattern","never_repeat"],
+    "emptyNegativeKnowledgeAllowed": true,
+    "unresolvedConflictPrecedesOrdinaryContext": true,
+    "credentialShapedTextRedacted": true,
+    "legacyUnscopedFallback": false,
+    "mutation": false,
+    "executionRole": "service_role"
+  },
+  "currentExactProject": {
+    "projectId": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+    "projectKey": "mcpmaster-pandoras-box",
+    "principalKey": "projectos-mcpmaster-production",
+    "currentExactConstraints": 0,
+    "currentExactDecisions": 0,
+    "currentExactOpenLoops": 0,
+    "currentExactConflicts": 0,
+    "emptyAuthoritativeLayersExpected": true
+  },
+  "security": {
+    "rawPromptOrProviderResponseRequired": false,
+    "browserOrMobileCredential": false,
+    "crossProjectFallback": false,
+    "canonicalPromotion": false
+  }
+}
