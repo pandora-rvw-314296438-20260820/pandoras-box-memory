@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "tasks": [
+    14,
+    16
+  ],
+  "title": "MemoryContextPack v2 production schema-identity repair",
+  "source": {
+    "baseCommit": "83be73a7aabea23614201248d656f87b7e691234",
+    "repairMigration": "supabase/migrations/20260902232200_memory_context_pack_v2_repair.sql",
+    "defect": "pandora_projects.name does not exist",
+    "repair": "v_project.canonical_name"
+  },
+  "verification": {
+    "transactionalProductionDryRun": {
+      "schemaVersion": "2.0",
+      "projectKey": "mcpmaster-pandoras-box",
+      "byteSizeAt12288": 8973,
+      "contextSha256Length": 64,
+      "canonicalCount": 15,
+      "negativeCount": 0,
+      "decisionCount": 0,
+      "openLoopCount": 0,
+      "conflictCount": 0,
+      "legacyUnscopedPackUsed": false
+    },
+    "minimumBudgetDryRun": {
+      "requestedBytes": 8192,
+      "returnedBytes": 7963,
+      "canonicalCount": 13,
+      "degraded": true,
+      "omittedCanonical": 2
+    },
+    "negativeTests": [
+      "wrong project => SQLSTATE 42501",
+      "wrong namespace => SQLSTATE 22023"
+    ]
+  },
+  "security": {
+    "credentialExposure": false,
+    "dataMutation": false,
+    "serviceRoleOnlyPreserved": true
+  }
+}
