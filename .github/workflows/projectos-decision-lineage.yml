@@ -43,4 +43,4 @@ jobs:
       - name: Verify decision lineage contract
         run: python3 scripts/verify_visible_creation_decision_lineage.py
       - name: Type-check exact Edge source
-        run: deno check supabase/functions/pandora-projectos-decision-lineage/index.ts
+        run: deno check --node-modules-dir=auto supabase/functions/pandora-projectos-decision-lineage/index.ts
