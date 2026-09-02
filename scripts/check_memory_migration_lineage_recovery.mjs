@@ -33,9 +33,12 @@ const actualFiles = readdirSync(migrationDir).filter((name) => name.endsWith(".s
 const baselineFiles = actualFiles.filter((name) => name.split("_", 1)[0] < "20260901000000");
 const programFiles = actualFiles.filter((name) => name.split("_", 1)[0] >= "20260901000000");
 assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${baselineFiles.length}`);
-assert(JSON.stringify(programFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql"]), `unexpected post-baseline migration set: ${programFiles.join(",")}`);
+assert(JSON.stringify(programFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql"]), `unexpected post-baseline migration set: ${programFiles.join(",")}`);
 const providerLearningBytes = readFileSync(resolve(migrationDir, programFiles[0]));
 assert(gitBlobSha1(providerLearningBytes) === "1a2f28224b313585dc3f55675785277eb22863c6", "provider-learning live/source blob mismatch");
+const decisionUsefulnessBytes = readFileSync(resolve(migrationDir, programFiles[1]));
+assert(gitBlobSha1(decisionUsefulnessBytes) === "61af2ec934724ba726c9f8c1ae7744194426f778", "decision-usefulness source blob mismatch");
+assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
@@ -145,4 +148,4 @@ assert(evidence.recovery.remainingCandidateSafeFiles === 0, "remaining safe coun
 assert(evidence.recovery.quarantinedLegacyFiles === 12, "quarantined count stale");
 assert(evidence.recovery.productionSchemaMutation === false, "production mutation must remain false");
 assert(evidence.recovery.productionReplayAuthorized === false, "production replay must remain unauthorized");
-process.stdout.write(`Memory migration lineage checkpoint valid: frozen 85-file historical baseline plus ${programFiles.length} exact post-baseline migration(s); provider-learning live/source parity verified. Current migration tree ${migrationTree}.\n`);
+process.stdout.write(`Memory migration lineage checkpoint valid: frozen 85-file historical baseline plus ${programFiles.length} exact post-baseline migration(s); provider-learning live/source parity plus decision-usefulness source identity verified. Current migration tree ${migrationTree}.\n`);
