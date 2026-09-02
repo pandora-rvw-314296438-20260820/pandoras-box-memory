@@ -599,6 +599,7 @@ const persistVisibleEvidence = async (
     proof_stage: value.proofStage,
     visible_project_id: value.visibleProjectId,
     deduplicated: !(candidateCreated || reviewCreated),
+    review_required: true,
     canonical_memory_written: false,
     privacy_policy: "metadata_only_v2_fail_closed",
   });
