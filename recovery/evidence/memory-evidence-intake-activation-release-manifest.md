@@ -24,13 +24,13 @@ The recovered `check_memory_evidence_activation.mjs` previously assumed that the
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `6ae5f00523a656be01175b82d651f9b2cc05585f513293801c17522fc62b884a`
-- Task 5 source change is project-isolated Memory search only.
+- Candidate bridge raw SHA-256: `39b7ccecc2653c455dbfe197a94c3cdac38a23b59dfc20d2a952421059519063`
+- Current candidate preserves exact-project Memory search isolation while adding retrieval-to-decision and decision-to-outcome lineage.
 - Search requires explicit canonical project identity plus an active `can_read` project grant.
 - Search returns exact-project `memory_items` only and omits namespace-wide profiles, open loops, events, and context packs when those tables cannot prove project ownership.
 - Evidence-candidate intake remains review-gated and continues to require `memory:write` plus an active `can_propose` project grant.
 - Candidate responses continue to state `canonical_memory_written=false`.
-- No schema migration is introduced.
+- One forward migration adds decision/outcome lineage columns and service-role-only binding RPCs; the frozen historical migration baseline is unchanged.
 - **No scope mutation in this PR.**
 
 The Box caller side is already live from merge `a996aa3e116f6ed9659040c2f42b72e7d83246fc` on `mcpmaster.vercel.app`, so strict Memory-side project enforcement can be deployed without a caller compatibility gap.
