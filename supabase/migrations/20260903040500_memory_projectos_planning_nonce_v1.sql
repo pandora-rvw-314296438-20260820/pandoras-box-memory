@@ -1,3 +1,9 @@
+-- PANDORA_SECURITY_ADJUDICATION: reviewed
+-- PANDORA_SECURITY_ACCESS_PATH: service-role-only HMAC replay guard; no anon/authenticated/private-schema access
+-- PANDORA_SECURITY_TEST_PLAN: exact-head planning-context gate plus security adjudication; duplicate request_id must fail replay and client roles remain revoked
+-- PANDORA_SECURITY_ROLLBACK: drop the nonce RPC/table only after disabling the planning endpoint; never regrant client access
+-- PANDORA_SECURITY_OWNER: Pandora Memory Program
+
 begin;
 
 create table if not exists private.memory_projectos_planning_nonces (
