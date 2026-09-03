@@ -1,0 +1,31 @@
+name: Memory review persistence lineage
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"
+      - "scripts/check_memory_review_persistence_lineage.mjs"
+      - ".github/workflows/memory-review-persistence-lineage.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"
+      - "scripts/check_memory_review_persistence_lineage.mjs"
+      - ".github/workflows/memory-review-persistence-lineage.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify project lineage and idempotent replay contract
+        run: node scripts/check_memory_review_persistence_lineage.mjs
+      - name: Scan source for literal secrets
+        run: bash scripts/check_no_literal_secrets.sh

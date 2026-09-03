@@ -36,7 +36,7 @@ assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${bas
 const providerReceiptFiles = ["20260902230157_memory_project_review_priority_v1.sql","20260902231549_memory_context_pack_v2.sql","20260902232544_memory_context_pack_v2_repair.sql"];
 const executableProgramFiles = programFiles.filter((name) => !providerReceiptFiles.includes(name));
 const observedReceiptFiles = programFiles.filter((name) => providerReceiptFiles.includes(name));
-assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
+assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql","20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
 assert(JSON.stringify(observedReceiptFiles) === JSON.stringify(providerReceiptFiles), `unexpected provider receipt set: ${observedReceiptFiles.join(",")}`);
 for (const receipt of providerReceiptFiles) {
   const text = readFileSync(resolve(migrationDir, receipt), "utf8");
