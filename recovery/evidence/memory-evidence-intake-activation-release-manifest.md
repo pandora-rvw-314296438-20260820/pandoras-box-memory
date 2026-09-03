@@ -24,7 +24,7 @@ The recovered `check_memory_evidence_activation.mjs` previously assumed that the
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `2e7286035cf90fd324454cddf0d7d55c33d7da5ffaf569b71b53ef79896e7569`
+- Candidate bridge raw SHA-256: `9e0f093623dd0afe3ff7823a97a611e3626b8a0b1e9605d3794db6160cb5d447`
 - Current candidate preserves exact-project Memory search isolation while adding retrieval-to-decision and decision-to-outcome lineage.
 - Search requires explicit canonical project identity plus an active `can_read` project grant.
 - Search returns exact-project `memory_items` only and omits namespace-wide profiles, open loops, events, and context packs when those tables cannot prove project ownership.

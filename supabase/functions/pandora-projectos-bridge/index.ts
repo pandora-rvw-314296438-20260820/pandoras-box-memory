@@ -368,6 +368,58 @@ const searchMemory = async (
     return respond({ ok: false, error: "project_grant_invalid" }, 503);
   }
 
+  const { data: contextPack, error: contextPackError } = await supabase.rpc(
+    "memory_context_pack_v2",
+    {
+      p_project_id: canonicalProjectId,
+      p_principal_key: PRINCIPAL_KEY,
+      p_namespace: namespace,
+      p_as_of: new Date().toISOString(),
+      p_max_bytes: 12 * 1024,
+    },
+  );
+  if (contextPackError) {
+    console.error("projectos_memory_context_pack_failed", {
+      code: contextPackError.code,
+      message: contextPackError.message,
+    });
+    return respond({ ok: false, error: "context_pack_unavailable" }, 503);
+  }
+
+  const packProject = isRecord(contextPack?.project) ? contextPack.project : null;
+  const packAuthorization = isRecord(contextPack?.authorization)
+    ? contextPack.authorization
+    : null;
+  const packDegradation = isRecord(contextPack?.degradation)
+    ? contextPack.degradation
+    : null;
+  const packFreshness = isRecord(contextPack?.freshness)
+    ? contextPack.freshness
+    : null;
+  const packOpenLoops = Array.isArray(contextPack?.openLoops)
+    ? contextPack.openLoops
+    : [];
+  const packConflicts = Array.isArray(contextPack?.conflicts)
+    ? contextPack.conflicts
+    : [];
+  const contextPackValid = isRecord(contextPack) &&
+    contextPack.schemaVersion === "2.0" &&
+    contextPack.status === "available" &&
+    contextPack.namespace === namespace &&
+    packProject?.id === canonicalProjectId &&
+    packProject?.projectKey === canonicalProjectKey &&
+    packAuthorization?.principalKey === PRINCIPAL_KEY &&
+    packAuthorization?.environment === principal.environment &&
+    packAuthorization?.canRead === true &&
+    packDegradation?.legacyUnscopedPackUsed === false &&
+    typeof contextPack.contextSha256 === "string" &&
+    /^[a-f0-9]{64}$/.test(contextPack.contextSha256) &&
+    typeof contextPack.byteSize === "number" &&
+    contextPack.byteSize <= 12 * 1024;
+  if (!contextPackValid) {
+    return respond({ ok: false, error: "context_pack_invalid" }, 503);
+  }
+
   const terms = safeSearchTerms(query);
   const canonStatuses = requestedCanonStatuses(body.canon_statuses);
   let itemQuery = supabase
@@ -444,12 +496,15 @@ const searchMemory = async (
         project_id: canonicalProjectId,
         project_key: canonicalProjectKey,
         returned_profiles: 0,
-        returned_open_loops: 0,
+        returned_open_loops: packOpenLoops.length,
         returned_events: 0,
         returned_items: semanticMatches.length,
         returned_approved_items: approvedCount,
-        returned_context_pack: false,
-        context_pack_type: null,
+        returned_context_pack: true,
+        context_pack_type: "MemoryContextPack v2",
+        context_pack_sha256: contextPack.contextSha256,
+        context_pack_degraded: packDegradation?.degraded === true,
+        context_pack_has_conflicts: packConflicts.length > 0,
         returned_daily_context_pack: false,
         search_terms: terms.length,
         canon_statuses: canonStatuses,
@@ -471,10 +526,10 @@ const searchMemory = async (
     profileCount: 0,
     eventCount: 0,
     terms,
-    contextPack: null,
+    contextPack,
   });
   warnings.push(
-    "Project isolation omitted profiles, open loops, events, and context packs because those records do not carry enforceable first-class project identity.",
+    "Project isolation omits legacy unscoped profiles and events; project-scoped open loops and ContextPack v2 are returned only through the governed exact-project pack authority.",
   );
 
   return respond({
@@ -490,8 +545,11 @@ const searchMemory = async (
     project_context: [],
     people_context: [],
     risk_warnings: [],
-    open_loops: [],
-    latest_context_pack: null,
+    open_loops: packOpenLoops,
+    latest_context_pack: contextPack,
+    context_pack_freshness: packFreshness,
+    context_pack_degraded: packDegradation?.degraded === true,
+    context_pack_has_conflicts: packConflicts.length > 0,
     daily_context_pack: null,
     recent_events: [],
     semantic_matches: semanticMatches,
