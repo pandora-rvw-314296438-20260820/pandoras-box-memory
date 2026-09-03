@@ -10,7 +10,7 @@ const MAX_SEARCH_TERMS = 12;
 const MIN_TERM_LENGTH = 3;
 const MAX_TERM_LENGTH = 64;
 const DEFAULT_CANON_STATUSES = ["hard_canon", "soft_canon"];
-const RETRIEVABLE_CANON_STATUSES = new Set(["hard_canon", "soft_canon", "draft"]);
+const RETRIEVABLE_CANON_STATUSES = new Set(["hard_canon", "soft_canon"]);
 const APPROVED_CANON_STATUSES = new Set(["hard_canon", "soft_canon"]);
 const STOP_TERMS = new Set([
   "and", "are", "for", "from", "has", "have", "its", "not", "our", "that",
@@ -340,7 +340,7 @@ const searchMemory = async (
   const canonicalProjectKey = boundProject.project_key;
   const { data: projectGrant, error: projectGrantError } = await supabase
     .from("pandora_project_grants")
-    .select("project_id")
+    .select("project_id,allowed_record_types")
     .eq("principal_key", PRINCIPAL_KEY)
     .eq("project_id", canonicalProjectId)
     .eq("environment", principal.environment)
@@ -358,18 +358,30 @@ const searchMemory = async (
   if (!projectGrant?.project_id) {
     return respond({ ok: false, error: "project_not_allowed" }, 403);
   }
+  const allowedRecordTypes = Array.isArray(projectGrant.allowed_record_types)
+    ? projectGrant.allowed_record_types.filter(
+      (entry): entry is string =>
+        typeof entry === "string" && /^[a-z0-9][a-z0-9._-]{0,95}$/.test(entry),
+    )
+    : [];
+  if (allowedRecordTypes.length === 0) {
+    return respond({ ok: false, error: "project_grant_invalid" }, 503);
+  }
 
   const terms = safeSearchTerms(query);
   const canonStatuses = requestedCanonStatuses(body.canon_statuses);
   let itemQuery = supabase
     .from("memory_items")
     .select(
-      "id,project_id,title,body,confidence,source_summary,created_at,updated_at,canon_status,memory_type,strength,metadata",
+      "id,project_id,title,body,confidence,source_summary,created_at,updated_at,canon_status,memory_type,strength,metadata,record_type",
     )
     .eq("user_id", principal.memory_user_id)
     .eq("namespace", namespace)
     .eq("project_id", canonicalProjectId)
     .eq("is_active", true)
+    .is("superseded_at", null)
+    .is("revoked_at", null)
+    .in("record_type", allowedRecordTypes)
     .in("canon_status", canonStatuses)
     .order("updated_at", { ascending: false })
     .limit(maxItems);
@@ -1042,7 +1054,7 @@ const submitEvidenceCandidate = async (
   const canonicalProjectKey = boundProject.project_key;
   const { data: projectGrant, error: projectGrantError } = await admin
     .from("pandora_project_grants")
-    .select("project_id")
+    .select("project_id,allowed_record_types")
     .eq("principal_key", PRINCIPAL_KEY)
     .eq("project_id", canonicalProjectId)
     .eq("environment", principal.environment)
@@ -1295,7 +1307,7 @@ const resolveDecisionScope = async (
   }
   const { data: grant, error: grantError } = await admin
     .from("pandora_project_grants")
-    .select("project_id")
+    .select("project_id,allowed_record_types")
     .eq("principal_key", PRINCIPAL_KEY)
     .eq("project_id", projectId)
     .eq("environment", principal.environment)
