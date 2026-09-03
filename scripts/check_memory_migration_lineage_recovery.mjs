@@ -33,17 +33,27 @@ const actualFiles = readdirSync(migrationDir).filter((name) => name.endsWith(".s
 const baselineFiles = actualFiles.filter((name) => name.split("_", 1)[0] < "20260901000000");
 const programFiles = actualFiles.filter((name) => name.split("_", 1)[0] >= "20260901000000");
 assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${baselineFiles.length}`);
-assert(JSON.stringify(programFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql"]), `unexpected post-baseline migration set: ${programFiles.join(",")}`);
-const providerLearningBytes = readFileSync(resolve(migrationDir, programFiles[0]));
+const providerReceiptFiles = ["20260902230157_memory_project_review_priority_v1.sql","20260902231549_memory_context_pack_v2.sql","20260902232544_memory_context_pack_v2_repair.sql"];
+const executableProgramFiles = programFiles.filter((name) => !providerReceiptFiles.includes(name));
+const observedReceiptFiles = programFiles.filter((name) => providerReceiptFiles.includes(name));
+assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
+assert(JSON.stringify(observedReceiptFiles) === JSON.stringify(providerReceiptFiles), `unexpected provider receipt set: ${observedReceiptFiles.join(",")}`);
+for (const receipt of providerReceiptFiles) {
+  const text = readFileSync(resolve(migrationDir, receipt), "utf8");
+  assert(text.includes("Pandora remote migration history receipt."), `provider receipt marker missing: ${receipt}`);
+  assert(text.includes("Replay mode: history_receipt_noop"), `provider receipt replay marker missing: ${receipt}`);
+  assert(text.trimEnd().endsWith("select 1;"), `provider receipt must be no-op: ${receipt}`);
+}
+const providerLearningBytes = readFileSync(resolve(migrationDir, executableProgramFiles[0]));
 assert(gitBlobSha1(providerLearningBytes) === "1a2f28224b313585dc3f55675785277eb22863c6", "provider-learning live/source blob mismatch");
-const decisionUsefulnessBytes = readFileSync(resolve(migrationDir, programFiles[1]));
+const decisionUsefulnessBytes = readFileSync(resolve(migrationDir, executableProgramFiles[1]));
 assert(gitBlobSha1(decisionUsefulnessBytes) === "61af2ec934724ba726c9f8c1ae7744194426f778", "decision-usefulness source blob mismatch");
 assert(sha256(decisionUsefulnessBytes) === "e2864d845e2eca06e4cd4c9da62322f2472e78183a02f80fbf432bb9d86df846", "decision-usefulness source sha256 mismatch");
-const reviewPriorityBytes = readFileSync(resolve(migrationDir, programFiles[2]));
+const reviewPriorityBytes = readFileSync(resolve(migrationDir, executableProgramFiles[2]));
 assert(gitBlobSha1(reviewPriorityBytes) === "40313cfd1fbc15c938d0fb846d0f4217090cb274", "Task10 review-priority source blob mismatch");
-const contextPackBytes = readFileSync(resolve(migrationDir, programFiles[3]));
+const contextPackBytes = readFileSync(resolve(migrationDir, executableProgramFiles[3]));
 assert(gitBlobSha1(contextPackBytes) === "3a66818f4d3b7cc41334bc4ffe611b27250745a3", "Tasks14/16 context-pack source blob mismatch");
-const contextPackRepairBytes = readFileSync(resolve(migrationDir, programFiles[4]));
+const contextPackRepairBytes = readFileSync(resolve(migrationDir, executableProgramFiles[4]));
 assert(gitBlobSha1(contextPackRepairBytes) === "ab08a60f7421affee665f066a33c09b25cf715e0", "Tasks14/16 context-pack repair source blob mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
