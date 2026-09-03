@@ -1,0 +1,34 @@
+{
+    "receipt": {
+        "mode": "history_receipt_noop",
+        "path": "supabase/migrations/20260903075940_memory_review_persistence_lineage_idempotency_v1.sql",
+        "ddlReplay": false,
+        "canonicalExecutableAuthority": "supabase/migrations/20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"
+    },
+    "provider": {
+        "projectRef": "ivmvufhcsezyhczzondn",
+        "migrationName": "memory_review_persistence_lineage_idempotency_v1",
+        "statementCount": 1,
+        "migrationVersion": "20260903075940",
+        "statementsSha256": "cd3b4224abab0aff896964350c67e82590126c58df8adfc084cf58879142ced1",
+        "functionDefinitionSha256": "20237043af04dfa4fc9e8f7f242ec5cabee6640205ef35c205b51b9cc479812c"
+    },
+    "readback": {
+        "reviewIdentityBound": true,
+        "candidateProjectValidated": true,
+        "memoryItemProjectInserted": true,
+        "plannedOperationDigestBound": true,
+        "genericPersistedRowsBeforeRepair": 0
+    },
+    "security": {
+        "dataRewrite": false,
+        "credentialsRecorded": false,
+        "canonPromotionChanged": false,
+        "providerSqlBodyRecorded": false
+    },
+    "capturedAt": "2026-09-03T08:01:10Z",
+    "evidenceId": "memory-review-persistence-provider-receipt-2026-09-03",
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "schemaVersion": "1.0",
+    "mergedRepairCommit": "b061b089d3698ed7989e402a2e3effcb19693c6a"
+}
