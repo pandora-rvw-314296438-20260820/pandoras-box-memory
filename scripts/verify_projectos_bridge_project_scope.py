@@ -27,6 +27,14 @@ required = [
     'retrieval_mode: "project_scoped_keyword_recency"',
     'error: "project_identity_invalid"',
     'error: "project_not_allowed"',
+    '"memory_context_pack_v2"',
+    'p_project_id: canonicalProjectId',
+    'p_principal_key: PRINCIPAL_KEY',
+    'error: "context_pack_unavailable"',
+    'error: "context_pack_invalid"',
+    'packDegradation?.legacyUnscopedPackUsed === false',
+    'latest_context_pack: contextPack',
+    'open_loops: packOpenLoops',
 ]
 for token in required:
     if token not in search and token not in bridge[:start]:
@@ -69,4 +77,7 @@ for token in ['.is("superseded_at", null)', '.is("revoked_at", null)', '.in("rec
     if token not in item_query:
         raise SystemExit(f"memory item query missing strict eligibility predicate: {token}")
 
-print("PASS: ProjectOS bridge search is exact-project scoped, approved-only, grant-type restricted, current-head only, and omits unscoped component tables.")
+if 'latest_context_pack: null' in search:
+    raise SystemExit("ProjectOS bridge still omits governed MemoryContextPack v2")
+
+print("PASS: ProjectOS bridge search is exact-project scoped, approved-only, grant-type restricted, current-head only, exposes governed MemoryContextPack v2, and omits legacy unscoped component tables.")
