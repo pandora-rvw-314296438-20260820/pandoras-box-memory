@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "tasks": [49],
+  "title": "Memory provider migration history receipt parity",
+  "source": {
+    "baseCommit": "6e3ce79f850bcdd526423ed932cf8c81755bd2d2",
+    "branch": "chatgpt-memory/migration-provider-receipts-20260903",
+    "receiptMode": "history_receipt_noop",
+    "canonicalExecutableMigrations": [
+      "supabase/migrations/20260902224500_memory_project_review_priority_v1.sql",
+      "supabase/migrations/20260902231500_memory_context_pack_v2.sql",
+      "supabase/migrations/20260902232200_memory_context_pack_v2_repair.sql"
+    ]
+  },
+  "providerHistory": [
+    {
+      "version": "20260902230157",
+      "name": "memory_project_review_priority_v1",
+      "statementCount": 1,
+      "statementsSha256": "b0f952f86a9882fca510700c42e0edc483cbbea980f9eecf4f2790877900891d",
+      "receipt": "supabase/migrations/20260902230157_memory_project_review_priority_v1.sql"
+    },
+    {
+      "version": "20260902231549",
+      "name": "memory_context_pack_v2",
+      "statementCount": 1,
+      "statementsSha256": "a6748f3464130bc7a3eba78aa2522b13ad2cfbca35151c8093f18c89d1121f4b",
+      "receipt": "supabase/migrations/20260902231549_memory_context_pack_v2.sql"
+    },
+    {
+      "version": "20260902232544",
+      "name": "memory_context_pack_v2_repair",
+      "statementCount": 1,
+      "statementsSha256": "04f4a3c8fdb35931f1c5bd86f817c6ea165cafe936ab72099c7fba9b5f1fd982",
+      "receipt": "supabase/migrations/20260902232544_memory_context_pack_v2_repair.sql"
+    }
+  ],
+  "verification": {
+    "liveSchemaMutation": false,
+    "ddlReplay": false,
+    "receiptStatements": "select 1;",
+    "migrationLineageGuardUpdated": true
+  },
+  "security": {
+    "credentialExposure": false,
+    "providerSqlBodyRecorded": false,
+    "runtimeBehaviorChanged": false
+  }
+}
