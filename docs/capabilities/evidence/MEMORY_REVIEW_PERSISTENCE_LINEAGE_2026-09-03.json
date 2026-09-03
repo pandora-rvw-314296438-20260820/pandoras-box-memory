@@ -1,0 +1,52 @@
+{
+    "repair": {
+        "migration": "supabase/migrations/20260903075000_memory_review_persistence_lineage_idempotency_v1.sql",
+        "dataRewrite": false,
+        "replayIdentity": [
+            "reviewItemId",
+            "previewFingerprint",
+            "plannedOperationSha256"
+        ],
+        "boxTransportChanged": false,
+        "canonicalPromotionChanged": false,
+        "legacyUnscopedCompatibility": true,
+        "projectLineagePreservedWhenPresent": true,
+        "candidateProjectSourceLineageValidatedWhenCandidateTyped": true
+    },
+    "worker": "CHATGPT-MEMORY",
+    "finding": {
+        "defect": "generic approved-review persistence omitted memory_items.project_id and accepted idempotency replay by user+key without binding review/fingerprint/payload identity",
+        "function": "public.memory_execute_approved_review_persistence",
+        "classification": "customer_continuity_correctness_defect",
+        "liveDuplicatePersistenceKeys": 0,
+        "liveGenericReviewPersistedItems": 0,
+        "projectScopedReviewRowsObserved": 16,
+        "liveGenericProposalPersistedItems": 0
+    },
+    "baseMain": "029127e5b0268eb9aef786d7504df6b774c856b8",
+    "security": {
+        "credentialsRecorded": false,
+        "rawUserContentRecorded": false,
+        "projectNamespaceFailClosedRequired": true
+    },
+    "capturedAt": "2026-09-03T07:58:30Z",
+    "evidenceId": "memory-review-persistence-lineage-2026-09-03",
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "modelReview": {
+        "kimiJobId": "f76bb159-c816-41dc-b706-0a41675b64c6",
+        "kimiStatus": "succeeded",
+        "kimiUseful": "corroborated approval/lifecycle/isolation/idempotency requirements",
+        "geminiJobId": "76ad43e8-f4e7-47a6-a3fe-fd25e1b02183",
+        "geminiStatus": "succeeded",
+        "geminiDisposition": "generic regression ideas retained; invented schema identifiers rejected"
+    },
+    "verification": {
+        "vercelMutated": false,
+        "liveExposureRead": true,
+        "sourceSemanticGate": "scripts/check_memory_review_persistence_lineage.mjs",
+        "productionDataMutated": false,
+        "productionSchemaMutated": false,
+        "providerFunctionDefinitionRead": true
+    },
+    "schemaVersion": "1.0"
+}
