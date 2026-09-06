@@ -6,7 +6,8 @@ import {
 } from "npm:jose@5.10.0";
 import {
   applyMemoryHealthScope,
-  buildMemorySearchQuery,
+  buildMemorySearchRpcArgs,
+  MEMORY_SEARCH_AUTHORITY,
   MEMORY_SEARCH_RESOURCE,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";
@@ -479,7 +480,7 @@ function toolList() {
     {
       name: "memory_search",
       description:
-        "Search approved canonical Pandora Memory belonging to the authenticated principal.",
+        "Search canonical Pandora Memory belonging to the authenticated principal. Results are discovery-only; decision authority uses approved hard-canon project context.",
       inputSchema: {
         type: "object",
         properties: {
@@ -587,15 +588,14 @@ async function callTool(req: Request, body: RpcRequest) {
     );
     if (identity instanceof Response) return identity;
 
-    const { data, error } = await buildMemorySearchQuery(
-      admin
-        .from("memory_items")
-        .select(
-          "id,title,body,namespace,canon_status,confidence,source_summary,updated_at,project_id,record_type",
-        ),
-      identity.userId,
-      safe,
-      limit,
+    const searchStarted = performance.now();
+    const { data, error } = await admin.rpc(
+      "memory_search_scoped_v1",
+      buildMemorySearchRpcArgs(identity.userId, safe, limit),
+    );
+    const queryMs = Math.max(
+      0,
+      Math.round((performance.now() - searchStarted) * 100) / 100,
     );
 
     if (error) {
@@ -631,6 +631,10 @@ async function callTool(req: Request, body: RpcRequest) {
         text: JSON.stringify({
           items: data || [],
           count: data?.length || 0,
+          candidate_count: data?.length || 0,
+          query_ms: queryMs,
+          authority: MEMORY_SEARCH_AUTHORITY,
+          decision_authoritative: false,
         }),
       }],
     });
