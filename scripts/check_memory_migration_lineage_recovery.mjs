@@ -36,7 +36,7 @@ assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${bas
 const providerReceiptFiles = ["20260902230157_memory_project_review_priority_v1.sql","20260902231549_memory_context_pack_v2.sql","20260902232544_memory_context_pack_v2_repair.sql","20260903075940_memory_review_persistence_lineage_idempotency_v1.sql"];
 const executableProgramFiles = programFiles.filter((name) => !providerReceiptFiles.includes(name));
 const observedReceiptFiles = programFiles.filter((name) => providerReceiptFiles.includes(name));
-assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql","20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
+assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql","20260903040500_memory_projectos_planning_nonce_v1.sql","20260903075000_memory_review_persistence_lineage_idempotency_v1.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
 assert(JSON.stringify(observedReceiptFiles) === JSON.stringify(providerReceiptFiles), `unexpected provider receipt set: ${observedReceiptFiles.join(",")}`);
 for (const receipt of providerReceiptFiles) {
   const text = readFileSync(resolve(migrationDir, receipt), "utf8");
@@ -55,6 +55,9 @@ const contextPackBytes = readFileSync(resolve(migrationDir, executableProgramFil
 assert(gitBlobSha1(contextPackBytes) === "3a66818f4d3b7cc41334bc4ffe611b27250745a3", "Tasks14/16 context-pack source blob mismatch");
 const contextPackRepairBytes = readFileSync(resolve(migrationDir, executableProgramFiles[4]));
 assert(gitBlobSha1(contextPackRepairBytes) === "ab08a60f7421affee665f066a33c09b25cf715e0", "Tasks14/16 context-pack repair source blob mismatch");
+const planningNonceBytes = readFileSync(resolve(migrationDir, executableProgramFiles[5]));
+assert(gitBlobSha1(planningNonceBytes) === "2eeeb43119a21c040ea6f063639748a912cca66e", "planning-nonce source blob mismatch");
+assert(sha256(planningNonceBytes) === "de0d61fbde3f7aad26ca532042084e3b2434ee1d4d6f52666d99ba39cb763854", "planning-nonce source sha256 mismatch");
 assert(evidence.sourceStateAfterRecovery.migrationFiles === 73, "evidence migration file count stale");
 assert(evidence.sourceStateAfterRecovery.exactAppliedFiles === 73, "exact applied source count stale");
 assert(evidence.sourceStateAfterRecovery.missingAppliedFiles === 12, "missing applied count stale");
