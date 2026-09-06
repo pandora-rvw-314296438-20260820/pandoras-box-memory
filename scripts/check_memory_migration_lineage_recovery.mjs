@@ -36,7 +36,34 @@ assert(baselineFiles.length === 85, `expected frozen 85-file baseline, got ${bas
 const providerReceiptFiles = ["20260902023147_provision_grok_memory_gateway_oauth.sql","20260902023434_rebind_memory_gateway_projectos_vercel_oidc.sql","20260902083833_memory_decision_usefulness_v1.sql","20260902230157_memory_project_review_priority_v1.sql","20260902231549_memory_context_pack_v2.sql","20260902232544_memory_context_pack_v2_repair.sql","20260903075940_memory_review_persistence_lineage_idempotency_v1.sql","20260906024019_memory_projectos_planning_nonce_v1.sql","20260906043524_memory_approved_canon_retrieval_gate_v1.sql"];
 const executableProgramFiles = programFiles.filter((name) => !providerReceiptFiles.includes(name));
 const observedReceiptFiles = programFiles.filter((name) => providerReceiptFiles.includes(name));
-assert(JSON.stringify(executableProgramFiles) === JSON.stringify(["20260901184935_pandora_provider_learning_v1.sql","20260902081500_memory_decision_usefulness_v1.sql","20260902224500_memory_project_review_priority_v1.sql","20260902231500_memory_context_pack_v2.sql","20260902232200_memory_context_pack_v2_repair.sql","20260903040500_memory_projectos_planning_nonce_v1.sql","20260903075000_memory_review_persistence_lineage_idempotency_v1.sql","20260906041000_memory_approved_canon_retrieval_gate_v1.sql","20260906043655_memory_approved_canon_retrieval_gate_v1_repair.sql"]), `unexpected executable post-baseline migration set: ${executableProgramFiles.join(",")}`);
+const knownExecutableProgramFiles = [
+  "20260901184935_pandora_provider_learning_v1.sql",
+  "20260902081500_memory_decision_usefulness_v1.sql",
+  "20260902224500_memory_project_review_priority_v1.sql",
+  "20260902231500_memory_context_pack_v2.sql",
+  "20260902232200_memory_context_pack_v2_repair.sql",
+  "20260903040500_memory_projectos_planning_nonce_v1.sql",
+  "20260903075000_memory_review_persistence_lineage_idempotency_v1.sql",
+  "20260906041000_memory_approved_canon_retrieval_gate_v1.sql",
+  "20260906043655_memory_approved_canon_retrieval_gate_v1_repair.sql",
+];
+assert(
+  JSON.stringify(executableProgramFiles.slice(0, knownExecutableProgramFiles.length)) ===
+    JSON.stringify(knownExecutableProgramFiles),
+  `known executable post-baseline migration lineage changed: ${executableProgramFiles.join(",")}`,
+);
+const newExecutableProgramFiles = executableProgramFiles.slice(knownExecutableProgramFiles.length);
+for (const filename of newExecutableProgramFiles) {
+  const source = readFileSync(resolve(migrationDir, filename), "utf8");
+  assert(
+    !source.includes("Replay mode: history_receipt_noop"),
+    `new executable migration cannot be a provider receipt: ${filename}`,
+  );
+}
+execFileSync("node", ["scripts/verify_migration_authority.mjs"], {
+  cwd: root,
+  stdio: "inherit",
+});
 assert(JSON.stringify(observedReceiptFiles) === JSON.stringify(providerReceiptFiles), `unexpected provider receipt set: ${observedReceiptFiles.join(",")}`);
 for (const receipt of providerReceiptFiles) {
   const text = readFileSync(resolve(migrationDir, receipt), "utf8");

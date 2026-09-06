@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "sourceDirectory": "supabase/migrations",
+  "purpose": "Classify migration files without rewriting applied production history.",
+  "classifications": [
+    {
+      "id": "provider_receipt",
+      "description": "History or receipt file that points at an already-live executable authority.",
+      "contentMarkers": [
+        "Canonical executable authority:",
+        "history-only",
+        "Replay mode: history_receipt_noop"
+      ]
+    },
+    {
+      "id": "historical_control",
+      "description": "Temporary, recovery, probe, or retirement control retained for immutable history.",
+      "filenamePattern": "(?:temporary|remove_temporary|retire_|recovery|probe)"
+    },
+    {
+      "id": "executable_authority",
+      "description": "Default executable migration authority when no receipt/history marker applies.",
+      "default": true
+    }
+  ],
+  "invariants": [
+    "Every migration is classified exactly once.",
+    "Every Canonical executable authority receipt points to a file that exists.",
+    "Receipt files are never treated as a second executable authority."
+  ]
+}

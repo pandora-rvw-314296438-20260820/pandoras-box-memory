@@ -9,7 +9,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:bridge-url": "node scripts/verify_projectos_bridge_url_contract.mjs",
+    "verify:migration-authority": "node scripts/verify_migration_authority.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

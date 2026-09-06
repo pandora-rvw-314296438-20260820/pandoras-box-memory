@@ -3,12 +3,32 @@ import { NextResponse, type NextRequest } from "next/server";
 const MAX_RESPONSE_BYTES = 500_000;
 const TIMEOUT_MS = 8_000;
 
-// Security boundary: ProjectOS traffic must always reach the canonical
-// Pandoras-Box Memory Supabase project. Do not make this endpoint environment-
-// overridable; a stale or foreign NEXT_PUBLIC_SUPABASE_URL must not redirect
-// production service-principal authentication to another project.
-const BRIDGE_URL =
-  "https://ivmvufhcsezyhczzondn.supabase.co/functions/v1/pandora-projectos-bridge";
+// Security boundary: configuration may change the deployment URL only within
+// the canonical Memory Supabase project. A stale/foreign public Supabase URL
+// can never redirect ProjectOS service-principal authentication.
+const CANONICAL_MEMORY_PROJECT_REF = "ivmvufhcsezyhczzondn";
+const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-projectos-bridge";
+const DEFAULT_BRIDGE_URL =
+  `https://${CANONICAL_MEMORY_PROJECT_REF}.supabase.co${CANONICAL_BRIDGE_PATH}`;
+
+function bridgeUrl() {
+  const configured =
+    process.env.PANDORA_MEMORY_PROJECTOS_BRIDGE_URL?.trim() ||
+    DEFAULT_BRIDGE_URL;
+  const url = new URL(configured);
+  if (
+    url.protocol !== "https:" ||
+    url.hostname !== `${CANONICAL_MEMORY_PROJECT_REF}.supabase.co` ||
+    url.pathname !== CANONICAL_BRIDGE_PATH ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("invalid_memory_bridge_url");
+  }
+  return url.toString();
+}
 
 function workloadToken(request: NextRequest) {
   const dedicated = request.headers.get("x-pandora-vercel-oidc")?.trim();
@@ -72,7 +92,7 @@ export async function proxyProjectOSMemoryRequest(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const response = await fetch(BRIDGE_URL, {
+    const response = await fetch(bridgeUrl(), {
       method: "POST",
       cache: "no-store",
       redirect: "error",
