@@ -20,6 +20,10 @@ export function sanitizeMemorySearchQuery(query: string): string {
     .trim();
 }
 
+/**
+ * Constrain even aggregate health metadata to the principal's real_life rows.
+ * The service-role client must never disclose same-owner rows in another namespace.
+ */
 export function applyMemoryHealthScope<T>(
   query: T,
   userId: string,
