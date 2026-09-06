@@ -1,0 +1,47 @@
+name: ProjectOS planning context
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/pandora-projectos-planning-context/**"
+      - "supabase/migrations/20260903040500_memory_projectos_planning_nonce_v1.sql"
+      - "scripts/verify_projectos_planning_context.py"
+      - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - ".github/workflows/projectos-planning-context.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/pandora-projectos-planning-context/**"
+      - "supabase/migrations/20260903040500_memory_projectos_planning_nonce_v1.sql"
+      - "scripts/verify_projectos_planning_context.py"
+      - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - ".github/workflows/projectos-planning-context.yml"
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+      - name: Set up Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.4.3
+      - name: Verify planning context contract
+        run: python3 scripts/verify_projectos_planning_context.py
+      - name: Type-check exact Edge source
+        run: deno check --node-modules-dir=auto supabase/functions/pandora-projectos-planning-context/index.ts
