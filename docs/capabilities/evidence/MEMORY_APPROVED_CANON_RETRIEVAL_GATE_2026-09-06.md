@@ -25,3 +25,14 @@ This evidence record covers the review-gated change in PR #47 that prevents cano
 ## Verification gate
 
 The exact PR head must pass the Memory capability registry, evidence-intake activation, security adjudication, project-isolation, migration-lineage, lifecycle, quality, and generalization gates before merge.
+
+
+## Production repair — 2026-09-06
+
+Production readback after the first activation exposed two exact defects in `memory_context_pack_v2`: it referenced nonexistent `pandora_projects.name`, and three Memory-backed retrieval branches did not repeat the approval-receipt predicate used by the eligibility count.
+
+- Provider duplicate receipt: `20260906043524_memory_approved_canon_retrieval_gate_v1`
+- Production repair receipt: `20260906043655_memory_approved_canon_retrieval_gate_v1_repair`
+- Repair uses `pandora_projects.canonical_name`.
+- All four Memory-backed ContextPack branches require non-null `approved_by` and `approved_at`.
+- Live post-repair proof returned only approval-backed canonical/negative Memory while active unapproved hard-canon rows remained present, proving exclusion rather than absence.
