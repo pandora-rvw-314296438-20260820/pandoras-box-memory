@@ -20,12 +20,6 @@ export function sanitizeMemorySearchQuery(query: string): string {
     .trim();
 }
 
-/**
- * Constrain health metadata to the machine gateway's real_life boundary.
- *
- * The gateway uses a service-role client, so even aggregate counts must not
- * disclose the existence of same-owner rows in another namespace.
- */
 export function applyMemoryHealthScope<T>(
   query: T,
   userId: string,
@@ -37,10 +31,6 @@ export function applyMemoryHealthScope<T>(
     .eq("is_active", true) as unknown as T;
 }
 
-/**
- * Build the only parameters accepted by the indexed service-only search RPC.
- * Row-level scope is enforced again inside memory_search_scoped_v1.
- */
 export function buildMemorySearchRpcArgs(
   userId: string,
   safeQuery: string,
