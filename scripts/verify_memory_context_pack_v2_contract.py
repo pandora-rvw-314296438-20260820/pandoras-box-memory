@@ -1,7 +1,7 @@
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
-sql = (root / "supabase/migrations/20260906041000_memory_approved_canon_retrieval_gate_v1.sql").read_text()
+sql = (root / "supabase/migrations/20260906043655_memory_approved_canon_retrieval_gate_v1_repair.sql").read_text()
 
 required = [
     "memory_context_pack_v2",
@@ -55,6 +55,15 @@ for forbidden in [
 ]:
     if forbidden in sql.lower():
         raise SystemExit(f"ContextPack v2 violates read-only/isolation contract: {forbidden}")
+
+if sql.count("m.approved_by is not null") != 4:
+    raise SystemExit("all four Memory-backed ContextPack branches must require approved_by")
+if sql.count("m.approved_at is not null") != 4:
+    raise SystemExit("all four Memory-backed ContextPack branches must require approved_at")
+if "v_project.canonical_name" not in sql:
+    raise SystemExit("ContextPack project name must use pandora_projects.canonical_name")
+if "v_project.name" in sql:
+    raise SystemExit("invalid pandora_projects.name reference must not return")
 
 if sql.count("project_id=p_project_id") < 5:
     raise SystemExit("all ContextPack v2 layers must be exact-project scoped")
