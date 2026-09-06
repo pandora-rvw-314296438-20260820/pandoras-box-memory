@@ -15,7 +15,7 @@ using gin (
 )
 where namespace = 'real_life'
   and is_active = true
-  and canon_status::text in ('hard_canon','soft_canon');
+  and canon_status in ('hard_canon'::public.canon_status,'soft_canon'::public.canon_status);
 
 create or replace function public.memory_search_scoped_v1(
   p_user_id uuid,
@@ -74,7 +74,7 @@ begin
   where m.user_id = p_user_id
     and m.namespace = 'real_life'
     and m.is_active = true
-    and m.canon_status::text in ('hard_canon','soft_canon')
+    and m.canon_status in ('hard_canon'::public.canon_status,'soft_canon'::public.canon_status)
     and to_tsvector(
       'simple',
       coalesce(m.title,'') || ' ' || coalesce(m.body,'')
