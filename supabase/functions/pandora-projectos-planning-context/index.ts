@@ -131,7 +131,8 @@ Deno.serve(async (request: Request) => {
   const { data: items, error: itemError } = await admin.from("memory_items")
     .select("id,title,source_summary,confidence,canon_status,memory_type,updated_at")
     .eq("user_id", memoryUserId).eq("namespace", NAMESPACE).eq("project_id", memoryProjectId)
-    .eq("is_active", true).in("canon_status", APPROVED_CANON).order("updated_at", { ascending: false }).limit(MAX_ITEMS);
+    .eq("is_active", true).not("approved_by", "is", null).not("approved_at", "is", null)
+    .in("canon_status", APPROVED_CANON).order("updated_at", { ascending: false }).limit(MAX_ITEMS);
   if (itemError) return json(503, { ok: false, error: "memory_query_failed" });
 
   const highlights: JsonRecord[] = [];

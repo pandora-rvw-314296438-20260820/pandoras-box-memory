@@ -1,7 +1,7 @@
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
-sql = (root / "supabase/migrations/20260902231500_memory_context_pack_v2.sql").read_text()
+sql = (root / "supabase/migrations/20260906041000_memory_approved_canon_retrieval_gate_v1.sql").read_text()
 
 required = [
     "memory_context_pack_v2",
@@ -18,6 +18,8 @@ required = [
     "m.project_id=p_project_id",
     "m.namespace::text=p_namespace",
     "m.canon_status::text='hard_canon'",
+    "m.approved_by is not null",
+    "m.approved_at is not null",
     "m.record_type=any(v_allowed)",
     "security_constraint",
     "guardrail",

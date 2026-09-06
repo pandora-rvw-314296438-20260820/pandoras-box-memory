@@ -431,6 +431,8 @@ const searchMemory = async (
     .eq("namespace", namespace)
     .eq("project_id", canonicalProjectId)
     .eq("is_active", true)
+    .not("approved_by", "is", null)
+    .not("approved_at", "is", null)
     .is("superseded_at", null)
     .is("revoked_at", null)
     .in("record_type", allowedRecordTypes)
