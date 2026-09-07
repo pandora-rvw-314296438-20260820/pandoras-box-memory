@@ -1,4 +1,3 @@
-
 name: Memory Hardening Readiness Gate
 
 on:
@@ -6,6 +5,7 @@ on:
     paths:
       - "supabase/functions/**"
       - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - "docs/capabilities/evidence/PROJECTOS_BRIDGE_RETRY_PRODUCTION_VERIFICATION_*.md"
       - "scripts/verify_memory_hardening_readiness.py"
       - "scripts/verify_projectos_bridge_project_scope.py"
       - "scripts/verify_projectos_bridge_url_contract.mjs"
@@ -22,6 +22,7 @@ on:
     paths:
       - "supabase/functions/**"
       - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
+      - "docs/capabilities/evidence/PROJECTOS_BRIDGE_RETRY_PRODUCTION_VERIFICATION_*.md"
       - "scripts/verify_memory_hardening_readiness.py"
       - "scripts/verify_projectos_bridge_project_scope.py"
       - "scripts/verify_projectos_bridge_url_contract.mjs"
