@@ -23,6 +23,8 @@ The ProjectOS web proxy may use `PANDORA_MEMORY_PROJECTOS_BRIDGE_URL`, but confi
 
 Applied provider history remains immutable. A machine-readable migration-authority manifest distinguishes executable source, provider receipts, and historical controls. The frozen pre-September baseline remains unchanged.
 
+Production provider history records `memory_indexed_search_v1` as version `20260906080241`, while its canonical executable source is `20260906075000_memory_indexed_search_v1.sql`. Source now carries `20260906080241_memory_indexed_search_v1.sql` as a no-op provider-history receipt bound to executable SHA-256 `d24c2ddebf55f5135523c9886d6c5706bd15816eeb7f18e4a8972d63826dee02`. This restores provider/source identity parity without replaying the already-live generic indexed-search SQL.
+
 ## Verification gates
 
 The PR must pass:
