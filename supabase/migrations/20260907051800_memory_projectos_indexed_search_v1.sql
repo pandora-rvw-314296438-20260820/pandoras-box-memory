@@ -72,7 +72,7 @@ begin
   if coalesce(cardinality(p_canon_statuses),0) = 0
      or exists (
        select 1
-       from unnest(p_canon_statuses) status
+       from unnest(p_canon_statuses) as s(status)
        where status not in ('hard_canon','soft_canon')
      )
   then
