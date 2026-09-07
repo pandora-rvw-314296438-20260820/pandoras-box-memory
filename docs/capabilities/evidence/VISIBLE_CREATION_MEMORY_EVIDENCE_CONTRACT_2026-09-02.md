@@ -22,8 +22,12 @@ The lifecycle payload contains only bounded enums, UUIDs, timestamps, counters a
 ## Exact source binding
 
 - `supabase/functions/pandora-projectos-bridge/index.ts`
-  - Git blob: `83afdfe047796ee1e5bc4be0d975a39b9623994e`
-  - Raw SHA-256: `92faeacdfd4b5a63f1594e3f7542911c06a2f9bc738abdcc3ecb6feb74ad05b8`
+  - Git blob: `27e1a1d6ef2658343add4b927ffcd9211a6e1ef2`
+  - Raw SHA-256: `3733beca22f535a6bbe061aed072319bac22f1b4b9fb3cee82757bcc5d380a03`
+- `supabase/migrations/20260907051800_memory_projectos_indexed_search_v1.sql`
+  - Git blob: `1c95c8a81a7c9872ce6180eef77ad0825f9ee794`
+  - Raw SHA-256: `8a75a5e61e47dec4ec021805e5340ae2cd989621c5b0b2ecd64dbc732634092e`
+  - Scope: service-role-only exact-project indexed retrieval; no broader authorization.
 - `supabase/functions/pandora-projectos-learning/index.ts`
   - Git blob: `1ee821c8e362a1fd240af80611c8286f287c3131`
   - Raw SHA-256: `1b0856d71c679e824051f2ef03a9be0561da58901c3bfae9b4789499de33f554`
