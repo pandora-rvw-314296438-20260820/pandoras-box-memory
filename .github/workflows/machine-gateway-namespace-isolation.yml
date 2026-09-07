@@ -2,17 +2,9 @@ name: Machine Gateway Namespace Isolation
 
 on:
   pull_request:
-    paths:
-      - "supabase/functions/pandora-machine-gateway/**"
-      - "docs/architecture/MACHINE_GATEWAY_ARCHITECTURE.md"
-      - ".github/workflows/machine-gateway-namespace-isolation.yml"
   push:
     branches:
       - main
-    paths:
-      - "supabase/functions/pandora-machine-gateway/**"
-      - "docs/architecture/MACHINE_GATEWAY_ARCHITECTURE.md"
-      - ".github/workflows/machine-gateway-namespace-isolation.yml"
 
 permissions:
   contents: read
