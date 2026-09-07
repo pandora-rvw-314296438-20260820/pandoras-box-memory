@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "docs/capabilities/evidence/MEMORY_LIFECYCLE_CONSOLIDATION_CONTRACT_2026-09-01.md"
 EVIDENCE = ROOT / "docs/capabilities/evidence/MEMORY_LIFECYCLE_LIVE_EVIDENCE_2026-09-01.json"
 BRIDGE = ROOT / "supabase/functions/pandora-projectos-bridge/index.ts"
+INDEXED_SEARCH = ROOT / "supabase/migrations/20260907051800_memory_projectos_indexed_search_v1.sql"
 
 IMMUTABLE_TABLES = (
     "memory_items",
@@ -251,17 +252,33 @@ def validate_contract() -> None:
             raise AssertionError(f"evidence must preserve current supersede-RPC gap: {key}")
 
     bridge = read_text(BRIDGE)
-    if '.from("memory_items")' not in bridge:
-        raise AssertionError("canonical bridge no longer reads memory_items")
+    indexed_search = read_text(INDEXED_SEARCH)
     for marker in (
-        '.eq("user_id", principal.memory_user_id)',
-        '.eq("namespace", namespace)',
-        '.eq("project_id", canonicalProjectId)',
-        '.eq("is_active", true)',
+        '"memory_projectos_search_scoped_v1"',
+        'p_user_id: principal.memory_user_id',
+        'p_namespace: namespace',
+        'p_project_id: canonicalProjectId',
+        'p_principal_key: PRINCIPAL_KEY',
+        'p_environment: principal.environment',
     ):
         if marker not in bridge:
             raise AssertionError(f"canonical project-scoped bridge invariant missing: {marker}")
+    for marker in (
+        "from public.memory_items m",
+        "m.user_id = p_user_id",
+        "m.namespace::text = p_namespace",
+        "m.project_id = p_project_id",
+        "m.is_active = true",
+        "m.approved_by is not null",
+        "m.approved_at is not null",
+        "m.superseded_at is null",
+        "m.revoked_at is null",
+        "m.record_type = any(v_allowed)",
+    ):
+        if marker not in indexed_search:
+            raise AssertionError(f"indexed lifecycle search invariant missing: {marker}")
     reject_terminal_only_prematch_filter(bridge)
+    reject_terminal_only_prematch_filter(indexed_search)
 
 def main() -> int:
     parser = argparse.ArgumentParser()
