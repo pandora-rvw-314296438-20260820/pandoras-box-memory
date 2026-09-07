@@ -5,6 +5,7 @@ import path from "node:path";
 const baselinePath = "docs/capabilities/evidence/MEMORY_CROSS_PROJECT_GENERALIZATION_BASELINE_2026-09-01.json";
 const contractPath = "docs/verification/MEMORY_CROSS_PROJECT_GENERALIZATION_CONTRACT_2026-09-01.md";
 const bridgePath = "supabase/functions/pandora-projectos-bridge/index.ts";
+const indexedSearchPath = "supabase/migrations/20260907051800_memory_projectos_indexed_search_v1.sql";
 
 const forbiddenKeys = new Set([
   "user_id","userid","customer_id","customerid","customer","customer_name","organization_id","organizationid",
@@ -133,6 +134,7 @@ function fullVerify() {
   const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
   const contract = fs.readFileSync(contractPath, "utf8");
   const bridge = fs.readFileSync(bridgePath, "utf8");
+  const indexedSearch = fs.readFileSync(indexedSearchPath, "utf8");
 
   const exact = [
     [baseline.no_duplication.generalization_playbook_pattern_abstract_tables_or_routines === 0, "baseline must prove zero parallel generalization authorities"],
@@ -166,12 +168,31 @@ function fullVerify() {
     '.from("pandora_project_grants")',
     '.eq("can_read", true)',
     '.is("revoked_at", null)',
-    '.from("memory_items")',
-    '.eq("project_id", canonicalProjectId)',
+    '"memory_projectos_search_scoped_v1"',
+    'p_project_id: canonicalProjectId',
+    'p_principal_key: PRINCIPAL_KEY',
+    'p_environment: principal.environment',
     'unscoped_components_omitted: true',
     'error: "project_not_allowed"'
   ];
   for (const token of bridgeTokens) if (!bridge.includes(token)) throw new Error(`project isolation weakened: ${token}`);
+
+  const indexedTokens = [
+    'from public.memory_items m',
+    'g.principal_key = p_principal_key',
+    'g.environment = p_environment',
+    'g.can_read = true',
+    'g.revoked_at is null',
+    'm.user_id = p_user_id',
+    'm.namespace::text = p_namespace',
+    'm.project_id = p_project_id',
+    'm.approved_by is not null',
+    'm.approved_at is not null',
+    'm.superseded_at is null',
+    'm.revoked_at is null',
+    'm.record_type = any(v_allowed)'
+  ];
+  for (const token of indexedTokens) if (!indexedSearch.includes(token)) throw new Error(`indexed project isolation weakened: ${token}`);
 
   const runtimeRoots = ["supabase/functions", "app/api", "lib"];
   for (const runtimeRoot of runtimeRoots) {
