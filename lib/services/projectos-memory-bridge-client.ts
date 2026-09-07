@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const MAX_RESPONSE_BYTES = 500_000;
 const TIMEOUT_MS = 8_000;
+const SAFE_READ_MAX_ATTEMPTS = 3;
+const SAFE_READ_BACKOFF_MS = [125, 350] as const;
+const MAX_RETRY_AFTER_MS = 2_000;
 
 // Security boundary: configuration may change the deployment URL only within
 // the canonical Memory Supabase project. A stale/foreign public Supabase URL
@@ -36,6 +39,40 @@ function workloadToken(request: NextRequest) {
   const authorization = request.headers.get("authorization") ?? "";
   const [scheme, token] = authorization.split(" ");
   return scheme?.toLowerCase() === "bearer" && token ? token : null;
+}
+
+function retrySafeAction(payload: Record<string, unknown>) {
+  return payload.action === "health" || payload.action === "search";
+}
+
+function retryableBridgeStatus(status: number) {
+  return status === 408 || status === 429 || status === 500 ||
+    status === 502 || status === 503 || status === 504;
+}
+
+function retryAfterMs(response: Response) {
+  const raw = response.headers.get("retry-after")?.trim();
+  if (!raw) return null;
+  if (/^\d+$/.test(raw)) {
+    return Math.min(Number(raw) * 1000, MAX_RETRY_AFTER_MS);
+  }
+  const parsed = Date.parse(raw);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.min(Math.max(parsed - Date.now(), 0), MAX_RETRY_AFTER_MS);
+}
+
+function retryDelayMs(attempt: number, response?: Response) {
+  const retryAfter = response ? retryAfterMs(response) : null;
+  if (retryAfter !== null) return retryAfter;
+  return SAFE_READ_BACKOFF_MS[
+    Math.min(attempt - 1, SAFE_READ_BACKOFF_MS.length - 1)
+  ] ?? 0;
+}
+
+function sleep(ms: number) {
+  return ms > 0
+    ? new Promise<void>((resolve) => setTimeout(resolve, ms))
+    : Promise.resolve();
 }
 
 async function readBounded(response: Response) {
@@ -89,43 +126,91 @@ export async function proxyProjectOSMemoryRequest(
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    const response = await fetch(bridgeUrl(), {
-      method: "POST",
-      cache: "no-store",
-      redirect: "error",
-      headers: {
-        // Supabase reserves Authorization for its gateway. Carry the bounded
-        // Vercel workload token in a dedicated internal header so the custom-
-        // auth Edge boundary receives it byte-for-byte.
-        "x-pandora-vercel-oidc": token,
-        accept: "application/json",
-        "content-type": "application/json",
-        "user-agent": "Pandora-Memory-ProjectOS-Proxy/1.2",
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-    const text = await readBounded(response);
-    return new NextResponse(
-      text || JSON.stringify({ ok: false, error: "empty_bridge_response" }),
-      {
-        status: response.status,
+  // Only read-only health/search calls are retried. Evidence-candidate writes
+  // remain single-attempt because an upstream timeout/5xx can be ambiguous.
+  const safeToRetry = retrySafeAction(payload);
+  const maxAttempts = safeToRetry ? SAFE_READ_MAX_ATTEMPTS : 1;
+  const deadline = Date.now() + TIMEOUT_MS;
+  let terminalError: "bridge_timeout" | "bridge_unavailable" = "bridge_unavailable";
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      terminalError = "bridge_timeout";
+      break;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), remainingMs);
+    try {
+      const response = await fetch(bridgeUrl(), {
+        method: "POST",
+        cache: "no-store",
+        redirect: "error",
         headers: {
-          "content-type": "application/json; charset=utf-8",
-          "cache-control": "no-store",
+          // Supabase reserves Authorization for its gateway. Carry the bounded
+          // Vercel workload token in a dedicated internal header so the custom-
+          // auth Edge boundary receives it byte-for-byte.
+          "x-pandora-vercel-oidc": token,
+          accept: "application/json",
+          "content-type": "application/json",
+          "user-agent": "Pandora-Memory-ProjectOS-Proxy/1.3",
         },
-      },
-    );
-  } catch (error) {
-    const timedOut = error instanceof Error && error.name === "AbortError";
-    return NextResponse.json(
-      { ok: false, error: timedOut ? "bridge_timeout" : "bridge_unavailable" },
-      { status: 503 },
-    );
-  } finally {
-    clearTimeout(timeout);
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const text = await readBounded(response);
+
+      if (
+        safeToRetry &&
+        retryableBridgeStatus(response.status) &&
+        attempt < maxAttempts
+      ) {
+        const delayMs = retryDelayMs(attempt, response);
+        if (delayMs < deadline - Date.now()) {
+          await sleep(delayMs);
+          continue;
+        }
+      }
+
+      return new NextResponse(
+        text || JSON.stringify({ ok: false, error: "empty_bridge_response" }),
+        {
+          status: response.status,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "no-store",
+          },
+        },
+      );
+    } catch (error) {
+      if (error instanceof Error && error.message === "response_too_large") {
+        return NextResponse.json(
+          { ok: false, error: "bridge_response_too_large" },
+          { status: 502 },
+        );
+      }
+      if (error instanceof Error && error.message === "invalid_memory_bridge_url") {
+        return NextResponse.json(
+          { ok: false, error: "bridge_misconfigured" },
+          { status: 500 },
+        );
+      }
+
+      const timedOut = error instanceof Error && error.name === "AbortError";
+      terminalError = timedOut ? "bridge_timeout" : "bridge_unavailable";
+      if (!safeToRetry || attempt >= maxAttempts) break;
+
+      const delayMs = retryDelayMs(attempt);
+      if (delayMs >= deadline - Date.now()) break;
+      await sleep(delayMs);
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+
+  return NextResponse.json(
+    { ok: false, error: terminalError },
+    { status: terminalError === "bridge_timeout" ? 504 : 503 },
+  );
 }
