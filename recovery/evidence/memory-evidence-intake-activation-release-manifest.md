@@ -24,10 +24,11 @@ The recovered `check_memory_evidence_activation.mjs` previously assumed that the
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `76b678fec40064c3de0185d81830baf927e36395370a454c2e214d2054ed712e`
+- Candidate bridge raw SHA-256: `3733beca22f535a6bbe061aed072319bac22f1b4b9fb3cee82757bcc5d380a03`
 - Current candidate preserves exact-project Memory isolation and requires explicit `approved_by` plus `approved_at` receipts before canonical Memory is retrievable through the bridge, planning context, or ContextPack v2.
 - Search requires explicit canonical project identity plus an active `can_read` project grant.
-- Search returns exact-project `memory_items` only and omits namespace-wide profiles, open loops, events, and context packs when those tables cannot prove project ownership.
+- Search returns exact-project `memory_items` only through the service-role-only `memory_projectos_search_scoped_v1` indexed RPC, which independently re-checks user, namespace, project, environment, active read grant, approved canon, current-head status, revocation, and allowed record types.
+- Indexed ProjectOS search migration raw SHA-256: `8a75a5e61e47dec4ec021805e5340ae2cd989621c5b0b2ecd64dbc732634092e`; Git blob: `1c95c8a81a7c9872ce6180eef77ad0825f9ee794`.
 - Evidence-candidate intake remains review-gated and continues to require `memory:write` plus an active `can_propose` project grant.
 - Candidate responses continue to state `canonical_memory_written=false`.
 - One forward migration adds decision/outcome lineage columns and service-role-only binding RPCs; the frozen historical migration baseline is unchanged.
