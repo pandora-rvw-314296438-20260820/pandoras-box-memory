@@ -209,11 +209,6 @@ const safeSearchTerms = (query: string): string[] => {
   return [...terms];
 };
 
-const orFilter = (terms: string[], columns: string[]): string =>
-  terms
-    .flatMap((term) => columns.map((column) => `${column}.ilike.%${term}%`))
-    .join(",");
-
 const requestedCanonStatuses = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [...DEFAULT_CANON_STATUSES];
   const allowed = value.filter(
@@ -422,37 +417,28 @@ const searchMemory = async (
 
   const terms = safeSearchTerms(query);
   const canonStatuses = requestedCanonStatuses(body.canon_statuses);
-  let itemQuery = supabase
-    .from("memory_items")
-    .select(
-      "id,project_id,title,body,confidence,source_summary,created_at,updated_at,canon_status,memory_type,strength,metadata,record_type",
-    )
-    .eq("user_id", principal.memory_user_id)
-    .eq("namespace", namespace)
-    .eq("project_id", canonicalProjectId)
-    .eq("is_active", true)
-    .not("approved_by", "is", null)
-    .not("approved_at", "is", null)
-    .is("superseded_at", null)
-    .is("revoked_at", null)
-    .in("record_type", allowedRecordTypes)
-    .in("canon_status", canonStatuses)
-    .order("updated_at", { ascending: false })
-    .limit(maxItems);
-  if (terms.length) {
-    itemQuery = itemQuery.or(orFilter(terms, ["title", "body"]));
-  }
-
-  const itemsResult = await itemQuery;
-  if (itemsResult.error) {
+  const { data: indexedItems, error: indexedItemsError } = await supabase.rpc(
+    "memory_projectos_search_scoped_v1",
+    {
+      p_user_id: principal.memory_user_id,
+      p_namespace: namespace,
+      p_project_id: canonicalProjectId,
+      p_principal_key: PRINCIPAL_KEY,
+      p_environment: principal.environment,
+      p_terms: terms,
+      p_canon_statuses: canonStatuses,
+      p_limit: maxItems,
+    },
+  );
+  if (indexedItemsError) {
     console.error("projectos_memory_search_failed", {
-      code: itemsResult.error.code,
-      message: itemsResult.error.message,
+      code: indexedItemsError.code,
+      message: indexedItemsError.message,
     });
     return respond({ ok: false, error: "memory_query_failed" }, 503);
   }
 
-  const items = (itemsResult.data ?? []) as JsonRecord[];
+  const items = (indexedItems ?? []) as JsonRecord[];
   const semanticMatches = items.map((item: JsonRecord) => ({
     id: item.id,
     source: "memory_item",
