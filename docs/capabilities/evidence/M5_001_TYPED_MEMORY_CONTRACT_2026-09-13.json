@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0.0",
+  "taskId": "M5-001",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/m5-001-typed-memory-20260913",
+  "reconciledAgainstMain": "604964c559302f9a219aac21db892ee93940696c",
+  "reconciliationCommit": "7f568f9ff80bc818e538dcda8659c541d4fd812f",
+  "preEvidenceHead": "bf977c74cf2c550a174dc6778692f9c6783670c3",
+  "m0ContractBlob": "63aaee1a61f077e019ac1ab4ff804c53faa1f25b",
+  "sourceBlobs": {
+    "migration": "261ba47ae8a1be82a2b263f5f456f2a140419006",
+    "verifier": "d871eebb23944d0672c1d9645d043073d0e9d85d",
+    "contract": "3a804f948236fa44b3a1a0b0f96e4a9db2955979",
+    "workflow": "face723bad091826ecc1593bf1e74e63eef243a8"
+  },
+  "frozenClasses": ["fact","pattern","policy","procedure","failure_lesson","outcome","provider_performance"],
+  "authorityRule": "Inference, prediction, patterns, procedures, provider performance, prior success and model output never create authorization. Typed policy records only represent explicit current user instruction or active explicit standing policy and still require exact runtime scope/validity/revocation validation.",
+  "rawTelemetryRule": "Raw polling, transient runtime chatter and low-value telemetry remain outside canonical Memory until high-signal promotion.",
+  "productionReadback": {
+    "m5MigrationApplied": false,
+    "typedColumnsPresentBeforeMigration": false,
+    "productionMutationPerformed": false
+  },
+  "verification": {
+    "localContractVerifier": "PASS before provider write",
+    "supabasePreviewRequiredBeforeProduction": true,
+    "exactHeadCIRequired": true,
+    "independentAuthorityReviewRequired": true
+  },
+  "secretsIncluded": false
+}
