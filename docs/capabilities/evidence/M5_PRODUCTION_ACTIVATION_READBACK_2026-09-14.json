@@ -41,7 +41,7 @@
         "Do not mass-backfill legacy ProjectOS candidate project_id or typed proposal fields.",
         "Prediction, Memory inference, provider performance and prior success never grant execution authority."
     ],
-    "observedAt": "2026-09-14T04:25:21.176+08:00",
+    "observedAt": "2026-09-14T04:25:58.874+08:00",
     "production": {
         "bridge": {
             "mode": "project_scoped_keyword_recency",
@@ -87,7 +87,7 @@
     },
     "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
     "evidenceKind": "m5-production-activation-readback",
-    "schemaVersion": "1.0",
+    "schemaVersion": "1.1",
     "sourceMainSha": "7853f1614d9ec984612c0c39cae1b5ac0a36dc57",
     "canonicalState": {
         "m5V1RecordCount": 0,
@@ -109,13 +109,16 @@
         "memoryProjectId": "43f619bb-ecc2-4a9a-bd56-424325eb81ac",
         "memoryProjectKey": "memory",
         "memoryVercelProjectId": "prj_brg3BJDcHfSftHH84NhnFtDJAnDO",
-        "projectosCanonicalKey": "memory",
         "currentGithubRepository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
         "memorySupabaseProjectRef": "ivmvufhcsezyhczzondn",
+        "sourceDeclaredProjectKey": "memory",
+        "projectosMemoryAliasPresent": false,
         "projectosCurrentRepoProjectId": "0306198e-38e5-4b1d-8932-efd58da3b856",
         "projectosLegacyProviderProjectId": "2de36f97-557c-4fdb-993e-cb82ed715fe2",
+        "recommendedProjectosCanonicalKey": "memory",
         "memoryRegistryGithubOwnerObserved": "banataosystems",
-        "memoryRegistryGithubOwnerOperationallyReferenced": false
+        "projectosCanonicalRegistryPresent": false,
+        "memoryRegistryGithubOwnerStoredFunctionReferenceFound": false
     },
     "taskAwareRpcProof": {
         "status": "available",
@@ -140,6 +143,8 @@
         "currentSupabaseDevelopmentBranches": [
             "main"
         ],
+        "projectosProductionMigrationPlanFound": false,
+        "projectosExternalMemoryRuntimeResourceFound": false,
         "matchingCanonicalSupabaseReleaseReceiptFound": false
     },
     "memorySupabaseProjectRef": "ivmvufhcsezyhczzondn"
