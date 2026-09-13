@@ -6,6 +6,8 @@ on:
       - 'supabase/migrations/**m5_typed_memory_records_v1.sql'
       - 'scripts/verify_m5_typed_memory_contract.py'
       - 'docs/architecture/M5_TYPED_MEMORY_CONTRACT.md'
+      - 'docs/architecture/pandora-memory-class-contract-v1.json'
+      - 'docs/capabilities/evidence/M5_001_TYPED_MEMORY_CONTRACT_2026-09-13.json'
       - '.github/workflows/m5-typed-memory-contract.yml'
   push:
     branches: [main]
@@ -13,6 +15,8 @@ on:
       - 'supabase/migrations/**m5_typed_memory_records_v1.sql'
       - 'scripts/verify_m5_typed_memory_contract.py'
       - 'docs/architecture/M5_TYPED_MEMORY_CONTRACT.md'
+      - 'docs/architecture/pandora-memory-class-contract-v1.json'
+      - 'docs/capabilities/evidence/M5_001_TYPED_MEMORY_CONTRACT_2026-09-13.json'
       - '.github/workflows/m5-typed-memory-contract.yml'
 
 permissions:
@@ -22,15 +26,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Verify M5 typed Memory invariants
         run: python3 scripts/verify_m5_typed_memory_contract.py
       - name: Compile verifier
         run: python3 -m py_compile scripts/verify_m5_typed_memory_contract.py
-      - name: Reject obvious literal secret material
-        shell: bash
-        run: |
-          if grep -ERn --exclude-dir=.git --include='*m5*' '(sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,})' supabase/migrations scripts docs .github/workflows; then
-            echo 'Potential literal secret material found in M5 change set'
-            exit 1
-          fi
+      - name: Reject literal secret material
+        run: bash scripts/check_no_literal_secrets.sh
