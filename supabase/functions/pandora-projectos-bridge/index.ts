@@ -259,6 +259,30 @@ const PROJECT_SEARCH_KEY_PATTERN = /^[a-z0-9][a-z0-9._-]{1,95}$/;
 const PROJECT_SEARCH_UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const M5_TYPED_MEMORY_CLASSES = new Set([
+  "fact",
+  "pattern",
+  "policy",
+  "procedure",
+  "failure_lesson",
+  "outcome",
+  "provider_performance",
+]);
+const M1_INTENTS = new Set([
+  "communication",
+  "research",
+  "coding_building",
+  "files",
+  "device_operations",
+  "business",
+  "travel",
+  "scheduling",
+  "future_capability",
+  "general_assistance",
+]);
+const M1_ACTION_MODES = new Set(["no_action", "read_only", "state_change"]);
+const M1_CAPABILITY_PATTERN = /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/;
+
 const searchMemory = async (
   body: JsonRecord,
   principal: Principal,
@@ -269,16 +293,25 @@ const searchMemory = async (
   const currentTask = typeof body.current_task === "string"
     ? body.current_task.slice(0, 2_000)
     : null;
-  const requestedMax =
-    typeof body.max_items === "number" && Number.isInteger(body.max_items)
-      ? body.max_items
-      : 12;
+  const intentValue = body.intent ?? body.intent_domain ?? body.intentDomain;
+  const intent = typeof intentValue === "string" && intentValue.trim()
+    ? intentValue.trim()
+    : "general_assistance";
+  const actionModeValue = body.action_mode ?? body.actionMode;
+  const actionMode = typeof actionModeValue === "string" && actionModeValue.trim()
+    ? actionModeValue.trim()
+    : "read_only";
+  const consequential = body.consequential === true;
+  const capabilitiesValue = body.required_capabilities ?? body.requiredCapabilities;
+  const requiredCapabilities = Array.isArray(capabilitiesValue)
+    ? capabilitiesValue.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  const requestedMax = typeof body.max_items === "number" && Number.isInteger(body.max_items)
+    ? body.max_items
+    : 12;
   const maxItems = Math.min(Math.max(requestedMax, 1), MAX_ITEMS);
-  const projectKey = typeof body.project_key === "string"
-    ? body.project_key.trim()
-    : "";
-  const projectIdProvided = body.project_id !== null &&
-    body.project_id !== undefined;
+  const projectKey = typeof body.project_key === "string" ? body.project_key.trim() : "";
+  const projectIdProvided = body.project_id !== null && body.project_id !== undefined;
   const projectId = projectIdProvided && typeof body.project_id === "string"
     ? body.project_id.trim()
     : null;
@@ -295,11 +328,21 @@ const searchMemory = async (
   if (!query || query.length > MAX_QUERY_LENGTH) {
     return respond({ ok: false, error: "invalid_query" }, 400);
   }
+  if (!M1_INTENTS.has(intent) || !M1_ACTION_MODES.has(actionMode)) {
+    return respond({ ok: false, error: "invalid_task_context" }, 400);
+  }
+  if (
+    requiredCapabilities.length > 16 ||
+    requiredCapabilities.some((capability) =>
+      capability.length > 96 || !M1_CAPABILITY_PATTERN.test(capability)
+    )
+  ) {
+    return respond({ ok: false, error: "invalid_required_capabilities" }, 400);
+  }
   if (
     !projectKey ||
     !PROJECT_SEARCH_KEY_PATTERN.test(projectKey) ||
-    (projectIdProvided &&
-      (!projectId || !PROJECT_SEARCH_UUID_PATTERN.test(projectId)))
+    (projectIdProvided && (!projectId || !PROJECT_SEARCH_UUID_PATTERN.test(projectId)))
   ) {
     return respond({ ok: false, error: "project_identity_invalid" }, 400);
   }
@@ -312,13 +355,9 @@ const searchMemory = async (
     .eq("lifecycle_status", "active");
   if (projectId) projectQuery = projectQuery.eq("id", projectId);
 
-  const { data: boundProject, error: boundProjectError } = await projectQuery
-    .maybeSingle();
+  const { data: boundProject, error: boundProjectError } = await projectQuery.maybeSingle();
   if (boundProjectError) {
-    console.error(
-      "projectos_memory_project_lookup_failed",
-      boundProjectError.message,
-    );
+    console.error("projectos_memory_project_lookup_failed", boundProjectError.message);
     return respond({ ok: false, error: "project_lookup_failed" }, 503);
   }
   if (
@@ -344,10 +383,7 @@ const searchMemory = async (
     .is("revoked_at", null)
     .maybeSingle();
   if (projectGrantError) {
-    console.error(
-      "projectos_memory_project_grant_lookup_failed",
-      projectGrantError.message,
-    );
+    console.error("projectos_memory_project_grant_lookup_failed", projectGrantError.message);
     return respond({ ok: false, error: "project_grant_lookup_failed" }, 503);
   }
   if (!projectGrant?.project_id) {
@@ -355,13 +391,13 @@ const searchMemory = async (
   }
   const allowedRecordTypes = Array.isArray(projectGrant.allowed_record_types)
     ? projectGrant.allowed_record_types.filter(
-      (entry): entry is string =>
-        typeof entry === "string" && /^[a-z0-9][a-z0-9._-]{0,95}$/.test(entry),
+      (entry): entry is string => typeof entry === "string" && /^[a-z0-9][a-z0-9._-]{0,95}$/.test(entry),
     )
     : [];
   if (allowedRecordTypes.length === 0) {
     return respond({ ok: false, error: "project_grant_invalid" }, 503);
   }
+  const allowedTypedClasses = allowedRecordTypes.filter((entry) => M5_TYPED_MEMORY_CLASSES.has(entry));
 
   const { data: contextPack, error: contextPackError } = await supabase.rpc(
     "memory_context_pack_v2",
@@ -382,21 +418,11 @@ const searchMemory = async (
   }
 
   const packProject = isRecord(contextPack?.project) ? contextPack.project : null;
-  const packAuthorization = isRecord(contextPack?.authorization)
-    ? contextPack.authorization
-    : null;
-  const packDegradation = isRecord(contextPack?.degradation)
-    ? contextPack.degradation
-    : null;
-  const packFreshness = isRecord(contextPack?.freshness)
-    ? contextPack.freshness
-    : null;
-  const packOpenLoops = Array.isArray(contextPack?.openLoops)
-    ? contextPack.openLoops
-    : [];
-  const packConflicts = Array.isArray(contextPack?.conflicts)
-    ? contextPack.conflicts
-    : [];
+  const packAuthorization = isRecord(contextPack?.authorization) ? contextPack.authorization : null;
+  const packDegradation = isRecord(contextPack?.degradation) ? contextPack.degradation : null;
+  const packFreshness = isRecord(contextPack?.freshness) ? contextPack.freshness : null;
+  const packOpenLoops = Array.isArray(contextPack?.openLoops) ? contextPack.openLoops : [];
+  const packConflicts = Array.isArray(contextPack?.conflicts) ? contextPack.conflicts : [];
   const contextPackValid = isRecord(contextPack) &&
     contextPack.schemaVersion === "2.0" &&
     contextPack.status === "available" &&
@@ -415,61 +441,149 @@ const searchMemory = async (
     return respond({ ok: false, error: "context_pack_invalid" }, 503);
   }
 
-  const terms = safeSearchTerms(query);
   const canonStatuses = requestedCanonStatuses(body.canon_statuses);
-  const { data: indexedItems, error: indexedItemsError } = await supabase.rpc(
-    "memory_projectos_search_scoped_v1",
-    {
-      p_user_id: principal.memory_user_id,
-      p_namespace: namespace,
-      p_project_id: canonicalProjectId,
-      p_principal_key: PRINCIPAL_KEY,
-      p_environment: principal.environment,
-      p_terms: terms,
-      p_canon_statuses: canonStatuses,
-      p_limit: maxItems,
-    },
-  );
-  if (indexedItemsError) {
-    console.error("projectos_memory_search_failed", {
-      code: indexedItemsError.code,
-      message: indexedItemsError.message,
-    });
-    return respond({ ok: false, error: "memory_query_failed" }, 503);
+  let terms = safeSearchTerms(query);
+  let retrievalMode = "project_scoped_keyword_recency_legacy_until_m5_class_grant";
+  let taskContext: JsonRecord | null = null;
+  let policyMemory: JsonRecord[] = [];
+  let advisoryMemory: JsonRecord[] = [];
+  let items: JsonRecord[] = [];
+
+  if (allowedTypedClasses.length > 0) {
+    terms = safeSearchTerms([query, currentTask ?? "", ...requiredCapabilities].join(" "));
+    const { data: typedContext, error: typedContextError } = await supabase.rpc(
+      "memory_task_context_v1",
+      {
+        p_user_id: principal.memory_user_id,
+        p_namespace: namespace,
+        p_project_id: canonicalProjectId,
+        p_principal_key: PRINCIPAL_KEY,
+        p_environment: principal.environment,
+        p_intent: intent,
+        p_action_mode: actionMode,
+        p_consequential: consequential,
+        p_terms: terms,
+        p_required_capabilities: [...new Set(requiredCapabilities)],
+        p_canon_statuses: canonStatuses,
+        p_max_bytes: 12 * 1024,
+        p_as_of: new Date().toISOString(),
+      },
+    );
+    if (typedContextError) {
+      console.error("projectos_memory_task_context_failed", {
+        code: typedContextError.code,
+        message: typedContextError.message,
+      });
+      return respond({ ok: false, error: "task_context_unavailable" }, 503);
+    }
+    const typedProject = isRecord(typedContext?.project) ? typedContext.project : null;
+    const typedTask = isRecord(typedContext?.task) ? typedContext.task : null;
+    const typedAuthorization = isRecord(typedContext?.authorization) ? typedContext.authorization : null;
+    const typedInvariants = isRecord(typedContext?.invariants) ? typedContext.invariants : null;
+    const typedAllowed = Array.isArray(typedAuthorization?.allowedTypedClasses)
+      ? typedAuthorization.allowedTypedClasses.filter((entry): entry is string => typeof entry === "string")
+      : [];
+    policyMemory = Array.isArray(typedContext?.policyMemory) ? typedContext.policyMemory.filter(isRecord) : [];
+    advisoryMemory = Array.isArray(typedContext?.advisoryMemory) ? typedContext.advisoryMemory.filter(isRecord) : [];
+    const allowedTypedSet = new Set(allowedTypedClasses);
+    const typedContextValid = isRecord(typedContext) &&
+      typedContext.schemaVersion === "m5.task-aware-retrieval.v1" &&
+      typedContext.status === "available" &&
+      typedContext.namespace === namespace &&
+      typedProject?.id === canonicalProjectId &&
+      typedProject?.projectKey === canonicalProjectKey &&
+      typedTask?.intent === intent &&
+      typedTask?.actionMode === actionMode &&
+      typedAuthorization?.principalKey === PRINCIPAL_KEY &&
+      typedAuthorization?.environment === principal.environment &&
+      typedAuthorization?.canRead === true &&
+      typedAuthorization?.retrievalDoesNotGrantExecutionAuthority === true &&
+      typedAllowed.length === allowedTypedClasses.length &&
+      typedAllowed.every((entry) => allowedTypedSet.has(entry)) &&
+      typedInvariants?.advisoryMemoryNeverAuthorizes === true &&
+      typedInvariants?.policiesSeparatedFromAdvisoryMemory === true &&
+      typedInvariants?.policyRequiresRuntimeScopeValidityRevocationValidation === true &&
+      typeof typedContext.contextSha256 === "string" &&
+      /^[a-f0-9]{64}$/.test(typedContext.contextSha256) &&
+      typeof typedContext.byteSize === "number" &&
+      typedContext.byteSize <= 12 * 1024 &&
+      advisoryMemory.every((item) => item.recordType !== "policy" && item.authorizationEffect === "none") &&
+      policyMemory.every((item) => item.recordType === "policy" && item.authorizationEffect === "requires_exact_runtime_scope_validity_revocation_validation" && item.requiresRuntimeAuthorizationValidation === true);
+    if (!typedContextValid) {
+      return respond({ ok: false, error: "task_context_invalid" }, 503);
+    }
+    taskContext = typedContext as JsonRecord;
+    items = [...advisoryMemory, ...policyMemory];
+    retrievalMode = "m5_task_aware_bounded";
+  } else {
+    const { data: indexedItems, error: indexedItemsError } = await supabase.rpc(
+      "memory_projectos_search_scoped_v1",
+      {
+        p_user_id: principal.memory_user_id,
+        p_namespace: namespace,
+        p_project_id: canonicalProjectId,
+        p_principal_key: PRINCIPAL_KEY,
+        p_environment: principal.environment,
+        p_terms: terms,
+        p_canon_statuses: canonStatuses,
+        p_limit: maxItems,
+      },
+    );
+    if (indexedItemsError) {
+      console.error("projectos_memory_search_failed", {
+        code: indexedItemsError.code,
+        message: indexedItemsError.message,
+      });
+      return respond({ ok: false, error: "memory_query_failed" }, 503);
+    }
+    items = (indexedItems ?? []) as JsonRecord[];
   }
 
-  const items = (indexedItems ?? []) as JsonRecord[];
   const semanticMatches = items.map((item: JsonRecord) => ({
     id: item.id,
     source: "memory_item",
-    source_ref: item.source_summary,
-    summary: `${item.title}: ${item.body}`,
+    source_ref: item.source_summary ?? item.authorityRef ?? null,
+    summary: typeof item.summary === "string"
+      ? item.summary
+      : `${String(item.title ?? "Memory")}: ${String(item.body ?? "")}`,
     confidence: item.confidence,
-    created_at: item.created_at,
-    updated_at: item.updated_at,
+    created_at: item.created_at ?? item.observedAt ?? null,
+    updated_at: item.updated_at ?? item.effectiveAt ?? null,
   }));
-  const canonicalRecords = items.map((item: JsonRecord) => ({
-    id: item.id,
-    namespace,
-    title: item.title,
-    body: item.body,
-    canon_status: item.canon_status,
-    approved: APPROVED_CANON_STATUSES.has(String(item.canon_status)),
-    memory_type: item.memory_type,
-    strength: item.strength,
-    confidence: item.confidence,
-    source_summary: item.source_summary,
-    provenance: isRecord(item.metadata) ? item.metadata : null,
-    created_at: item.created_at,
-    updated_at: item.updated_at,
-  }));
+  const canonicalRecords = items.map((item: JsonRecord) => {
+    const typed = typeof item.recordType === "string";
+    const canonStatus = typed ? item.canonStatus : item.canon_status;
+    return {
+      id: item.id,
+      namespace,
+      title: item.title,
+      body: typed ? item.summary : item.body,
+      canon_status: canonStatus,
+      approved: APPROVED_CANON_STATUSES.has(String(canonStatus)),
+      memory_type: typed ? item.memoryType : item.memory_type,
+      strength: typed ? null : item.strength,
+      confidence: item.confidence,
+      source_summary: typed ? item.summary : item.source_summary,
+      provenance: typed
+        ? { semanticSource: item.provenanceSemanticSource ?? null }
+        : isRecord(item.metadata) ? item.metadata : null,
+      created_at: typed ? item.observedAt : item.created_at,
+      updated_at: typed ? item.effectiveAt : item.updated_at,
+      record_type: typed ? item.recordType : item.record_type,
+      authority_kind: typed ? item.authorityKind : null,
+      authority_ref: typed ? item.authorityRef : null,
+      authorization_effect: typed ? item.authorizationEffect : "none",
+    };
+  });
   const approvedRecords = canonicalRecords.filter((item) => item.approved);
   const approvedCount = approvedRecords.length;
   const approvedMemoryItemIds = approvedRecords
     .map((item) => typeof item.id === "string" ? item.id : "")
     .filter((id) => EVIDENCE_UUID_PATTERN.test(id));
 
-  const queryHash = await sha256(`${namespace}:${canonicalProjectId}:${query}`);
+  const queryHash = await sha256(
+    `${namespace}:${canonicalProjectId}:${query}:${intent}:${actionMode}:${consequential}:${requiredCapabilities.join(",")}`,
+  );
   const { data: retrievalLog, error: logError } = await supabase
     .from("memory_retrieval_logs")
     .insert({
@@ -483,11 +597,19 @@ const searchMemory = async (
         source: "projectos",
         project_id: canonicalProjectId,
         project_key: canonicalProjectKey,
+        intent,
+        action_mode: actionMode,
+        consequential,
+        required_capabilities: [...new Set(requiredCapabilities)],
+        retrieval_mode: retrievalMode,
+        allowed_typed_classes: allowedTypedClasses,
         returned_profiles: 0,
         returned_open_loops: packOpenLoops.length,
         returned_events: 0,
         returned_items: semanticMatches.length,
         returned_approved_items: approvedCount,
+        returned_policy_items: policyMemory.length,
+        returned_advisory_items: advisoryMemory.length,
         returned_context_pack: true,
         context_pack_type: "MemoryContextPack v2",
         context_pack_sha256: contextPack.contextSha256,
@@ -497,6 +619,7 @@ const searchMemory = async (
         search_terms: terms.length,
         canon_statuses: canonStatuses,
         unscoped_components_omitted: true,
+        retrieval_does_not_grant_authority: true,
       },
     })
     .select("id")
@@ -516,6 +639,11 @@ const searchMemory = async (
     terms,
     contextPack,
   });
+  if (allowedTypedClasses.length === 0) {
+    warnings.push(
+      "Project grant has no M5 typed classes; Pandora retained legacy scoped retrieval rather than silently expanding authority.",
+    );
+  }
   warnings.push(
     "Project isolation omits legacy unscoped profiles and events; project-scoped open loops and ContextPack v2 are returned only through the governed exact-project pack authority.",
   );
@@ -528,6 +656,15 @@ const searchMemory = async (
     retrieval_log_id: typeof retrievalLog?.id === "string" ? retrievalLog.id : null,
     approved_memory_item_ids: approvedMemoryItemIds,
     current_task: currentTask,
+    intent,
+    action_mode: actionMode,
+    consequential,
+    required_capabilities: [...new Set(requiredCapabilities)],
+    allowed_typed_classes: allowedTypedClasses,
+    retrieval_does_not_grant_authority: true,
+    policy_memory: policyMemory,
+    advisory_memory: advisoryMemory,
+    task_context: taskContext,
     adaptive_profile: [],
     style_profile: [],
     project_context: [],
@@ -544,9 +681,10 @@ const searchMemory = async (
     canonical_records: canonicalRecords,
     approved_record_count: approvedCount,
     requested_canon_statuses: canonStatuses,
-    retrieval_mode: "project_scoped_keyword_recency",
-    retrieval_reasoning_summary:
-      "ProjectOS received only exact-project, service-principal-authorized Memory items using project grant enforcement, bounded per-term matching, and recency ordering. Unscoped component types were omitted fail-closed.",
+    retrieval_mode: retrievalMode,
+    retrieval_reasoning_summary: retrievalMode === "m5_task_aware_bounded"
+      ? "ProjectOS received only task-relevant, bounded, typed Memory already permitted by the exact project grant. Policy Memory is separated from advisory Memory and retrieval does not grant execution authority."
+      : "ProjectOS retained the existing exact-project keyword/recency retrieval because this grant does not yet authorize M5 typed classes; no grant expansion was inferred.",
     warnings,
   });
 };
