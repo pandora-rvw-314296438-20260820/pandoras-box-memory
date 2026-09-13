@@ -1,0 +1,146 @@
+{
+    "capture": {
+        "grantMutation": false,
+        "legacyBackfill": false,
+        "schemaMutation": false,
+        "productionMutation": false,
+        "credentialsIncluded": false,
+        "repositoryWriteRoute": "approved_supabase_vault_backed_github_api",
+        "directGithubWriteUsed": false,
+        "edgeFunctionDeployment": false
+    },
+    "blockers": [
+        "R-044",
+        "R-045",
+        "R-046",
+        "R-047"
+    ],
+    "grantState": {
+        "canRead": true,
+        "canPropose": true,
+        "projectKey": "mcpmaster-pandoras-box",
+        "legacyRecordTypes": [
+            "project_identity",
+            "repository",
+            "architecture",
+            "decision",
+            "roadmap",
+            "governance_rule",
+            "authentication_model",
+            "integration_state",
+            "deployment_rule",
+            "branding_requirement",
+            "source_of_truth"
+        ],
+        "typedClassesGranted": false
+    },
+    "guardrails": [
+        "Do not replay already-live M5 migrations.",
+        "Do not deploy the task-aware bridge through an ungoverned native write path.",
+        "Do not widen typed grants merely because the RPC is live.",
+        "Do not mass-backfill legacy ProjectOS candidate project_id or typed proposal fields.",
+        "Prediction, Memory inference, provider performance and prior success never grant execution authority."
+    ],
+    "observedAt": "2026-09-14T04:25:21.176+08:00",
+    "production": {
+        "bridge": {
+            "mode": "project_scoped_keyword_recency",
+            "slug": "pandora-projectos-bridge",
+            "version": 27,
+            "ezbrSha256": "d886ca27b5b2939a98796e08697244fc883d843d3e2c7d8a2966a02ccade6d28",
+            "taskAwareRpcUsed": false
+        },
+        "learning": {
+            "slug": "pandora-projectos-learning",
+            "version": 8,
+            "ezbrSha256": "415a56273824f4edf62747eef51a3c2da0c32d446bf707a8ab2519585949a8e2",
+            "signedBaseSchema": "projectos-learning-v1"
+        },
+        "migrations": [
+            {
+                "name": "m5_typed_memory_records_v1",
+                "version": "20260913032000",
+                "createdBy": null,
+                "idempotencyKey": null,
+                "statementCount": 20
+            },
+            {
+                "name": "m5_task_aware_retrieval_v1",
+                "version": "20260913143500",
+                "createdBy": null,
+                "idempotencyKey": null,
+                "statementCount": 3
+            },
+            {
+                "name": "m5_projectos_learning_scope_integrity_v1",
+                "version": "20260913185000",
+                "createdBy": null,
+                "idempotencyKey": null,
+                "statementCount": 12
+            }
+        ],
+        "taskAwareRpcPresent": true,
+        "m5InsertGuardPresent": true,
+        "m5UpdateGuardPresent": true,
+        "projectosLineageGuardPresent": true,
+        "typedMemoryItemsColumnsPresent": true
+    },
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "evidenceKind": "m5-production-activation-readback",
+    "schemaVersion": "1.0",
+    "sourceMainSha": "7853f1614d9ec984612c0c39cae1b5ac0a36dc57",
+    "canonicalState": {
+        "m5V1RecordCount": 0,
+        "typedProposalCount": 0
+    },
+    "activationState": "partial",
+    "learningBacklog": {
+        "visibleCreationBound": 54,
+        "projectosPostTaskUnbound": 3560,
+        "totalProjectosCandidates": 3614,
+        "projectosPostTaskRejected": 1,
+        "projectosPostTaskPersisted": 0,
+        "projectosPostTaskPendingReview": 3559,
+        "providerModelOutcomeReviewsPending": 3,
+        "providerModelOutcomeTypedProposals": 0,
+        "providerModelOutcomeCandidatesPending": 3
+    },
+    "identityReadback": {
+        "memoryProjectId": "43f619bb-ecc2-4a9a-bd56-424325eb81ac",
+        "memoryProjectKey": "memory",
+        "memoryVercelProjectId": "prj_brg3BJDcHfSftHH84NhnFtDJAnDO",
+        "projectosCanonicalKey": "memory",
+        "currentGithubRepository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+        "memorySupabaseProjectRef": "ivmvufhcsezyhczzondn",
+        "projectosCurrentRepoProjectId": "0306198e-38e5-4b1d-8932-efd58da3b856",
+        "projectosLegacyProviderProjectId": "2de36f97-557c-4fdb-993e-cb82ed715fe2",
+        "memoryRegistryGithubOwnerObserved": "banataosystems",
+        "memoryRegistryGithubOwnerOperationallyReferenced": false
+    },
+    "taskAwareRpcProof": {
+        "status": "available",
+        "warning": "No M5 typed Memory classes are present in this project grant; retrieval remains empty rather than expanding authority.",
+        "projectId": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+        "projectKey": "mcpmaster-pandoras-box",
+        "principalKey": "projectos-mcpmaster-production",
+        "contextSha256": "6d11eaf7a93dbb2faa72eef50303318c84cf047a463f3f75cd255312e698c1a3",
+        "schemaVersion": "m5.task-aware-retrieval.v1",
+        "returnedPolicy": 0,
+        "returnedAdvisory": 0,
+        "allowedTypedClasses": [
+        ],
+        "grantExpansionPerformed": false
+    },
+    "governanceEvidence": {
+        "interpretation": "Live provider state is verified. The available ledgers do not prove how the three M5 migrations were authorized/applied; absence of a receipt is not proof of unauthorized execution.",
+        "provenanceStatus": "unverified",
+        "m5MigrationCreatedByRecorded": false,
+        "matchingProjectosAuditEventFound": false,
+        "m5MigrationIdempotencyKeyRecorded": false,
+        "currentSupabaseDevelopmentBranches": [
+            "main"
+        ],
+        "matchingCanonicalSupabaseReleaseReceiptFound": false
+    },
+    "memorySupabaseProjectRef": "ivmvufhcsezyhczzondn"
+}
