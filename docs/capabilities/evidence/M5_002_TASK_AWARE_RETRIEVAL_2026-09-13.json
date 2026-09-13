@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "taskId": "M5-002",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/m5-002-task-aware-retrieval-20260913",
+  "baseMain": "c94550acf9d149238e4cbe0c23e733c7fce5c2bd",
+  "pandorasBoxMainObserved": "ad3450dc6cd94e7280e2e8573f0244a8e647d3b1",
+  "sourceBlobs": {
+    "contract": "b14c4fb1b21042f9b49156fa1a220756e33bf537",
+    "baseline": "8026bee9d8bba73393f0b22d009437ceefddd2d9",
+    "verifier": "1383255b38673b0eef65c99da27b9616670215e3",
+    "migration": "6499ded713bdd9be5d75a97504b88496c28e076e",
+    "behavior": "4e4e902ed257f51b7da0d45d637fc4f0b84626fc",
+    "workflow": "a9ef54ff83fbe5144e897c04546a794945fdb4e9",
+    "projectosBridge": "42503c2e24030e4bb9281f41bc0b1184a1e487ce"
+  },
+  "intentContract": {
+    "source": "M1-002 universal resolver",
+    "domains": ["communication","research","coding_building","files","device_operations","business","travel","scheduling","future_capability","general_assistance"],
+    "actionModes": ["no_action","read_only","state_change"]
+  },
+  "authorityRule": "Retrieval never grants execution authority. Policies are separated from advisory Memory and require exact runtime scope, validity and revocation validation. Inference, similarity, confidence, procedures, provider performance and prior success never grant permission.",
+  "grantRule": "M5 typed retrieval activates only for typed classes already present in the exact active project grant. This task does not expand grants.",
+  "boundedContextRule": "Task-aware pack is capped at 4-16 KiB with hard pre-budget maxima of 12 advisory and 4 policy records. Raw events are excluded.",
+  "productionReadback": {
+    "m5_001_migration_applied_before_task": false,
+    "m5_002_migration_applied": false,
+    "bridge_deployed": false,
+    "grant_expansion_performed": false,
+    "production_mutation_performed": false
+  },
+  "verification": {
+    "exactHeadCIRequired": true,
+    "disposablePostgresRequired": true,
+    "bridgeDenoCheckRequired": true,
+    "independentAuthorityReviewRequired": true
+  },
+  "secretsIncluded": false
+}
