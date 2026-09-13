@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.1.0",
+  "taskId": "M5-R042-PREREQUISITE",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/m5-r042-learning-scope-integrity-20260914",
+  "implementationBaseMain": "e4df6494fdfd79d4f83d067195bca54ec54615b0",
+  "candidateHeadBeforeEvidence": "4901c506888a002e4e28497465144df195fee7dd",
+  "pullRequest": 60,
+  "scope": "ProjectOS learning candidate/review/canonical project-lineage integrity only; this prerequisite does not claim or complete M5-003.",
+  "dependencyState": {
+    "m5_003_claimed": false,
+    "m1_003_required": true,
+    "m1_003_final_contract_merged": false
+  },
+  "productionFinding": {
+    "projectosOutcomeReviewRows": 3614,
+    "pendingReviewRows": 3613,
+    "rejectedRows": 1,
+    "persistedRowsObserved": 0,
+    "reviewsMissingSourceMetadataCandidateId": 3614,
+    "matchedCandidatesWithNullProjectId": 3560,
+    "currentSelectiveReviewRows": 96,
+    "currentDistinctSourceProjectKeys": 5,
+    "safelyResolvedAndGrantedRows": 43,
+    "unresolvedRows": 53,
+    "legacyBackfillPerformed": false
+  },
+  "sourceBlobs": {
+    "migration": "e8dcee05b8a1036e43949f7e65927cbdbf4f4c8b",
+    "baseline": "e594739aa78f250213fbde17ab3530407e0e84fa",
+    "behavior": "21dca2ab8533458dcf883d30d8304aec48dde7dc",
+    "verifier": "6d97b2e4a93464bdf6bb96ee8dbcaa0b7207648a",
+    "workflow": "1c7c533966a40beba1fb83f373fafab605a0328f",
+    "architectureNote": "68bfd570f060a8a7e6add025e316fc10219489db"
+  },
+  "integrityRules": [
+    "New governed ProjectOS learning candidates resolve exactly one active Memory project in the same namespace using canonical key, authoritative alias, or validated relational project_id.",
+    "Active non-revoked production can_propose grant for projectos-mcpmaster-production is required.",
+    "New projectos_outcome review rows bind exact candidateId and canonical projectId lineage.",
+    "Canonical ProjectOS persistence revalidates review-to-candidate-to-project-to-grant lineage and fails closed on missing or mismatched lineage.",
+    "Existing legacy candidates/reviews are not updated, backfilled, retyped, approved, rejected or promoted by this migration.",
+    "This integrity binding does not create execution authority or policy permission."
+  ],
+  "verification": {
+    "firstCandidateHead": "4901c506888a002e4e28497465144df195fee7dd",
+    "r042ContractJob": "PASS",
+    "r042DisposablePostgresJob": "PASS",
+    "repositoryWideGatesAtFirstCandidate": {
+      "memoryLifecycle": "PASS",
+      "memoryQualityObservability": "PASS",
+      "memoryHardeningReadiness": "PASS",
+      "sourceSecurity": "PASS",
+      "namespaceIsolation": "PASS",
+      "migrationLineage": "PASS",
+      "securityAdjudication": "PASS",
+      "capabilityRegistry": "FAIL_EXPECTED_EVIDENCE_COCHANGE_MISSING"
+    },
+    "exactFinalHeadCIRequired": true,
+    "finalHeadNotYetRecordedInThisArtifact": true
+  },
+  "productionReadback": {
+    "migrationApplied": false,
+    "productionDeploymentPerformed": false,
+    "legacyDataMutationPerformed": false,
+    "canonicalPromotionPerformed": false
+  },
+  "governance": {
+    "rule": "D-017 GitHub App first; approved Supabase Vault-backed repository route only when a safe bounded App repository writer is unavailable or insufficient.",
+    "githubAppRepositoryWriterAvailableSafely": false,
+    "vaultFallbackUsed": true,
+    "directGitHubWriteUsed": false,
+    "ambiguousWriteRetryUsed": false
+  },
+  "secretsIncluded": false
+}
