@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "M0-005",
+  "task": "Freeze Pandora Memory class semantics",
+  "date": "2026-09-13",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "base_sha": "b4398c70eee3f20a845c911456219301a054ef39",
+  "branch": "chatgpt/m0-005-memory-class-contract-20260913",
+  "authority_rule": "Inference, prediction, repeated behavior, model output, prior success, procedure reuse, and provider/model performance never silently become authorization.",
+  "canonical_memory_rule": "Raw runtime/polling telemetry stays outside canonical Memory until deliberate high-signal promotion.",
+  "artifacts": [
+    {
+      "path": "docs/architecture/pandora-memory-class-contract-v1.json",
+      "sha256": "4f0264d2da5961f59c26d0ee4444c3950cc22b5e21e743a41ad9b903f485da1b"
+    },
+    {
+      "path": "docs/architecture/M0_005_MEMORY_CLASS_CONTRACT.md",
+      "sha256": "52a60158b70c031a1583f29509aee2f35b5f8a20fa43a0292a2774e4b70f1c00"
+    },
+    {
+      "path": "scripts/verify_m0_005_memory_class_contract.py",
+      "sha256": "1d0bfa32d34d08dfa6fb9d41f63cdc4c6a9f0086aca5d920aa8db6a557b2f825"
+    },
+    {
+      "path": ".github/workflows/m0-005-memory-class-contract.yml",
+      "sha256": "086cdbb64261aaac4a812dea677fdf9b7dd29179777642bdd298ca05fb166613"
+    }
+  ],
+  "local_verification": {
+    "command": "python3 scripts/verify_m0_005_memory_class_contract.py",
+    "result": "PASS"
+  },
+  "production_mutation": false,
+  "secrets_included": false
+}
