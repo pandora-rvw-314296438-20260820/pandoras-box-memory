@@ -1,0 +1,36 @@
+name: M5 Typed Memory Contract
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**m5_typed_memory_records_v1.sql'
+      - 'scripts/verify_m5_typed_memory_contract.py'
+      - 'docs/architecture/M5_TYPED_MEMORY_CONTRACT.md'
+      - '.github/workflows/m5-typed-memory-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**m5_typed_memory_records_v1.sql'
+      - 'scripts/verify_m5_typed_memory_contract.py'
+      - 'docs/architecture/M5_TYPED_MEMORY_CONTRACT.md'
+      - '.github/workflows/m5-typed-memory-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify M5 typed Memory invariants
+        run: python3 scripts/verify_m5_typed_memory_contract.py
+      - name: Compile verifier
+        run: python3 -m py_compile scripts/verify_m5_typed_memory_contract.py
+      - name: Reject obvious literal secret material
+        shell: bash
+        run: |
+          if grep -ERn --exclude-dir=.git --include='*m5*' '(sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,})' supabase/migrations scripts docs .github/workflows; then
+            echo 'Potential literal secret material found in M5 change set'
+            exit 1
+          fi
