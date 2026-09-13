@@ -1,0 +1,76 @@
+name: M5 Task-Aware Retrieval
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**m5_task_aware_retrieval_v1.sql'
+      - 'supabase/functions/pandora-projectos-bridge/index.ts'
+      - 'scripts/verify_m5_task_aware_retrieval.py'
+      - 'docs/architecture/M5_002_TASK_AWARE_RETRIEVAL.md'
+      - 'docs/capabilities/evidence/M5_002_TASK_AWARE_RETRIEVAL_2026-09-13.json'
+      - 'tests/sql/m5_task_aware_retrieval_*.sql'
+      - '.github/workflows/m5-task-aware-retrieval.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**m5_task_aware_retrieval_v1.sql'
+      - 'supabase/functions/pandora-projectos-bridge/index.ts'
+      - 'scripts/verify_m5_task_aware_retrieval.py'
+      - 'docs/architecture/M5_002_TASK_AWARE_RETRIEVAL.md'
+      - 'docs/capabilities/evidence/M5_002_TASK_AWARE_RETRIEVAL_2026-09-13.json'
+      - 'tests/sql/m5_task_aware_retrieval_*.sql'
+      - '.github/workflows/m5-task-aware-retrieval.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Verify M5-002 retrieval contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/verify_m5_task_aware_retrieval.py
+      - run: python3 -m py_compile scripts/verify_m5_task_aware_retrieval.py
+      - run: bash scripts/check_no_literal_secrets.sh
+
+  postgres:
+    name: Prove M5-002 retrieval in disposable PostgreSQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Start isolated PostgreSQL 16
+        run: |
+          docker run -d --name m5-retrieval-postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            postgres:16
+          for i in $(seq 1 30); do
+            if docker exec m5-retrieval-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs m5-retrieval-postgres
+          exit 1
+      - name: Create production-shaped baseline
+        run: |
+          docker exec -i m5-retrieval-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_typed_memory_baseline.sql
+          docker exec -i m5-retrieval-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_task_aware_retrieval_baseline.sql
+      - name: Apply M5-001 typed Memory migration
+        run: docker exec -i m5-retrieval-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260913032000_m5_typed_memory_records_v1.sql
+      - name: Compile and apply M5-002 retrieval migration
+        run: docker exec -i m5-retrieval-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260913143500_m5_task_aware_retrieval_v1.sql
+      - name: Exercise task relevance, authority separation and isolation
+        run: docker exec -i m5-retrieval-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_task_aware_retrieval_behavior.sql
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f m5-retrieval-postgres >/dev/null 2>&1 || true
+
+  bridge:
+    name: Check ProjectOS task-aware bridge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.3
+        with:
+          deno-version: v2.x
+      - run: deno fmt --check supabase/functions/pandora-projectos-bridge/index.ts
+      - run: deno check supabase/functions/pandora-projectos-bridge/index.ts
