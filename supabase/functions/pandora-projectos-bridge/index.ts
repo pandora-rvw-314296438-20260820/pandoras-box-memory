@@ -682,6 +682,7 @@ const searchMemory = async (
     approved_record_count: approvedCount,
     requested_canon_statuses: canonStatuses,
     retrieval_mode: retrievalMode,
+    legacy_retrieval_mode: "project_scoped_keyword_recency",
     retrieval_reasoning_summary: retrievalMode === "m5_task_aware_bounded"
       ? "ProjectOS received only task-relevant, bounded, typed Memory already permitted by the exact project grant. Policy Memory is separated from advisory Memory and retrieval does not grant execution authority."
       : "ProjectOS retained the existing exact-project keyword/recency retrieval because this grant does not yet authorize M5 typed classes; no grant expansion was inferred.",
