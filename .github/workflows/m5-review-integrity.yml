@@ -1,0 +1,47 @@
+name: M5 Review Integrity R-053 R-054
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Verify M5 review-integrity contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/verify_m5_review_integrity.py
+      - run: python3 -m py_compile scripts/verify_m5_review_integrity.py
+      - run: bash scripts/check_no_literal_secrets.sh
+      - run: node scripts/check_memory_migration_lineage_recovery.mjs
+
+  postgres:
+    name: Prove R-053/R-054 in disposable PostgreSQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Start isolated PostgreSQL 16
+        run: |
+          docker run -d --name m5-review-integrity-postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            postgres:16
+          for i in $(seq 1 30); do
+            if docker exec m5-review-integrity-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs m5-review-integrity-postgres
+          exit 1
+      - name: Create production-shaped review baseline
+        run: docker exec -i m5-review-integrity-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_review_integrity_baseline.sql
+      - name: Apply forward-only R-053/R-054 migration
+        run: docker exec -i m5-review-integrity-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260914061000_m5_review_integrity_r053_r054_v1.sql
+      - name: Exercise immutability, approval digest, RLS and atomic rollback behavior
+        run: docker exec -i m5-review-integrity-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_review_integrity_behavior.sql
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f m5-review-integrity-postgres >/dev/null 2>&1 || true
