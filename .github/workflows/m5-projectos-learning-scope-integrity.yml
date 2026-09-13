@@ -1,0 +1,46 @@
+name: M5 ProjectOS Learning Scope Integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Verify R-042 learning scope contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/verify_m5_projectos_learning_scope_integrity.py
+      - run: python3 -m py_compile scripts/verify_m5_projectos_learning_scope_integrity.py
+      - run: bash scripts/check_no_literal_secrets.sh
+
+  postgres:
+    name: Prove R-042 in disposable PostgreSQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Start isolated PostgreSQL 16
+        run: |
+          docker run -d --name m5-r042-postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            postgres:16
+          for i in $(seq 1 30); do
+            if docker exec m5-r042-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs m5-r042-postgres
+          exit 1
+      - name: Create production-shaped baseline
+        run: docker exec -i m5-r042-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_projectos_learning_scope_integrity_baseline.sql
+      - name: Apply R-042 additive migration
+        run: docker exec -i m5-r042-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260913185000_m5_projectos_learning_scope_integrity_v1.sql
+      - name: Exercise project scope, lineage and revocation behavior
+        run: docker exec -i m5-r042-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_projectos_learning_scope_integrity_behavior.sql
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f m5-r042-postgres >/dev/null 2>&1 || true
