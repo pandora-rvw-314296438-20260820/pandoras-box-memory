@@ -75,4 +75,4 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno fmt --check app/api/projectos/memory/search/route.ts
-      - run: deno check supabase/functions/pandora-projectos-bridge/index.ts
+      - run: deno check --config supabase/functions/pandora-projectos-bridge/deno.json supabase/functions/pandora-projectos-bridge/index.ts
