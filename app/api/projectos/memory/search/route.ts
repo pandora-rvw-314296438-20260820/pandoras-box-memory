@@ -15,6 +15,14 @@ const ALLOWED_KEYS = new Set([
   "include_recent",
   "include_open_loops",
   "canon_statuses",
+  "intent",
+  "intent_domain",
+  "intentDomain",
+  "action_mode",
+  "actionMode",
+  "consequential",
+  "required_capabilities",
+  "requiredCapabilities",
 ]);
 
 export async function POST(request: NextRequest) {
