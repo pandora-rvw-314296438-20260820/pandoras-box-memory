@@ -5,6 +5,7 @@
   "branch": "chatgpt/m5-r042-learning-scope-integrity-20260914",
   "implementationBaseMain": "e4df6494fdfd79d4f83d067195bca54ec54615b0",
   "candidateHeadBeforeEvidence": "4901c506888a002e4e28497465144df195fee7dd",
+  "independentlyReviewedHead": "349d1e4cde815919deb59a9632583b14c355cc83",
   "pullRequest": 60,
   "scope": "ProjectOS learning candidate/review/canonical project-lineage integrity only; this prerequisite does not claim or complete M5-003.",
   "dependencyState": {
@@ -42,10 +43,9 @@
     "This integrity binding does not create execution authority or policy permission."
   ],
   "verification": {
-    "firstCandidateHead": "4901c506888a002e4e28497465144df195fee7dd",
-    "r042ContractJob": "PASS",
-    "r042DisposablePostgresJob": "PASS",
-    "repositoryWideGatesAtFirstCandidate": {
+    "reviewedHeadCI": {
+      "head": "349d1e4cde815919deb59a9632583b14c355cc83",
+      "m5ProjectosLearningScopeIntegrity": "PASS",
       "memoryLifecycle": "PASS",
       "memoryQualityObservability": "PASS",
       "memoryHardeningReadiness": "PASS",
@@ -53,10 +53,20 @@
       "namespaceIsolation": "PASS",
       "migrationLineage": "PASS",
       "securityAdjudication": "PASS",
-      "capabilityRegistry": "FAIL_EXPECTED_EVIDENCE_COCHANGE_MISSING"
+      "capabilityRegistry": "PASS"
     },
-    "exactFinalHeadCIRequired": true,
-    "finalHeadNotYetRecordedInThisArtifact": true
+    "independentAuthorityReview": {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite",
+      "responseId": "qe-mapKkFJWh1e8Ph4nAkQU",
+      "decision": "PASS",
+      "highCriticalFindings": [],
+      "mediumFindings": [],
+      "lowFindings": [],
+      "requiredChanges": [],
+      "advisoryOnly": true
+    },
+    "finalEvidenceOnlyHeadCIRequired": true
   },
   "productionReadback": {
     "migrationApplied": false,
