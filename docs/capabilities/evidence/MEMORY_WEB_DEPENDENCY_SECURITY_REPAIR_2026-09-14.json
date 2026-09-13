@@ -1,0 +1,45 @@
+
+{
+  "schemaVersion": "1.0.0",
+  "evidenceId": "memory-web-dependency-security-repair-2026-09-14",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "taskContext": "Security prerequisite discovered by M5-002 exact-head CI",
+  "baseMain": "c94550acf9d149238e4cbe0c23e733c7fce5c2bd",
+  "candidateDependencyHeadBeforeEvidence": "4f09c48bddee5ff3aff4defeda807300a7bbc937",
+  "pullRequest": 59,
+  "changes": {
+    "next": {"from": "16.3.1", "to": "16.3.5"},
+    "sharp": {"from": "0.35.3", "to": "0.35.4"},
+    "libvipsBundle": {"from": "1.3.2", "to": "1.3.3"}
+  },
+  "generation": {
+    "node": "24",
+    "npm": "11.19.0",
+    "method": "npm install --package-lock-only --ignore-scripts --no-audit --no-fund --save-exact next@16.3.5",
+    "ciWritePermission": false
+  },
+  "preflightProof": {
+    "workflowJobId": 103762168278,
+    "npmCi": "PASS",
+    "productionAudit": "PASS - 0 vulnerabilities",
+    "typecheck": "PASS",
+    "productionBuild": "PASS"
+  },
+  "candidateProof": {
+    "packageJsonGitBlob": "d7c1f6dfeb8a1cbb0c238563a0ef66c1bad5cdb3",
+    "packageLockGitBlob": "39b5309f1607933f234dc5519f0aacbb3dfed025",
+    "cleanBranchContainsTemporaryGeneratorWorkflow": false
+  },
+  "scope": {
+    "applicationBehaviorChanged": false,
+    "memorySchemaChanged": false,
+    "grantChanged": false,
+    "edgeFunctionDeployed": false,
+    "productionMutationPerformed": false
+  },
+  "governance": {
+    "writeRoute": "Pandora GitHub App / Supabase-backed Vault governed route",
+    "directGitHubWriteUsed": false,
+    "auditGateBypassed": false
+  }
+}
