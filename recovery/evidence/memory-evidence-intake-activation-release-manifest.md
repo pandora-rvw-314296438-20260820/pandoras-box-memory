@@ -24,7 +24,7 @@ The recovered `check_memory_evidence_activation.mjs` previously assumed that the
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `3733beca22f535a6bbe061aed072319bac22f1b4b9fb3cee82757bcc5d380a03`
+- Candidate bridge raw SHA-256: `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b`
 - Current candidate preserves exact-project Memory isolation and requires explicit `approved_by` plus `approved_at` receipts before canonical Memory is retrievable through the bridge, planning context, or ContextPack v2.
 - Search requires explicit canonical project identity plus an active `can_read` project grant.
 - Search returns exact-project `memory_items` only through the service-role-only `memory_projectos_search_scoped_v1` indexed RPC, which independently re-checks user, namespace, project, environment, active read grant, approved canon, current-head status, revocation, and allowed record types.
