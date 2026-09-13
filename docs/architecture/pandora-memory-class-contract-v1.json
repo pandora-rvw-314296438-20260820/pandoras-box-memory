@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "pandora-memory-class-contract-v1",
+  "status": "frozen",
+  "effectiveDate": "2026-09-13",
+  "purpose": "Freeze Memory class semantics so learning can inform Pandora without silently creating authority.",
+  "globalInvariants": {
+    "canonicalAuthorityRemainsMemoryItems": true,
+    "rawEventsAreNotCanonicalMemory": true,
+    "promotionRequiresHighSignalEvidence": true,
+    "appendOnlyCorrectionHistory": true,
+    "predictionNeverGrantsAuthority": true,
+    "patternNeverGrantsAuthority": true,
+    "modelOutputNeverGrantsAuthority": true,
+    "priorSuccessNeverGrantsAuthority": true,
+    "authorizationSourcesAreExplicitCurrentInstructionOrActiveExplicitStandingPolicy": true,
+    "confidenceNeverUpgradesAuthority": true,
+    "supersededHistoryIsPreserved": true,
+    "retrievalMustRespectProjectNamespacePrincipalAndGrantScope": true,
+    "staleOrRevokedPolicyNeverAuthorizes": true
+  },
+  "semanticSources": {
+    "observation": {
+      "meaning": "Evidence-backed observation from runtime, provider, artifact, or other directly inspectable source.",
+      "mayAuthorize": false
+    },
+    "inference": {
+      "meaning": "Model/statistical interpretation, prediction, or recurring-behavior inference.",
+      "mayAuthorize": false
+    },
+    "owner_decision": {
+      "meaning": "Explicit attributable owner/admin decision. It may create a fact or policy, but only the decision itself can supply authority.",
+      "mayAuthorize": "only when the decision is an explicit current instruction or valid scoped standing policy"
+    },
+    "authoritative_policy": {
+      "meaning": "Explicit policy with attributable owner/admin origin, scope bindings, validity, and revocation state.",
+      "mayAuthorize": "only within the exact validated scope"
+    }
+  },
+  "requiredRecordFields": [
+    "record_type",
+    "provenance",
+    "evidence_refs",
+    "observed_at",
+    "effective_at",
+    "confidence",
+    "authority_kind",
+    "authority_ref",
+    "promotion_basis",
+    "correction_of",
+    "superseded_by",
+    "superseded_at",
+    "supersession_reason"
+  ],
+  "classes": {
+    "fact": {
+      "definition": "Verified information treated as current truth until corrected or superseded.",
+      "semanticSource": [
+        "observation",
+        "owner_decision"
+      ],
+      "provenance": "Exact attributable source locator and source type.",
+      "evidenceLinkage": "One or more durable evidence references or an attributable explicit owner statement.",
+      "timestamp": "observed_at and effective_at required.",
+      "confidence": "Required; uncertainty is explicit and never changes authority.",
+      "authorityLevel": [
+        "verified_evidence",
+        "provider_truth",
+        "runtime_truth",
+        "owner_statement"
+      ],
+      "supersessionBehavior": "Newer authoritative same-scope evidence may supersede while preserving history.",
+      "correctionBehavior": "Append corrected fact, link correction_of, then supersede prior fact.",
+      "promotionCriteria": "Stable, useful, sufficiently evidenced, not low-value telemetry.",
+      "retrievalSemantics": "Prefer current non-revoked authoritative same-scope facts; retain superseded history for audit/conflict.",
+      "authorizationEffect": "none"
+    },
+    "pattern": {
+      "definition": "Confidence-weighted inference about recurring behavior or likely future behavior.",
+      "semanticSource": [
+        "inference"
+      ],
+      "provenance": "Inputs and derivation window attributable without pretending the inference is evidence.",
+      "evidenceLinkage": "References the observations/outcomes that support the pattern.",
+      "timestamp": "observed_at identifies derivation time; effective_at identifies applicability.",
+      "confidence": "Mandatory and calibrated; confidence decay/reassessment allowed through successor records.",
+      "authorityLevel": [
+        "inference"
+      ],
+      "supersessionBehavior": "A stronger/revised inference supersedes only another same-scope pattern.",
+      "correctionBehavior": "Append revised pattern; rejection/correction lowers or replaces future inference.",
+      "promotionCriteria": "Repeated meaningful signal with enough evidence to justify retrieval.",
+      "retrievalSemantics": "Use for suggestions/prediction only; never treat as permission.",
+      "authorizationEffect": "none"
+    },
+    "policy": {
+      "definition": "Explicit owner/admin authorization or constraint that can govern execution within a bounded scope.",
+      "semanticSource": [
+        "owner_decision",
+        "authoritative_policy"
+      ],
+      "provenance": "Exact attributable instruction/approval plus scope, validity, and revocation lineage.",
+      "evidenceLinkage": "Exact approval/instruction decision and policy fingerprint.",
+      "timestamp": "observed_at, effective_at, and validity/revocation timing required where applicable.",
+      "confidence": "Confidence does not determine validity; authority is explicit and scope-bound.",
+      "authorityLevel": [
+        "explicit_current_user_instruction",
+        "active_explicit_standing_policy"
+      ],
+      "supersessionBehavior": "Newer explicit policy may narrow/replace older policy; revocation takes effect immediately.",
+      "correctionBehavior": "Append explicitly approved replacement or revocation; never mutate inference into policy.",
+      "promotionCriteria": "Explicit owner/admin authorization after any suggestion/automation proposal.",
+      "retrievalSemantics": "Retrieve separately from advisory memory; validate principal, capability, operation, provider/resource scope, environment, sensitivity, cost, validity and conditional bindings before authorization.",
+      "authorizationEffect": "may_authorize_only_when_exact_scope_is_validated"
+    },
+    "procedure": {
+      "definition": "Reusable method proven by a verified successful outcome.",
+      "semanticSource": [
+        "observation"
+      ],
+      "provenance": "Exact execution/test/outcome lineage.",
+      "evidenceLinkage": "Verified outcome and applicable artifacts/tests.",
+      "timestamp": "observed_at/effective_at required.",
+      "confidence": "Reflects repeatability and evidence quality, not permission.",
+      "authorityLevel": [
+        "verified_outcome"
+      ],
+      "supersessionBehavior": "Better proven procedure may supersede an older same-scope procedure.",
+      "correctionBehavior": "Append repaired procedure linked to failure/correction evidence.",
+      "promotionCriteria": "Demonstrably successful, reusable, bounded, and high-signal.",
+      "retrievalSemantics": "Retrieve before similar work as advisory execution knowledge; current authority still governs actions.",
+      "authorizationEffect": "none"
+    },
+    "failure_lesson": {
+      "definition": "Verified account of what failed, why, and what prevents recurrence.",
+      "semanticSource": [
+        "observation"
+      ],
+      "provenance": "Incident, failed execution, correction, and verification lineage.",
+      "evidenceLinkage": "Exact failure and corrective evidence.",
+      "timestamp": "observed_at/effective_at required.",
+      "confidence": "Represents confidence in diagnosis/lesson, not authorization.",
+      "authorityLevel": [
+        "verified_incident",
+        "verified_outcome"
+      ],
+      "supersessionBehavior": "Revised diagnosis may supersede earlier lesson while preserving incident history.",
+      "correctionBehavior": "Append corrected lesson with explicit relationship to prior diagnosis.",
+      "promotionCriteria": "Failure is meaningful/recurrent/high-risk and the lesson is evidenced.",
+      "retrievalSemantics": "Prioritize before similar high-risk/debug/release/provider work.",
+      "authorizationEffect": "none"
+    },
+    "outcome": {
+      "definition": "Verified result of completed work, including success/failure and verification state.",
+      "semanticSource": [
+        "observation"
+      ],
+      "provenance": "Execution/runtime/provider readback lineage.",
+      "evidenceLinkage": "Exact result artifacts, tests, provider/runtime receipts or failure evidence.",
+      "timestamp": "observed_at/effective_at required.",
+      "confidence": "Reflects verification strength, never grants permission.",
+      "authorityLevel": [
+        "runtime_truth",
+        "provider_truth",
+        "verified_evidence"
+      ],
+      "supersessionBehavior": "Later verified outcome supersedes stale current-state interpretation without deleting history.",
+      "correctionBehavior": "Append corrected outcome after authoritative readback.",
+      "promotionCriteria": "Material result with meaningful verification value.",
+      "retrievalSemantics": "Use to inform decisions, procedures, failures and learning; authorization remains separate.",
+      "authorizationEffect": "none"
+    },
+    "provider_performance": {
+      "definition": "Measured provider/model quality, latency, cost, reliability and verified success by workload.",
+      "semanticSource": [
+        "observation"
+      ],
+      "provenance": "Measured run/evaluation metadata without secrets or private payloads.",
+      "evidenceLinkage": "Verified benchmark/evaluation samples and outcome references.",
+      "timestamp": "observed_at/effective_at required.",
+      "confidence": "Derived from sample strength/recency and must be explicit.",
+      "authorityLevel": [
+        "measured_evidence"
+      ],
+      "supersessionBehavior": "Newer representative measurements may supersede stale performance profiles.",
+      "correctionBehavior": "Append corrected measurement/profile; retain old samples for audit.",
+      "promotionCriteria": "Sufficient verified sample quality to influence routing; exclude noisy raw telemetry.",
+      "retrievalSemantics": "Retrieve by workload/provider/model constraints for routing optimization, never as authority to expand action scope.",
+      "authorizationEffect": "none"
+    }
+  },
+  "forbiddenSilentEscalations": [
+    "pattern_to_policy",
+    "prediction_to_policy",
+    "model_output_to_policy",
+    "prior_success_to_policy",
+    "procedure_to_policy",
+    "provider_performance_to_policy"
+  ],
+  "learningLifecycle": {
+    "stages": [
+      "observe",
+      "learn",
+      "suggest",
+      "explicit_owner_or_admin_approval",
+      "policy"
+    ],
+    "rule": "Automation or repeated behavior may be suggested before approval; only an explicit authorized decision can create policy."
+  },
+  "retrievalRules": {
+    "boundedTaskRelevantRetrieval": true,
+    "grantScopedRetrieval": true,
+    "excludeRevokedAndSupersededByDefault": true,
+    "includeHistoryForAuditConflictAndCorrection": true,
+    "preferVerifiedCurrentAuthority": true,
+    "similarityNeverDeterminesAuthority": true,
+    "retrieveFailureLessonsBeforeSimilarHighRiskWork": true,
+    "policiesRetrievedSeparatelyFromAdvisoryMemory": true
+  },
+  "rawEventPlane": {
+    "separateFromCanonicalMemory": true,
+    "promotionRequired": true,
+    "promotionTargets": [
+      "fact",
+      "pattern",
+      "procedure",
+      "failure_lesson",
+      "outcome",
+      "provider_performance"
+    ],
+    "rule": "Raw polling, transient runtime chatter and low-value telemetry stay outside canonical Memory."
+  }
+}
