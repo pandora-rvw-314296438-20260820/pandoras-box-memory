@@ -1,0 +1,50 @@
+{
+    "task": "Memory production/source migration ledger reconciliation",
+    "branch": "chatgpt/memory-r043-ledger-receipt-20260914",
+    "riskId": "R-043",
+    "safety": {
+        "productionMutation": false,
+        "providerHistoryRewritten": false,
+        "productionReplayAuthorized": false,
+        "newProductionVersionCreated": false,
+        "credentialsOrSecretsIncluded": false
+    },
+    "source": {
+        "path": "supabase/migrations/20260910051901_revoke_anon_dangerous_table_grants_20260910.sql",
+        "bytes": 1078,
+        "sha256": "3d758cda12aabd9e69865ecf9b0b6bdb96bcd267a90c04808c9cd11f440f7c2b",
+        "commitSha": "44a22dd822712808eeb1489d40641afb3283d33e",
+        "gitBlobSha1": "5ba67ae5888a09759eada333298d603a4eccef20",
+        "exactProviderBytes": true,
+        "canonicalDuplicateExists": false
+    },
+    "provider": {
+        "name": "revoke_anon_dangerous_table_grants_20260910",
+        "version": "20260910051901",
+        "projectRef": "ivmvufhcsezyhczzondn",
+        "alreadyApplied": true,
+        "statementBytes": 1078,
+        "statementCount": 1,
+        "statementSha256": "3d758cda12aabd9e69865ecf9b0b6bdb96bcd267a90c04808c9cd11f440f7c2b"
+    },
+    "governance": {
+        "userStandingRule": "GitHub App first; approved Supabase Vault-backed route when App cannot safely perform repository write; direct GitHub readback only",
+        "repositoryWriteRoute": "approved_supabase_vault_backed_github_api",
+        "directGithubWriteUsed": false
+    },
+    "observedAt": "2026-09-14T03:44:49+08:00",
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "baseMainSha": "f1ccc2e89292abd3d040cfd55217d565e71e52ea",
+    "recoveryMode": "exact_provider_source_restoration",
+    "verification": {
+        "sha256Match": true,
+        "byteCountMatch": true,
+        "githubReadback": true,
+        "providerReadback": true,
+        "exactHeadCiRequired": true,
+        "mergeReadbackRequired": true,
+        "migrationLineageVerifierRequired": true,
+        "migrationAuthorityVerifierRequired": true
+    },
+    "schemaVersion": "1.0"
+}
