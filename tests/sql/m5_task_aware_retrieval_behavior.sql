@@ -3,13 +3,13 @@
 
 insert into public.pandora_projects(id,project_key,canonical_name,memory_namespace,lifecycle_status)
 values
- ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','pandora','Pandora','real_life','active'),
+ ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','pandora','Pandora','real_life','active'),
  ('cccccccc-cccc-cccc-cccc-cccccccccccc','other','Other','real_life','active');
 
 insert into public.pandora_project_grants(
   principal_key,project_id,environment,allowed_record_types,can_read,is_active
 ) values
- ('projectos-mcpmaster-production','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','production',
+ ('projectos-mcpmaster-production','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','production',
   array['fact','pattern','policy','procedure','failure_lesson','outcome','provider_performance'],true,true),
  ('projectos-mcpmaster-production','cccccccc-cccc-cccc-cccc-cccccccccccc','production',
   array['fact','pattern','policy','procedure','failure_lesson','outcome','provider_performance'],true,true);
@@ -32,7 +32,7 @@ values ('21000000-0000-0000-0000-000000000001','11000000-0000-0000-0000-00000000
 insert into public.memory_items(id,user_id,namespace,project_id,memory_type,title,body,canon_status,metadata)
 values (
  '31000000-0000-0000-0000-000000000001','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
- 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','learning','Ambiguous write retry lesson',
+ 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','learning','Ambiguous write retry lesson',
  'For GitHub deploy writes, verify provider readback before retrying an ambiguous response.','hard_canon',
  '{"reviewItemId":"11000000-0000-0000-0000-000000000001","reviewDecisionId":"21000000-0000-0000-0000-000000000001"}'
 );
@@ -54,7 +54,7 @@ values ('21000000-0000-0000-0000-000000000002','11000000-0000-0000-0000-00000000
 insert into public.memory_items(id,user_id,namespace,project_id,memory_type,title,body,canon_status,metadata)
 values (
  '31000000-0000-0000-0000-000000000002','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
- 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','learning','Deployment readback procedure',
+ 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','learning','Deployment readback procedure',
  'Deploy, independently read provider state, and retain rollback evidence.','hard_canon',
  '{"reviewItemId":"11000000-0000-0000-0000-000000000002","reviewDecisionId":"21000000-0000-0000-0000-000000000002"}'
 );
@@ -76,7 +76,7 @@ values ('21000000-0000-0000-0000-000000000003','11000000-0000-0000-0000-00000000
 insert into public.memory_items(id,user_id,namespace,project_id,memory_type,title,body,canon_status,metadata)
 values (
  '31000000-0000-0000-0000-000000000003','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
- 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','governance','GitHub write route',
+ 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','governance','GitHub write route',
  'Use the governed GitHub App or Supabase Vault-backed credential path for GitHub writes.','hard_canon',
  '{"reviewItemId":"11000000-0000-0000-0000-000000000003","reviewDecisionId":"21000000-0000-0000-0000-000000000003"}'
 );
@@ -98,7 +98,7 @@ values ('21000000-0000-0000-0000-000000000004','11000000-0000-0000-0000-00000000
 insert into public.memory_items(id,user_id,namespace,project_id,memory_type,title,body,canon_status,metadata)
 values (
  '31000000-0000-0000-0000-000000000004','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
- 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','fact','Restaurant hours','Restaurant closes at 10pm.','hard_canon',
+ 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb','fact','Restaurant hours','Restaurant closes at 10pm.','hard_canon',
  '{"reviewItemId":"11000000-0000-0000-0000-000000000004","reviewDecisionId":"21000000-0000-0000-0000-000000000004"}'
 );
 
@@ -132,7 +132,7 @@ begin
   pack := public.memory_task_context_v1(
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     'real_life',
-    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbb',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
     'projectos-mcpmaster-production',
     'production',
     'coding_building',
@@ -183,7 +183,7 @@ end $$;
 -- Grant expansion must never be inferred. Legacy-only grants return an empty typed pack.
 update public.pandora_project_grants
 set allowed_record_types=array['architecture','decision']
-where project_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+where project_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb'
   and principal_key='projectos-mcpmaster-production';
 
 do $$
@@ -192,7 +192,7 @@ begin
   pack := public.memory_task_context_v1(
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     'real_life',
-    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb',
     'projectos-mcpmaster-production',
     'production',
     'research',
@@ -215,7 +215,7 @@ end $$;
 -- Revoked grants fail closed.
 update public.pandora_project_grants
 set is_active=false,revoked_at=now()
-where project_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+where project_id='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb'
   and principal_key='projectos-mcpmaster-production';
 
 do $$
@@ -224,7 +224,7 @@ begin
     perform public.memory_task_context_v1(
       'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
       'real_life',
-      'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbbbb',
       'projectos-mcpmaster-production',
       'production',
       'research',
