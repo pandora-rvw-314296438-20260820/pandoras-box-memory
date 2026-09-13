@@ -2,21 +2,6 @@ name: Memory Hardening Readiness Gate
 
 on:
   pull_request:
-    paths:
-      - "supabase/functions/**"
-      - "docs/capabilities/evidence/MEMORY_HARDENING_READINESS_2026-09-01.json"
-      - "docs/capabilities/evidence/PROJECTOS_BRIDGE_RETRY_PRODUCTION_VERIFICATION_*.md"
-      - "scripts/verify_memory_hardening_readiness.py"
-      - "scripts/verify_projectos_bridge_project_scope.py"
-      - "scripts/verify_projectos_bridge_url_contract.mjs"
-      - "scripts/verify_migration_authority.mjs"
-      - "docs/migrations/migration-authority-manifest.json"
-      - "lib/services/projectos-memory-bridge-client.ts"
-      - "package.json"
-      - "supabase/migrations/**"
-      - ".github/workflows/projectos-bridge-project-isolation.yml"
-      - ".github/workflows/machine-gateway-namespace-isolation.yml"
-      - ".github/workflows/memory-hardening-readiness.yml"
   push:
     branches: [main]
     paths:
