@@ -5,6 +5,7 @@ on:
     paths:
       - 'supabase/migrations/**m5_task_aware_retrieval_v1.sql'
       - 'supabase/functions/pandora-projectos-bridge/index.ts'
+      - 'app/api/projectos/memory/search/route.ts'
       - 'scripts/verify_m5_task_aware_retrieval.py'
       - 'docs/architecture/M5_002_TASK_AWARE_RETRIEVAL.md'
       - 'docs/capabilities/evidence/M5_002_TASK_AWARE_RETRIEVAL_2026-09-13.json'
@@ -15,6 +16,7 @@ on:
     paths:
       - 'supabase/migrations/**m5_task_aware_retrieval_v1.sql'
       - 'supabase/functions/pandora-projectos-bridge/index.ts'
+      - 'app/api/projectos/memory/search/route.ts'
       - 'scripts/verify_m5_task_aware_retrieval.py'
       - 'docs/architecture/M5_002_TASK_AWARE_RETRIEVAL.md'
       - 'docs/capabilities/evidence/M5_002_TASK_AWARE_RETRIEVAL_2026-09-13.json'
