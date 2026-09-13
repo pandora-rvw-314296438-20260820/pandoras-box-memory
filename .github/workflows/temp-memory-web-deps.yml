@@ -1,0 +1,47 @@
+name: Temporary Memory dependency repair generator
+
+on:
+  push:
+    branches:
+      - chatgpt/memory-web-deps-20260914
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Generate patched lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund --save-exact next@16.3.5
+      - name: Install exact generated lock
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ivmvufhcsezyhczzondn.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+        run: npm run build
+      - name: Emit generated public dependency files
+        shell: bash
+        run: |
+          echo 'PACKAGE_JSON_GZIP_BASE64_BEGIN'
+          gzip -c package.json | base64 -w0
+          echo
+          echo 'PACKAGE_JSON_GZIP_BASE64_END'
+          echo 'PACKAGE_LOCK_GZIP_BASE64_BEGIN'
+          gzip -c package-lock.json | base64 -w0
+          echo
+          echo 'PACKAGE_LOCK_GZIP_BASE64_END'
