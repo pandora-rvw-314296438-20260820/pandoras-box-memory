@@ -37,11 +37,10 @@ jobs:
       - name: Emit generated public dependency files
         shell: bash
         run: |
-          echo 'PACKAGE_JSON_GZIP_BASE64_BEGIN'
-          gzip -c package.json | base64 -w0
+          echo 'PACKAGE_JSON_BASE64_BEGIN'
+          base64 -w0 package.json
           echo
-          echo 'PACKAGE_JSON_GZIP_BASE64_END'
-          echo 'PACKAGE_LOCK_GZIP_BASE64_BEGIN'
-          gzip -c package-lock.json | base64 -w0
-          echo
-          echo 'PACKAGE_LOCK_GZIP_BASE64_END'
+          echo 'PACKAGE_JSON_BASE64_END'
+          echo 'PACKAGE_LOCK_BASE64_BEGIN'
+          base64 -w12000 package-lock.json | awk '{printf "LOCKCHUNK:%06d:%s\n", NR, $0}'
+          echo 'PACKAGE_LOCK_BASE64_END'
