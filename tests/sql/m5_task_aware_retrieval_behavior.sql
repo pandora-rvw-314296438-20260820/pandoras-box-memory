@@ -118,7 +118,7 @@ insert into public.memory_review_queue_decisions(id,review_item_id,user_id,names
 values ('21000000-0000-0000-0000-000000000005','11000000-0000-0000-0000-000000000005','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life','approved_for_append');
 insert into public.memory_items(id,user_id,namespace,project_id,memory_type,title,body,canon_status,metadata)
 values (
- '31000000-0000-0000-0000-000000000005','aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
+ '31000000-0000-0000-0000-000000000005','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','real_life',
  'cccccccc-cccc-cccc-cccc-cccccccccccc','learning','Other deployment retry lesson',
  'Deploy retry information for another project.','hard_canon',
  '{"reviewItemId":"11000000-0000-0000-0000-000000000005","reviewDecisionId":"21000000-0000-0000-0000-000000000005"}'
