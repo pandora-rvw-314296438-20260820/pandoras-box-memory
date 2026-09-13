@@ -1,12 +1,12 @@
 # M5 Typed Memory Contract
 
-Status: **SOURCE IMPLEMENTATION CANDIDATE — INTEGRATION/ROLLOUT NOT YET AUTHORIZED**
+Status: **SOURCE IMPLEMENTATION CANDIDATE - M0-005 RECONCILED; PRODUCTION ROLLOUT NOT YET AUTHORIZED**
 
 Task: `M5-001` from the Pandora Device execution plan.
 
 ## Purpose
 
-Extend the existing canonical `memory_items` + candidate/review/persistence path so Pandora can represent seven distinct durable knowledge classes without creating a parallel Memory authority:
+Extend the existing canonical `memory_items` plus candidate/review/persistence path so Pandora can represent the seven Memory classes frozen by M0-005 without creating a parallel authority:
 
 - `fact`
 - `pattern`
@@ -18,20 +18,47 @@ Extend the existing canonical `memory_items` + candidate/review/persistence path
 
 The implementation is additive. Legacy records remain valid and are not backfilled by inference.
 
+## Frozen M0-005 alignment
+
+Typed records persist every M0-005 required field:
+
+`record_type`, `provenance`, `evidence_refs`, `observed_at`, `effective_at`, `confidence`, `authority_kind`, `authority_ref`, `promotion_basis`, `correction_of`, `superseded_by`, `superseded_at`, and `supersession_reason`.
+
+`provenance.semanticSource` explicitly distinguishes:
+
+- `observation`
+- `inference`
+- `owner_decision`
+- `authoritative_policy`
+
+The schema does not infer authority from confidence, repetition, similarity, prior success, a procedure, provider performance, prediction, or model output.
+
 ## Authority semantics
 
-- `fact`: evidence-backed through `verified_evidence`, `provider_truth`, or explicit `owner_statement`.
-- `pattern`: confidence-weighted `inference`; useful for prediction and suggestions but never permission.
-- `policy`: `owner_policy` plus explicit approved review. A pattern cannot silently become policy.
-- `procedure` and `failure_lesson`: `verified_outcome`.
-- `outcome`: `runtime_truth`, `provider_truth`, or `verified_evidence`.
-- `provider_performance`: `measured_evidence`; raw provider prompts/responses, credentials, and private payloads remain outside canonical learning.
+- `fact`: `verified_evidence`, `provider_truth`, `runtime_truth`, or `owner_statement`; authorization effect is none.
+- `pattern`: `inference`; authorization effect is none.
+- `policy`: only `explicit_current_user_instruction` or `active_explicit_standing_policy`.
+- `procedure`: `verified_outcome`; authorization effect is none.
+- `failure_lesson`: `verified_incident` or `verified_outcome`; authorization effect is none.
+- `outcome`: `runtime_truth`, `provider_truth`, or `verified_evidence`; authorization effect is none.
+- `provider_performance`: `measured_evidence`; authorization effect is none.
 
-## Provenance and time
+A policy row is not sufficient by itself to authorize execution. Runtime governance must still validate exact principal, capability, operation, provider/resource, environment, sensitivity, cost, validity/conditions, fingerprint/scope, and revocation state. A stale or revoked policy never authorizes.
 
-A typed proposal requires exact record type, authority kind/reference, confidence in `[0,1]`, `effective_at`, and bounded structured provenance with `sourceType`, `sourceLocator`, and `observedAt`.
+The exact instruction or standing-policy identifier remains in `authority_ref`; the canonical review decision remains independently preserved in review lineage metadata.
 
-For policy records, canonical `authority_ref` is rebound to the exact approved review-decision ID.
+## Provenance, evidence, time, promotion
+
+A typed proposal requires:
+
+- bounded structured provenance with `sourceType`, `sourceLocator`, `observedAt`, and `semanticSource`;
+- a non-empty bounded `evidence_refs` array;
+- explicit `observed_at` and `effective_at`;
+- confidence in `[0,1]`;
+- explicit `promotion_basis` explaining why the item is high-signal canonical Memory rather than raw telemetry;
+- optional `correction_of` for append-only semantic correction.
+
+Raw polling, transient runtime chatter, and low-value telemetry remain outside canonical Memory.
 
 ## Governance path
 
@@ -39,44 +66,48 @@ No second persistence gateway is introduced. Existing flow remains:
 
 `candidate -> immutable review item -> explicit decision -> memory_execute_approved_review_persistence -> memory_items`
 
-The migration adds typed proposal fields to `memory_review_queue_items`. A `BEFORE INSERT` trigger on the existing `memory_items` insertion resolves those reviewed fields using the exact `reviewItemId` and `reviewDecisionId` already written by the canonical persistence function.
+The M5 `BEFORE INSERT` trigger resolves the typed proposal using the exact `reviewItemId` and `reviewDecisionId` already written by canonical persistence. If a review item has no typed proposal, legacy behavior is unchanged.
 
-If a review item has no typed proposal, legacy behavior is unchanged.
+Policy proposals require explicit policy authorization and one of the two frozen policy authority kinds. Non-policy classes cannot carry the policy-authorization flag.
 
 ## Supersession and correction
 
-M5 typed semantic fields are immutable after insert. A correction must append a new typed record, complete normal review/canonicalization, then supersede the old record with the new same-scope, same-type current canonical head and record `superseded_at` plus `supersession_reason`.
+M5 semantic fields are immutable after insertion. A correction appends a new reviewed/canonical typed record linked through `correction_of`; the prior record can then be superseded.
 
-The M5 update guard rejects cross-user, cross-namespace, cross-project, cross-type, revoked, inactive, unapproved, already-superseded, or self-referential successor targets. Historical evidence remains intact.
+Supersession rejects:
+
+- cross-user, cross-namespace, cross-project, cross-`memory_type`, or cross-record-type successors;
+- legacy/untyped successors;
+- revoked, inactive, unapproved, already-superseded, or self-referential targets;
+- correction links pointing to a different predecessor;
+- later mutation of an already-recorded supersession timestamp/reason.
+
+Historical evidence remains intact.
 
 ## Compatibility boundaries
 
 - `memory_items` remains canonical durable authority.
-- Existing `memory_type` remains for backward compatibility; M5 class identity uses the already-existing `record_type`.
+- Existing `memory_type` remains for backward compatibility; M5 class identity uses `record_type`.
 - Existing grant allowlists continue governing retrieval by `record_type`.
 - Existing provider-learning candidates and legacy rows are not rewritten.
-- No production data backfill, Edge deployment, or production provider mutation is performed here.
-- Retrieval behavior for these classes belongs to `M5-002`.
-
-## M0-005 dependency
-
-The Device plan states `M5-001` depends on coordinator-owned `M0-005` (facts vs patterns vs policies vs procedures vs outcomes). This branch is an additive candidate and must not be merged as final architecture until the coordinator confirms M0-005 compatibility.
-
-Any class-name or authority-semantic change must be reconciled before merge.
+- Existing rows are not silently reclassified.
+- No production data backfill, Edge deployment, or production provider mutation is performed by this source change.
+- Task-aware retrieval behavior belongs to `M5-002`.
+- High-signal automatic learning promotion belongs to `M5-003` and remains gated by M1-003.
 
 ## Verification
 
-`scripts/verify_m5_typed_memory_contract.py` checks:
+`scripts/verify_m5_typed_memory_contract.py` reads the frozen M0-005 machine contract and checks:
 
-- all seven typed classes;
-- fail-closed authority mappings;
-- pattern/policy separation;
-- required provenance/time/confidence;
+- exact seven-class parity;
+- parity with all required record fields and authority levels;
+- semantic-source/authority compatibility;
+- pattern/policy and advisory/authorization separation;
+- required provenance/evidence/time/confidence/promotion fields;
 - no parallel Memory authority;
 - no core-history delete/truncate/backfill;
 - append-plus-supersede correction behavior;
-- same-scope, same-type, current approved successor requirements.
+- same-scope, same-type, current approved successor requirements;
+- undeclared PL/pgSQL row-variable references, which catches the previously observed successor-identifier typo.
 
-`.github/workflows/m5-typed-memory-contract.yml` runs the verifier, compiles it, and scans the M5 change set for obvious literal secrets.
-
-Passing CI proves source-contract conformance only. It does not prove migration deployment or production runtime behavior.
+CI source checks prove source-contract conformance. Supabase Preview is the safe migration execution/compile proof before any production migration is considered. Production remains unchanged until governed release evidence explicitly authorizes it.
