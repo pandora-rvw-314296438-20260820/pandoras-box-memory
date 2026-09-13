@@ -5,27 +5,42 @@
   "branch": "chatgpt/m5-001-typed-memory-20260913",
   "reconciledAgainstMain": "604964c559302f9a219aac21db892ee93940696c",
   "reconciliationCommit": "7f568f9ff80bc818e538dcda8659c541d4fd812f",
-  "preEvidenceHead": "bf977c74cf2c550a174dc6778692f9c6783670c3",
+  "preEvidenceHead": "637a7dfa60c4fee71dc503a54c5f86a0239b74e8",
   "m0ContractBlob": "63aaee1a61f077e019ac1ab4ff804c53faa1f25b",
   "sourceBlobs": {
     "migration": "261ba47ae8a1be82a2b263f5f456f2a140419006",
     "verifier": "d871eebb23944d0672c1d9645d043073d0e9d85d",
     "contract": "3a804f948236fa44b3a1a0b0f96e4a9db2955979",
-    "workflow": "face723bad091826ecc1593bf1e74e63eef243a8"
+    "workflow": "3c68cdf6b1b40d11c4047dbd1381a1e203a755c8",
+    "disposableBaseline": "65f38081bbeb859a667f15334a0970149861a1ea",
+    "behaviorTests": "ff50794e64cdd649d685063d61881ce7b740b820"
   },
   "frozenClasses": ["fact","pattern","policy","procedure","failure_lesson","outcome","provider_performance"],
-  "authorityRule": "Inference, prediction, patterns, procedures, provider performance, prior success and model output never create authorization. Typed policy records only represent explicit current user instruction or active explicit standing policy and still require exact runtime scope/validity/revocation validation.",
+  "authorityRule": "Inference, prediction, patterns, procedures, provider performance, prior success and model output never create authorization. Typed policy records only represent explicit current user instruction or active explicit standing policy and still require exact runtime scope, validity and revocation validation.",
   "rawTelemetryRule": "Raw polling, transient runtime chatter and low-value telemetry remain outside canonical Memory until high-signal promotion.",
   "productionReadback": {
     "m5MigrationApplied": false,
     "typedColumnsPresentBeforeMigration": false,
     "productionMutationPerformed": false
   },
-  "verification": {
-    "localContractVerifier": "PASS before provider write",
-    "supabasePreviewRequiredBeforeProduction": true,
-    "exactHeadCIRequired": true,
-    "independentAuthorityReviewRequired": true
+  "safeMigrationVerification": {
+    "head": "637a7dfa60c4fee71dc503a54c5f86a0239b74e8",
+    "workflowRunId": 34762688196,
+    "jobId": 103738164269,
+    "result": "SUCCESS",
+    "steps": ["isolated PostgreSQL 16 started","production-shaped baseline created","exact M5 migration compiled and applied","authority/correction/supersession behavior passed","disposable database removed"],
+    "productionTouched": false
   },
+  "independentAuthorityReview": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "responseId": "GLOmao_-KvT81e8Ph4j3gAg",
+    "decision": "PASS",
+    "highCriticalFindings": [],
+    "mediumFindings": [],
+    "lowFindings": [],
+    "requiredChanges": []
+  },
+  "finalExactHeadCIRequiredAfterThisEvidenceCommit": true,
   "secretsIncluded": false
 }
