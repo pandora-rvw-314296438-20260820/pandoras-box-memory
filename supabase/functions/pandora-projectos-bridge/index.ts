@@ -480,8 +480,8 @@ const searchMemory = async (
     const typedTask = isRecord(typedContext?.task) ? typedContext.task : null;
     const typedAuthorization = isRecord(typedContext?.authorization) ? typedContext.authorization : null;
     const typedInvariants = isRecord(typedContext?.invariants) ? typedContext.invariants : null;
-    const typedAllowed = Array.isArray(typedAuthorization?.allowedTypedClasses)
-      ? typedAuthorization.allowedTypedClasses.filter((entry): entry is string => typeof entry === "string")
+    const typedAllowed: string[] = Array.isArray(typedAuthorization?.allowedTypedClasses)
+      ? (typedAuthorization.allowedTypedClasses as unknown[]).filter((entry: unknown): entry is string => typeof entry === "string")
       : [];
     policyMemory = Array.isArray(typedContext?.policyMemory) ? typedContext.policyMemory.filter(isRecord) : [];
     advisoryMemory = Array.isArray(typedContext?.advisoryMemory) ? typedContext.advisoryMemory.filter(isRecord) : [];
@@ -499,7 +499,7 @@ const searchMemory = async (
       typedAuthorization?.canRead === true &&
       typedAuthorization?.retrievalDoesNotGrantExecutionAuthority === true &&
       typedAllowed.length === allowedTypedClasses.length &&
-      typedAllowed.every((entry) => allowedTypedSet.has(entry)) &&
+      typedAllowed.every((entry: string) => allowedTypedSet.has(entry)) &&
       typedInvariants?.advisoryMemoryNeverAuthorizes === true &&
       typedInvariants?.policiesSeparatedFromAdvisoryMemory === true &&
       typedInvariants?.policyRequiresRuntimeScopeValidityRevocationValidation === true &&
