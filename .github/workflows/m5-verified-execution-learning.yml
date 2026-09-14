@@ -31,7 +31,8 @@ jobs:
             if docker exec m5-003-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
             sleep 1
           done
-          docker logs m5-003-postgres          exit 1
+          docker logs m5-003-postgres
+          exit 1
       - name: Create production-shaped baseline
         run: docker exec -i m5-003-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_verified_execution_learning_baseline.sql
       - name: Apply M5-003 additive migration
