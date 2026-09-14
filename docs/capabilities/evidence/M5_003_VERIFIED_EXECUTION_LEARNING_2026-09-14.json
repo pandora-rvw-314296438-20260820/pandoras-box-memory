@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0.0",
+  "taskId": "M5-003",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/m5-003-verified-outcome-learning-20260914",
+  "baseMain": "d29738e32d7bda9bb4d61be2b27853220427cbc9",
+  "candidateHeadBeforeCIFixes": "5a1bfd86600850f35ee2ef624fab0c2171a28df4",
+  "candidateHeadAfterPostgresRoleFix": "d0585617e55316de10ea825571f8f3aa78f70baf",
+  "purpose": "Learn only from verified continuous-execution outcomes by creating review-governed typed Memory proposals; never write canonical Memory directly and never convert learning into execution authority.",
+  "acceptedLearningKinds": ["fact", "procedure", "failure_lesson", "outcome"],
+  "authorityBoundary": {
+    "requiresExactActiveProductionGrant": true,
+    "requiresCanPropose": true,
+    "expandsGrant": false,
+    "writesCanonicalMemoryDirectly": false,
+    "grantsPolicyAuthorization": false,
+    "rawExecutionEnvelopePersisted": false
+  },
+  "successLearningRule": "fact/procedure/outcome require pandora-continuous-execution-v2 terminal result, verified=true, exact verification receipt in execution evidence, and matching Activity Theatre result projection.",
+  "failureLearningRule": "failure_lesson requires failed/blocked terminal truth, exact blocker evidence from the execution result, plus independent incident verification evidence.",
+  "reviewRule": "All accepted learning becomes append-only pending review candidate/review rows before any canonical promotion.",
+  "ciDefectsReconciled": [
+    "Disposable PostgreSQL baseline now creates Supabase-shaped anon, authenticated, and service_role roles required by migration privilege statements.",
+    "Capability Registry Gate requires an evidence/registry co-change for tracked source changes; this evidence file satisfies that contract and records the M5-003 authority boundary."
+  ],
+  "verification": {
+    "localStaticContract": "PASS before PR publication",
+    "m5_001_m5_002_regressions": "PASS before PR publication",
+    "memoryLifecycleObservabilityHardening": "PASS before PR publication",
+    "migrationAuthority": "PASS before PR publication",
+    "secretScan": "PASS before PR publication",
+    "exactHeadCIRequiredAfterThisEvidenceCommit": true,
+    "disposablePostgresRequired": true,
+    "capabilityRegistryGateRequired": true
+  },
+  "governance": {
+    "repositoryWriteAttempt": "GitHub App first",
+    "githubAppResult": "403 Resource not accessible by integration",
+    "fallback": "approved Supabase Vault-backed Github_supabase governed writer",
+    "credentialExposed": false
+  },
+  "productionMutationPerformed": false,
+  "secretsIncluded": false
+}
