@@ -1,0 +1,44 @@
+name: M5 Verified Execution Learning
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Verify M5-003 learning contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 scripts/verify_m5_verified_execution_learning.py
+      - run: python3 -m py_compile scripts/verify_m5_verified_execution_learning.py
+      - run: bash scripts/check_no_literal_secrets.sh
+
+  postgres:
+    name: Prove M5-003 in disposable PostgreSQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Start isolated PostgreSQL 16
+        run: |
+          docker run -d --name m5-003-postgres -e POSTGRES_PASSWORD=postgres postgres:16
+          for i in $(seq 1 30); do
+            if docker exec m5-003-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs m5-003-postgres
+          exit 1
+      - name: Create production-shaped baseline
+        run: docker exec -i m5-003-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_verified_execution_learning_baseline.sql
+      - name: Apply M5-003 additive migration
+        run: docker exec -i m5-003-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260914100000_m5_verified_execution_learning_v1.sql
+      - name: Exercise verified result and failure-learning boundaries
+        run: docker exec -i m5-003-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/m5_verified_execution_learning_behavior.sql
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f m5-003-postgres >/dev/null 2>&1 || true
