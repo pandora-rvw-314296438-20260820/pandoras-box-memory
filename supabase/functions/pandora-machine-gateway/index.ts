@@ -11,6 +11,13 @@ import {
   MEMORY_SEARCH_RESOURCE,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";
+import {
+  buildVerifiedLearningRpcArgs,
+  parseVerifiedLearningInput,
+  VERIFIED_LEARNING_ACTION,
+  VERIFIED_LEARNING_TOOL,
+  verifiedLearningResource,
+} from "./verified-learning-policy.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -500,6 +507,42 @@ function toolList() {
         additionalProperties: false,
       },
     },
+    {
+      name: VERIFIED_LEARNING_TOOL,
+      description:
+        "Propose a verified execution lesson for review-governed Pandora Memory. Only verified M1 results or independently verified incidents are eligible. This never writes canonical Memory directly.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          namespace: { type: "string", enum: ["real_life", "au"] },
+          projectId: { type: "string", format: "uuid" },
+          execution: { type: "object" },
+          learningKind: {
+            type: "string",
+            enum: ["fact", "procedure", "failure_lesson", "outcome"],
+          },
+          learningSummary: { type: "string", minLength: 1, maxLength: 2000 },
+          promotionBasis: { type: "string", minLength: 1, maxLength: 4096 },
+          confidence: { type: "number", minimum: 0, maximum: 1 },
+          incidentVerificationRef: { type: ["string", "null"], maxLength: 500 },
+          additionalEvidenceRefs: {
+            type: "array",
+            maxItems: 32,
+            items: { type: "string", minLength: 1, maxLength: 500 },
+          },
+        },
+        required: [
+          "namespace",
+          "projectId",
+          "execution",
+          "learningKind",
+          "learningSummary",
+          "promotionBasis",
+          "confidence",
+        ],
+        additionalProperties: false,
+      },
+    },
   ];
 }
 
@@ -561,6 +604,76 @@ async function callTool(req: Request, body: RpcRequest) {
           active_memory_items: count ?? 0,
           internal_processing_independent_of_mcp: true,
           auth_mode: identity.authMode,
+        }),
+      }],
+    });
+  }
+
+  if (name === VERIFIED_LEARNING_TOOL) {
+    let parsed;
+    try {
+      parsed = parseVerifiedLearningInput(args);
+    } catch (error) {
+      const reason = error instanceof Error
+        ? error.message
+        : "verified_learning_invalid";
+      return rpcError(body.id, -32602, reason);
+    }
+
+    const resource = verifiedLearningResource(parsed.projectId);
+    const identity = await authenticate(
+      req,
+      "pandora_memory",
+      VERIFIED_LEARNING_ACTION,
+      resource,
+    );
+    if (identity instanceof Response) return identity;
+
+    const { data, error } = await admin.rpc(
+      "memory_ingest_verified_execution_learning_v1",
+      buildVerifiedLearningRpcArgs(
+        identity.userId,
+        identity.principalKey,
+        parsed,
+      ),
+    );
+
+    if (error) {
+      await audit(
+        identity,
+        requestId,
+        identity.authMode,
+        "pandora_memory",
+        VERIFIED_LEARNING_ACTION,
+        resource,
+        "error",
+        "verified_learning_rpc_error",
+        Date.now() - started,
+      );
+      return rpcError(body.id, -32603, "memory_verified_learning_failed");
+    }
+
+    await audit(
+      identity,
+      requestId,
+      identity.authMode,
+      "pandora_memory",
+      VERIFIED_LEARNING_ACTION,
+      resource,
+      "allow",
+      "authorized",
+      Date.now() - started,
+    );
+
+    return rpc(body.id, {
+      content: [{
+        type: "text",
+        text: JSON.stringify({
+          ok: true,
+          learning: data,
+          canonical_memory_written: false,
+          requires_review: true,
+          authorization_effect: "none",
         }),
       }],
     });
@@ -665,7 +778,7 @@ Deno.serve(async (req: Request) => {
       oauth_authorization_server: AUTHORIZATION_SERVER,
       oauth_resource_metadata: RESOURCE_METADATA_URL,
       workload_header: "x-pandora-workload-oidc",
-      tools: ["memory_health", "memory_search"],
+      tools: ["memory_health", "memory_search", VERIFIED_LEARNING_TOOL],
     });
   }
 
