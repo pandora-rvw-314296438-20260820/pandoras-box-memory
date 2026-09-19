@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "task": "PLP Enterprise verified-learning owner-resolution fix",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "fix/plp-memory-owner-resolution-20260919",
+  "baseMainSha": "c463c7d9c1adf998080d432a41839618ab6cf9f9",
+  "reason": "Production migration preflight exposed that PostgreSQL does not provide min(uuid). The identity uniqueness guard remains authoritative; the single resolved user is now selected directly with LIMIT 1.",
+  "verification": {
+    "migrationAppliedBeforeFix": false,
+    "transactionRolledBack": true,
+    "contractTestsRequired": true,
+    "exactTreePublicationRequired": true,
+    "providerReadbackRequired": true
+  },
+  "safety": {
+    "grantScopeUnchanged": true,
+    "canApprove": false,
+    "forcePushUsed": false,
+    "branchProtectionBypassed": false
+  }
+}

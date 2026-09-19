@@ -16,6 +16,8 @@ test("PLP Enterprise gets an exact non-legacy workload identity", () => {
     /owner:mbanatao:project:enterprise:environment:production/,
   );
   assert.doesNotMatch(migration, /ProjectOS/i);
+  assert.doesNotMatch(migration, /min\s*\(\s*gp\.user_id\s*\)/i);
+  assert.match(migration, /select gp\.user_id[\s\S]*limit 1;/i);
 });
 
 test("verified learning is enabled only for exact PLP project proposals", () => {
