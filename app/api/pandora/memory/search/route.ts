@@ -1,2 +1,44 @@
+import { NextRequest, NextResponse } from "next/server";
+import { proxyPandoraMemoryRequest } from "@/lib/services/pandora-memory-bridge-client";
+
 export const dynamic = "force-dynamic";
-export { POST } from "../../../projectos/memory/search/route";
+
+const ALLOWED_KEYS = new Set([
+  "namespace",
+  "project_id",
+  "project_key",
+  "query",
+  "current_task",
+  "max_items",
+  "include_semantic",
+  "include_profiles",
+  "include_recent",
+  "include_open_loops",
+  "canon_statuses",
+  "intent",
+  "intent_domain",
+  "intentDomain",
+  "action_mode",
+  "actionMode",
+  "consequential",
+  "required_capabilities",
+  "requiredCapabilities",
+]);
+
+export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, {
+      status: 400,
+    });
+  }
+
+  const payload = Object.fromEntries(
+    Object.entries(body).filter(([key]) => ALLOWED_KEYS.has(key)),
+  );
+
+  return proxyPandoraMemoryRequest(request, {
+    action: "search",
+    ...payload,
+  });
+}
