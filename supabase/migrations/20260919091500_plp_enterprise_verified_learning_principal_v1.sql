@@ -16,12 +16,13 @@ begin
     raise exception 'PLP Memory owner identity is not uniquely resolvable' using errcode='42501';
   end if;
 
-  select min(gp.user_id)
+  select gp.user_id
     into v_memory_user_id
   from public.gateway_principals gp
   where gp.principal_type = 'oauth_user_client'
     and gp.is_active is true
-    and gp.user_id is not null;
+    and gp.user_id is not null
+  limit 1;
 
   insert into public.gateway_principals(
     principal_key,
