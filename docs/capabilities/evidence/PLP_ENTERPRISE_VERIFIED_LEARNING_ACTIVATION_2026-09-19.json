@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "task": "PLP Enterprise verified-learning production authorization",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/plp-enterprise-memory-principal-20260919",
+  "baseMainSha": "17d3efcd29bf18e8870bf866b3528f6bace12f73",
+  "implementationCommitBeforeEvidenceRegistration": "2244ccff3cba6ef57c86d4b2d65f1ef241b38e14",
+  "implementationTreeSha": "312b8bc81637f13632406c02258b5b9a1710a69d",
+  "purpose": "Authorize the exact PLP Enterprise production workload to propose verified execution lessons into review-governed Pandora Memory without granting canonical Memory approval authority.",
+  "authorityBoundary": {
+    "workloadPrincipal": "plp-enterprise-production",
+    "environment": "production",
+    "projectId": "5536b0be-cd7b-454e-ab27-57574539699d",
+    "namespace": "real_life",
+    "canPropose": true,
+    "canApprove": false,
+    "directCanonicalMemoryWrite": false,
+    "reviewRequired": true,
+    "authorizationEffect": "none"
+  },
+  "acceptedLearningKinds": [
+    "fact",
+    "procedure",
+    "failure_lesson",
+    "outcome"
+  ],
+  "verification": {
+    "contractTests": "3/3 PASS",
+    "exactTreePublication": true,
+    "providerReadback": true,
+    "sourceRegistryUpdate": true,
+    "productionActivationPerformed": false
+  },
+  "safety": {
+    "credentialsIncluded": false,
+    "crossTenantGrant": false,
+    "forcePushUsed": false,
+    "branchProtectionBypassed": false
+  }
+}
