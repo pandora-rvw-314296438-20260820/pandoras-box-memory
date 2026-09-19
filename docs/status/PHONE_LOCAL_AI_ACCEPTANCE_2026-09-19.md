@@ -24,9 +24,9 @@
 - Kotlin/native Android compilation: passed.
 - Badging, permissions and APK signing evidence captured.
 - Evidence branch: `build/phone-local-ai-evidence-b78f328c467b-20260920`.
-- Draft GitHub Release asset ID: `575610524`.
+- Private GitHub prerelease asset ID: `575610524`.
 - GitHub asset digest independently reports `sha256:2775acce3eb32d2446d6541c4e92a338707d714fe66e0c0a536202f238074565`.
-- Draft asset filename: `pandora-phone-local-b78f328c467b7d0f3312d1c88cdbe7c00be2c29d.apk`.
+- Prerelease tag: `phone-local-ai-b78f328c467b-20260920`.\n- Asset filename: `pandora-phone-local-b78f328c467b7d0f3312d1c88cdbe7c00be2c29d.apk`.
 
 ## Verified implementation facts
 - Android-local llama.cpp GGUF inference is integrated into the existing Pandora conversation.
