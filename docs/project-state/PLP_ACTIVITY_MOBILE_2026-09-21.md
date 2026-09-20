@@ -125,6 +125,19 @@ The page includes:
 - dedicated `Ask Pandora about activity…` persistent composer
 - quick commands for attention, guest activity, and team updates
 
+## CI migration-parity failure and correction
+
+The first full Node 24 run after the Activity migrations failed exactly one test: the Supabase migration-parity contract. The source repository contained nine provider-applied PLP forward migrations that were not yet admitted to the test's governed forward-migration inventories. The correction explicitly added those exact migration filenames to the governed-forward, appended-history, and post-snapshot allowlists rather than weakening or deleting the parity check.
+
+Corrective source commit:
+- `7e7c9542059411e736854ce63e0b37f852768a0d`
+
+Exact provider result on that commit:
+- Pandora Node 24 run `35531474410`: PASS
+- canonical Node 24 gate: PASS
+
+Lesson: every provider-applied migration must be immediately represented in source and in the explicit migration-parity governance inventory. Never weaken parity to make CI green.
+
 ## Current source candidate
 
 At the time of this record, the latest activity-related source work is on PR #654. Exact-source CI for the final candidate is still running. Do not promote this implementation to release-certified from this document until the exact candidate SHA and CI outcome are appended after provider readback.
