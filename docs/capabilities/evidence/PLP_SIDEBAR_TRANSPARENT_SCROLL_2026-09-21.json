@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-21",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 669,
+  "sourceHeadSha": "5ea7c926d2d12c5883aff4d4aba8b5c935a54a55",
+  "mergedMainSha": "36883a93319ce160400c34bb7023978dde3fbc5c",
+  "problem": {
+    "surface": "PLP/Pandora left navigation drawer",
+    "symptom": "Menu items disappeared when scrolling into the upper-left header region.",
+    "rootCause": "The header/search controls were laid out above the SingleChildScrollView, so the scroll viewport physically began below the header and content could not travel underneath it."
+  },
+  "implementation": {
+    "approach": "Use a full-height scrolling layer inside a Stack with the Pandora header/search controls as a transparent positioned overlay.",
+    "preserved": [
+      "full-screen layout",
+      "sidebar dimensions",
+      "navigation hierarchy",
+      "existing menu contents"
+    ],
+    "regressionTest": "Scroll Guest Experience into the header region, verify it remains geometrically present there, then scroll back down."
+  },
+  "verification": {
+    "exactHeadGreen": true,
+    "workflows": {
+      "mobileExactSource": {
+        "runId": 35546741754,
+        "conclusion": "success"
+      },
+      "plpAndroidExactSource": {
+        "runId": 35546741770,
+        "conclusion": "success"
+      },
+      "node24": {
+        "runId": 35546741721,
+        "conclusion": "success"
+      },
+      "dependencyReview": {
+        "runId": 35546741729,
+        "conclusion": "success"
+      },
+      "canonicalReleaseEvidence": {
+        "runId": 35546741720,
+        "conclusion": "success"
+      },
+      "edgeSourceArtifact": {
+        "runId": 35546741732,
+        "conclusion": "success"
+      },
+      "windowsWorkerContract": {
+        "runId": 35546741745,
+        "conclusion": "success"
+      }
+    },
+    "pullRequestMerged": true,
+    "mainReadbackMatchedMergeSha": true
+  },
+  "coordinator": {
+    "initialDirectMergeResult": "blocked",
+    "initialBlockReason": "Required status check Pandora coordinator / integration was expected.",
+    "authoritativeSnapshotGeneration": 9,
+    "authoritativeSnapshotRevision": "gdrive-revision-755",
+    "authoritativeSnapshotSha256": "b3b5a0a7f5de0fa6bb0cfc3aaa5ffaa08ff5c8f62bf0846566f7d437bd983a8e",
+    "decision": "PASS",
+    "decisionGeneration": 1,
+    "checkRunId": 106176536202,
+    "mergeClaimId": "aa56112a-c3ef-41de-9d56-88770d115ff6",
+    "mergeFence": "released"
+  },
+  "durableLessons": [
+    "For protected Pandora merges, green CI alone is not sufficient when the coordinator check is required; publish a valid coordinator decision and claim the merge fence before external merge transport.",
+    "Do not weaken or bypass repository rules to finish a merge; satisfy the coordinator contract, merge the exact verified head, then complete the merge claim and verify main readback.",
+    "For transparent fixed sidebar headers, the scroll viewport must extend behind the overlay; moving the scroll boundary or padding the viewport only recreates clipping."
+  ]
+}
