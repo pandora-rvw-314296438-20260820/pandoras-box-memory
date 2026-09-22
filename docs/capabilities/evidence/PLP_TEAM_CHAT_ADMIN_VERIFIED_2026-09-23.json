@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-23",
+  "status": "verified",
+  "scope": "PLP Team administration through Ask Pandora chat",
+  "source": {
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+    "pullRequest": 686,
+    "headSha": "78e576dd3db581b662585ddfbb1071e31617a853",
+    "mergeSha": "89831f7f0698503e71639711548ddbc48181994d",
+    "treeSha": "e117275a4e9c7f79c7125ce7d44cca72b3bca9f3"
+  },
+  "verifiedBehavior": [
+    "Ask Pandora recognizes Team and Access administration commands before generic capability/model dispatch.",
+    "Missing invite email, role, or target is collected across follow-up chat turns.",
+    "Invite and membership mutations delegate to the governed pandora-user-admin backend.",
+    "User and assistant clarification/mutation turns are durably persisted.",
+    "Verified Team mutations emit provider readback and Activity Theatre evidence.",
+    "Mobile direct chat bypasses the old generic SQL preflight for Team administration requests."
+  ],
+  "providerState": {
+    "pandoraIntelligenceChatVersion": 66,
+    "pandoraIntelligenceChatExactMainMatch": true,
+    "pandoraUserAdminVersion": 57,
+    "verifyJwt": true
+  },
+  "verification": {
+    "denoCheck": "PASS",
+    "nodeContracts": "PASS",
+    "flutterAnalyze": "PASS",
+    "githubRequiredChecks": "PASS",
+    "coordinatorIntegration": "PASS",
+    "plpNativeAndroidExactSource": "PASS"
+  },
+  "releaseArtifact": {
+    "artifactId": 10719869109,
+    "sourceSha": "78e576dd3db581b662585ddfbb1071e31617a853",
+    "sourceTreeEqualsMergedMainTree": true,
+    "package": "com.banataosystems.pandora.plp",
+    "version": "0.4.0-rc.13+20",
+    "targetAbi": "arm64-v8a",
+    "apkSha256": "5d88a426c2ac97bfd7b3c9e03f60b8d6f4d32b1fed95de80ed91af3773b8f5b5"
+  },
+  "boundary": "No real PLP staff account was modified for the chat-lane verification. Physical Redmi acceptance remains separate from source/build/backend verification."
+}
