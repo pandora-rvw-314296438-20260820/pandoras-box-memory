@@ -10,7 +10,8 @@
   "mergedMainSha": "04c16cebb909fd0ee10ce51b9e7cd18cdfb06c69",
   "ownerIntent": {
     "summary": "Align PLP owner-workspace pages with Pandora's metallic black/silver/warm-gold profile-logo design language and remove repeated decorative page logos.",
-    "drawer": "Keep the PLP navigation drawer essentially pure black."
+    "drawer": "Keep the PLP navigation drawer essentially pure black.",
+    "sharedSidePanel": "Preserve PR #697's pure-black invariant: the shared Pandora side panel and the PLP navigation side panel remain #000000, while the chat canvas remains #000000."
   },
   "implementation": {
     "palette": {
@@ -32,7 +33,15 @@
       "apps/pandora-mobile/lib/app/plp_navigation_drawer.dart",
       "apps/pandora-mobile/lib/features/enterprise/plp_team_management_screen.dart"
     ],
-    "logoPolicy": "Repeated PLP image logos and the drawer PandoraMark were removed from page/header/hero/navigation chrome; functional icons remain. The owners/workspace selector was not changed."
+    "logoPolicy": "Repeated PLP image logos and the drawer PandoraMark were removed from page/header/hero/navigation chrome; functional icons remain. The owners/workspace selector was not changed.",
+    "predecessorInvariant": {
+      "sourcePullRequest": 697,
+      "mergedMainSha": "61d07a2cd051072f09eae0559c27b7c5d37325b8",
+      "sharedPandoraSidePanel": "#000000",
+      "plpNavigationSidePanel": "#000000",
+      "chatCanvas": "#000000",
+      "preserveNavigationSpacingSelectedStatesButtonsDividers": true
+    }
   },
   "executionTransport": {
     "requestedPath": "Supabase Vault-backed GitHub API",
@@ -95,7 +104,16 @@
       "plpImageLogoRefsInTargetFiles": 0,
       "pandoraMarkRefsInDrawer": 0,
       "drawerPureBlack": true,
-      "paletteReadbackMatched": true
+      "paletteReadbackMatched": true,
+      "sharedPandoraSidePanelPureBlack": true,
+      "plpNavigationSidePanelPureBlack": true,
+      "chatCanvasPureBlack": true,
+      "pureBlackRegressionContractPresent": "test/side-panel-pure-black-contract.test.js",
+      "currentMainReadback": {
+        "pandoraChatShell": "Drawer background and _PandoraSidePanel Material both use PandoraV2Colors.canvas.",
+        "pandoraCanvasToken": "PandoraV2Colors.canvas = Color(0xFF000000).",
+        "plpNavigationDrawer": "DecoratedBox background = Color(0xFF000000); legacy 0xF20A0C10 is absent."
+      }
     },
     "visualRuntimeAcceptance": {
       "performed": false,
@@ -119,6 +137,7 @@
     "A protected merge must satisfy the trusted Pandora coordinator check and merge fence; do not bypass repository rules.",
     "For a light-to-dark token inversion, dark feature panels whose background used the old ink token must be explicitly remapped to a dark surface token or they will invert to light.",
     "Removing decorative brand images should preserve semantic navigation and functional icons, and merged-main source readback should confirm no target-file image references remain.",
-    "Exact-source CI and diff review prove source/build integrity but do not substitute for post-merge visual runtime acceptance on the target device."
+    "Exact-source CI and diff review prove source/build integrity but do not substitute for post-merge visual runtime acceptance on the target device.",
+    "Treat PR #697's pure-black side-panel behavior as a preserved visual invariant: shared Pandora side panel #000000, PLP navigation side panel #000000, chat canvas #000000; later brand-alignment work must not regress it."
   ]
 }
