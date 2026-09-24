@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "recordedAt": "2026-09-25",
-  "status": "verified_source_merge",
+  "status": "superseded_by_owner_correction",
   "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
   "sourcePullRequest": 699,
   "sourceBranch": "chatgpt/plp-metallic-night-no-logos-20260925",
@@ -138,6 +138,21 @@
     "For a light-to-dark token inversion, dark feature panels whose background used the old ink token must be explicitly remapped to a dark surface token or they will invert to light.",
     "Removing decorative brand images should preserve semantic navigation and functional icons, and merged-main source readback should confirm no target-file image references remain.",
     "Exact-source CI and diff review prove source/build integrity but do not substitute for post-merge visual runtime acceptance on the target device.",
-    "Treat PR #697's pure-black side-panel behavior as a preserved visual invariant: shared Pandora side panel #000000, PLP navigation side panel #000000, chat canvas #000000; later brand-alignment work must not regress it."
-  ]
+    "Treat PR #697's pure-black side-panel behavior as a preserved visual invariant: shared Pandora side panel #000000, PLP navigation side panel #000000, chat canvas #000000; later brand-alignment work must not regress it.",
+    "PR #699's black PLP content-page interpretation was incorrect and is superseded by PR #701. Do not infer that matching Pandora's black profile mark means making PLP content pages black."
+  ],
+  "supersededBy": {
+    "sourcePullRequest": 701,
+    "sourceHeadSha": "545b3bd0ddff8023ef8ef9669046f2c0e7e69740",
+    "mergedMainSha": "b90be71c7a2bca2498cd8b0d2843c297b3ae9dbf",
+    "correction": "Owner clarified that PLP content pages must remain the approved light/ivory editorial design. Only the shared Pandora side panel and PLP navigation side panel are pure black. Pandora and PLP logos belong in the side panel; repeated decorative logos remain removed from page headers/heroes."
+  },
+  "ownerIntentCorrection": {
+    "plpContentPages": "Light/ivory editorial luxury; not black.",
+    "sharedPandoraSidePanel": "#000000",
+    "plpNavigationSidePanel": "#000000",
+    "sidePanelPandoraMark": "present",
+    "sidePanelPlpLogo": "present",
+    "pageHeaderHeroDecorativeLogos": "removed"
+  }
 }
