@@ -1,0 +1,36 @@
+
+{
+  "schemaVersion": 1,
+  "recordType": "verified_learning_resolution",
+  "recordedAt": "2026-09-25T02:50:00+08:00",
+  "supersedesFollowUpIn": "docs/capabilities/evidence/PR692_ANDROID_VERIFIER_DRIFT_2026-09-25.json",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "pullRequest": 693,
+  "reviewedHeadSha": "ba2f00809564d622281254c0d3a305b7277d349f",
+  "mergeSha": "3ac81d6d1e6753da48d18e785eb642f6e821cce5",
+  "resolved": {
+    "path": ".pandora-verifier/verify.sh",
+    "expectedAppVersion": "0.4.0-rc.14+21",
+    "versionNameRule": "derive prefix before + from EXPECTED_APP_VERSION",
+    "versionCodeRule": "derive suffix after + from EXPECTED_APP_VERSION",
+    "mergedMainBlobSha": "38add5ebf566d49ce5e6ca9b23b7c4575d197842"
+  },
+  "verification": {
+    "node24": "success",
+    "windows": "success",
+    "dependencyReview": "success",
+    "edgeSourceArtifact": "success",
+    "canonicalReleaseEvidence": "success",
+    "mobileExactSourceGate": "success",
+    "coordinatorCheckRunId": 107781313078,
+    "mergeClaimId": "4cd96e54-7b66-4bb5-b913-d025a195528f",
+    "mergeFenceFinalState": "released",
+    "mainReadbackSha": "3ac81d6d1e6753da48d18e785eb642f6e821cce5"
+  },
+  "durableLesson": "All Android identity verifiers now derive package versionCode/versionName from the canonical app version value rather than duplicating release literals; future version bumps should change the source version, not verifier literals.",
+  "provenance": {
+    "classification": "verified provider readback",
+    "github": "canonical PR, workflow, file, and main-ref readback",
+    "supabase": "governed coordinator state and merge fence"
+  }
+}
