@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-25",
+  "status": "verified_source_merge",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 701,
+  "sourceBranch": "chatgpt/plp-restore-light-pages-side-logos-20260925",
+  "sourceBaseSha": "04c16cebb909fd0ee10ce51b9e7cd18cdfb06c69",
+  "sourceHeadSha": "545b3bd0ddff8023ef8ef9669046f2c0e7e69740",
+  "mergedMainSha": "b90be71c7a2bca2498cd8b0d2843c297b3ae9dbf",
+  "correction": {
+    "supersedesPullRequest": 699,
+    "ownerClarification": "PLP content pages must not be black. Keep the approved light/ivory editorial luxury pages. Pure black applies to the shared Pandora side panel and PLP navigation side panel. Restore the Pandora mark and PLP workspace logo in the side panel.",
+    "pageLogoPolicy": "Repeated decorative PLP logos remain removed from page headers/heroes/content surfaces; side-panel identity logos remain present."
+  },
+  "verifiedVisualSourceContract": {
+    "plpContentPages": "light/ivory editorial",
+    "sharedPandoraSidePanel": "#000000",
+    "plpNavigationSidePanel": "#000000",
+    "chatCanvas": "#000000",
+    "sidePanelPandoraMark": "present",
+    "sidePanelPlpWorkspaceLogo": "present",
+    "sidePanelChrome": "preserve black/silver/warm-gold treatment",
+    "navigationSpacingSelectedStatesButtonsDividers": "preserved"
+  },
+  "sourceReadback": {
+    "targetFilesChecked": 8,
+    "allPlpContentSurfacesUseLightCanvas": true,
+    "plpNavigationDrawerPureBlack": true,
+    "pandoraMarkPresentInDrawer": true,
+    "plpWorkspaceLogoPresentInDrawer": true,
+    "decorativePlpAssetReferencesOnContentPages": 0
+  },
+  "verification": {
+    "exactHeadGreen": true,
+    "workflows": {
+      "node24": {
+        "runId": 36071257344,
+        "conclusion": "success"
+      },
+      "dependencyReview": {
+        "runId": 36071257444,
+        "conclusion": "success"
+      },
+      "windowsWorkerContract": {
+        "runId": 36071257413,
+        "conclusion": "success"
+      },
+      "canonicalReleaseEvidence": {
+        "runId": 36071257570,
+        "conclusion": "success"
+      },
+      "edgeSourceArtifact": {
+        "runId": 36071257401,
+        "conclusion": "success"
+      },
+      "plpAndroidExactSource": {
+        "runId": 36071257483,
+        "conclusion": "success"
+      },
+      "mobileExactSource": {
+        "runId": 36071257538,
+        "conclusion": "success"
+      }
+    },
+    "independentReview": {
+      "primaryAttempt": "kimi-k3",
+      "primaryAttemptResult": "rate_limited_429",
+      "fallbackProvider": "gemini-3.5-flash-lite",
+      "providerResponseId": "pbC1arzRIOz01e8Pm5ubmAM",
+      "decision": "PASS",
+      "criticalHighHoldDispositions": []
+    },
+    "mergedMainReadbackMatched": true,
+    "physicalDeviceVisualAcceptance": false
+  },
+  "coordinator": {
+    "authoritativeSnapshotGeneration": 13,
+    "authoritativeSnapshotRevision": "gdrive-revision-772",
+    "authoritativeSnapshotSha256": "5ca2ff5e5d283df55e5f8c8bc9eded799e532ccc9a3419a99900a0a45c8218c4",
+    "decision": "PASS",
+    "decisionGeneration": 1,
+    "checkRunId": 107876377402,
+    "mergeClaimId": "ea3ae56f-fecb-4d8a-bed0-ca9a9e053e6e",
+    "mergeFence": "released"
+  },
+  "artifact": {
+    "appVersion": "0.4.0-rc.14+21",
+    "package": "com.banataosystems.pandora.plp",
+    "sourceSha": "545b3bd0ddff8023ef8ef9669046f2c0e7e69740",
+    "apkSha256": "bd8f38fc608f3052aa3ad0e3c1ef4a0b381e4de54ea13fa9e598e7ca00eef52c",
+    "apkSizeBytes": 70884481,
+    "workflowArtifactId": 10838767890,
+    "physicalDeviceVerified": false
+  },
+  "durableLessons": [
+    "Do not translate Pandora's black profile-logo identity into black PLP content pages unless the owner explicitly requests a dark PLP content theme.",
+    "Pure black #000000 is a side-panel/chat-canvas invariant, not a global PLP page-canvas rule.",
+    "Pandora and PLP identity logos belong in the PLP side panel; removing repeated decorative logos from content pages does not imply removing side-panel identity marks.",
+    "When an owner clarification supersedes an earlier visual interpretation, mark the older Memory evidence as superseded so the incorrect interpretation cannot be reused."
+  ]
+}
