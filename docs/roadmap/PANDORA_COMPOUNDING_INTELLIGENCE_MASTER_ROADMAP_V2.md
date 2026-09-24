@@ -515,3 +515,8 @@ The system is never “done” merely because this state is reached; Phase 12 co
 # Next autonomous action
 
 Continue Phase 1 with an evidence-first registry foundation across the recorded original aggregate, exact canonical baseline, and time-bounded live provider state. Do not classify original files or claim completion until archive bytes/per-file evidence is recovered. In parallel, implement and review the highest-value safe source-only recovery candidates without production mutation.
+
+
+# Domain roadmaps
+
+- [Pandora Tax & Compliance Operating System — Master Plan V1](./PANDORA_TAX_COMPLIANCE_OPERATING_SYSTEM_MASTER_PLAN_V1.md) — owner-approved documented architecture for evidence-backed tax operations. It is a design/roadmap record, not implementation proof; live filing and payment remain gated by verified adapters, exact-source evidence, security controls, and authorized human approval.
