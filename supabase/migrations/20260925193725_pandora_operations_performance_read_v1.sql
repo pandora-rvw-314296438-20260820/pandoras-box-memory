@@ -19,6 +19,7 @@ declare
   id_pattern constant text := '^[A-Za-z0-9][A-Za-z0-9._:/-]{0,179}$';
   uuid_pattern constant text := '^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$';
   time_pattern constant text := '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$';
+  secret_pattern constant text := '(^|[^A-Za-z0-9])(github_pat_|gh[pousr]_[A-Za-z0-9_]{16,}|sb_secret_|AIza[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{16,}|Bearer[[:space:]]+[A-Za-z0-9._~-]{12,}|-----BEGIN [^-]*PRIVATE KEY)';
 begin
   if p_memory_user_id is null or p_project_id is null or p_namespace is distinct from 'real_life'
     or p_environment is null or p_environment not in ('production','preview','development','test')
@@ -47,7 +48,7 @@ begin
   end loop;
   if (p_request->'provider'<>'null'::jsonb and not coalesce(p_request->>'provider' ~ '^[a-z][a-z0-9._-]{0,119}$',false))
     or (p_request->'configurationDigest'<>'null'::jsonb and not coalesce(p_request->>'configurationDigest' ~ '^[a-f0-9]{64}$',false))
-    or p_request::text ~* '(github_pat_|gh[pousr]_[A-Za-z0-9_]{16,}|sb_secret_|AIza[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{16,}|Bearer[[:space:]]+[A-Za-z0-9._~-]{12,}|-----BEGIN [^-]*PRIVATE KEY)' then
+    or p_request::text ~* secret_pattern then
     raise exception 'OPS_MEMORY_PERFORMANCE_FILTER_INVALID' using errcode='22023';
   end if;
   select * into principal from public.pandora_service_principals
@@ -84,7 +85,7 @@ begin
     if scanned=128 then truncated:=true; exit; end if;
     scanned:=scanned+1; d:=m.metadata; bad:=false;
     if jsonb_typeof(d) is distinct from 'object' or octet_length(d::text)>65536
-      or d::text ~* '(github_pat_|gh[pousr]_[A-Za-z0-9_]{16,}|sb_secret_|AIza[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9_-]{16,}|Bearer[[:space:]]+[A-Za-z0-9._~-]{12,}|-----BEGIN [^-]*PRIVATE KEY)' then
+      or d::text ~* secret_pattern then
       invalid:=invalid+1; continue;
     end if;
     foreach k in array array['provider','model','taskClass'] loop

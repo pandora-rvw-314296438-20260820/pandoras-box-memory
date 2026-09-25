@@ -24,6 +24,20 @@ insert into public.memory_items values('66666666-6666-4666-8666-666666666666','4
  'real_life','33333333-3333-4333-8333-333333333333','provider_performance','hard_canon',true,null,null,
  'fixture-reviewer',clock_timestamp()-interval '30 minutes',clock_timestamp()+interval '30 days',null,pg_temp.performance_metadata());
 create temp table performance_original as select * from public.memory_items;
+update public.memory_items
+ set metadata=metadata||jsonb_build_object(
+   'model','risk-assessment-model-v12',
+   'evidenceRefs',jsonb_build_array('task-verification-run-0001')
+ );
+select pg_temp.check(
+  pg_temp.call(pg_temp.performance_request()||'{"model":"risk-assessment-model-v12"}'::jsonb)->>'state'='available',
+  'ordinary sk substring in model filter is not a secret'
+);
+select pg_temp.check(
+  pg_temp.call(pg_temp.performance_request()||'{"model":"risk-assessment-model-v12"}'::jsonb)#>>'{records,0,evidenceRefs,0}'='task-verification-run-0001',
+  'ordinary sk substring in evidence ref is retained'
+);
+update public.memory_items set metadata=(select metadata from performance_original);
 select pg_temp.check(pg_temp.call()->>'state'='available','approved evidence available');
 select pg_temp.check(pg_temp.call()#>>'{records,0,sampleCount}'='3','sample count from canonical metadata');
 select pg_temp.check(pg_temp.call()#>'{records,0,billedWindowCostMicros}'='null'::jsonb,'unknown billed cost remains null');
