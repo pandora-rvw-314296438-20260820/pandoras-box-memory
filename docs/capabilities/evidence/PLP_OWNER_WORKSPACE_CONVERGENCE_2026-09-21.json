@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-21",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 654,
+  "sourceHeadSha": "663c89ca6416922a916dcdc0de717ee6ab861008",
+  "mergedMainSha": "4c0f4369f7b92be632bf403170dadcad8e7fc1c3",
+  "coordinator": {
+    "checkRunId": 106152538266,
+    "snapshotGeneration": 9,
+    "snapshotRevision": "gdrive-revision-755",
+    "mergeFenceReleased": true
+  },
+  "verifiedState": {
+    "ownerWorkspaceExpandedByDefault": true,
+    "separateBusinessSectionPresent": false,
+    "destinations": [
+      "Home",
+      "Overview",
+      "Operations",
+      "Vision",
+      "Guest Experience",
+      "Team & Access",
+      "Revenue",
+      "Needs You",
+      "Activity",
+      "Settings"
+    ]
+  },
+  "verification": {
+    "pullRequestMerged": true,
+    "mainReadbackMatchedMergeSha": true,
+    "reviewThreadsResolved": true,
+    "protectedChecksGreen": true,
+    "supabaseForwardRepairVerified": true
+  },
+  "durableLessons": [
+    "Re-read the active PR head before declaring a previously correct UI change complete.",
+    "Historical correct commits do not prove current branch truth.",
+    "Already-applied database migrations require forward repair plus clean-replay source correction.",
+    "Protected merge requirements are part of implementation and must not be bypassed."
+  ]
+}
