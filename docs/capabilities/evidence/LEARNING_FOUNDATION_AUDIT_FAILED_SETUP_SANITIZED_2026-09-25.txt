@@ -1,0 +1,516 @@
+âœ– exact committed catalog inventory is repeatable and content addressed (211.8916ms)
+âœ– inventory cannot claim runtime, test, training, or mutation authority (0.1977ms)
+âœ– dirty working-tree text cannot replace exact committed source (0.1224ms)
+âœ– all moving or malformed source references are rejected before Git reads (0.1116ms)
+âœ– unknown or inherited repository kinds cannot become source targets (0.1422ms)
+âœ– wrong repository and credential-bearing remotes fail without URL disclosure (0.1364ms)
+âœ– configured canonical SSH is accepted without any network transport (0.1208ms)
+âœ– a blob identity is not accepted as a commit identity (0.1276ms)
+âœ– missing Git evidence is unavailable, never an empty successful result (0.1741ms)
+âœ– historical source metadata is visible but never rewritten or trusted as current (0.1812ms)
+âœ– missing exact paths are facts, not proof that the entire capability is absent (0.0925ms)
+âœ– raw skill body content does not enter inventory output (0.1309ms)
+âœ– malformed catalog JSON cannot become no-relevant-skills evidence (0.0931ms)
+âœ– unsupported schema versions fail explicitly (0.0673ms)
+âœ– duplicate skills and missing exact entrypoint objects fail closed (0.0849ms)
+âœ– shard traversal, duplicate shards, and excessive shard counts are bounded (0.0813ms)
+âœ– entrypoint traversal and non-string IDs cannot become file references (0.0714ms)
+âœ– denominator mismatch is explicit instead of silently shrinking coverage (0.0697ms)
+âœ– Git replacement refs cannot substitute a different tree for the requested SHA (0.0718ms)
+âœ– memory inventory is separately repository-bound and does not invent a skill catalog (0.0651ms)
+âœ– invalid time budgets cannot make execution unbounded (0.0696ms)
+âœ– CLI argument schema rejects unknown, missing, and duplicate options (0.1112ms)
+âœ– CLI returns an explicit sanitized error and a nonzero exit (0.0639ms)
+â„¹ tests 23
+â„¹ suites 0
+â„¹ pass 0
+â„¹ fail 23
+â„¹ cancelled 0
+â„¹ skipped 0
+â„¹ todo 0
+â„¹ duration_ms 585.415
+
+âœ– failing tests:
+
+test at test\pandora-learning-foundation-audit.test.js:56:1
+âœ– exact committed catalog inventory is repeatable and content addressed (211.8916ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:68:1
+âœ– inventory cannot claim runtime, test, training, or mutation authority (0.1977ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:78:1
+âœ– dirty working-tree text cannot replace exact committed source (0.1224ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:88:1
+âœ– all moving or malformed source references are rejected before Git reads (0.1116ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:93:1
+âœ– unknown or inherited repository kinds cannot become source targets (0.1422ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:96:1
+âœ– wrong repository and credential-bearing remotes fail without URL disclosure (0.1364ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:103:1
+âœ– configured canonical SSH is accepted without any network transport (0.1208ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:108:1
+âœ– a blob identity is not accepted as a commit identity (0.1276ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:111:1
+âœ– missing Git evidence is unavailable, never an empty successful result (0.1741ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:115:1
+âœ– historical source metadata is visible but never rewritten or trusted as current (0.1812ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:123:1
+âœ– missing exact paths are facts, not proof that the entire capability is absent (0.0925ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:129:1
+âœ– raw skill body content does not enter inventory output (0.1309ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:132:1
+âœ– malformed catalog JSON cannot become no-relevant-skills evidence (0.0931ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:136:1
+âœ– unsupported schema versions fail explicitly (0.0673ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:140:1
+âœ– duplicate skills and missing exact entrypoint objects fail closed (0.0849ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:146:1
+âœ– shard traversal, duplicate shards, and excessive shard counts are bounded (0.0813ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:152:1
+âœ– entrypoint traversal and non-string IDs cannot become file references (0.0714ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:158:1
+âœ– denominator mismatch is explicit instead of silently shrinking coverage (0.0697ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:162:1
+âœ– Git replacement refs cannot substitute a different tree for the requested SHA (0.0718ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:171:1
+âœ– memory inventory is separately repository-bound and does not invent a skill catalog (0.0651ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:179:1
+âœ– invalid time budgets cannot make execution unbounded (0.0696ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:182:1
+âœ– CLI argument schema rejects unknown, missing, and duplicate options (0.1112ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
+
+test at test\pandora-learning-foundation-audit.test.js:186:1
+âœ– CLI returns an explicit sanitized error and a nonzero exit (0.0639ms)
+  Error: Command failed: git -C <TEMP_FIXTURE_ROOT>\fixture-1 -c core.autocrlf=false init -q
+  fatal: unable to access '\\.\nul': Invalid argument
+
+      at genericNodeError (node:internal/errors:986:15)
+      at wrappedFn (node:internal/errors:540:14)
+      at checkExecSyncError (node:child_process:942:11)
+      at execFileSync (node:child_process:978:15)
+      at git (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:22:10)
+      at fixture (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:37:3)
+      at TestContext.<anonymous> (<SOURCE_WORKTREE>\test\pandora-learning-foundation-audit.test.js:52:10)
+      at async TestHook.run (node:internal/test_runner/test:1409:7) {
+    status: 128,
+    signal: null,
+    output: [ null, '', "fatal: unable to access '\\\\.\\nul': Invalid argument\n" ],
+    pid: [REDACTED_SUBPROCESS_PID],
+    stdout: '',
+    stderr: "fatal: unable to access '\\\\.\\nul': Invalid argument\n"
+  }
