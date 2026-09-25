@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "record_type": "memory_security_source_evidence",
+  "title": "Private Memory table RLS hardening source evidence",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "pull_request": 64,
+  "migration_path": "supabase/migrations/20260917104726_enable_rls_on_remaining_private_memory_tables_20260917.sql",
+  "migration_blob_sha": "02cba0f0e931deb1c3531902056a390ab68e2ba5",
+  "security_adjudication": "reviewed",
+  "access_path": "Seven existing private-schema tables enable row-level security. No anon/authenticated policies or grants are added. Existing service-role/BYPASSRLS behavior and grants are unchanged by the migration.",
+  "test_plan": [
+    "Verify row_security is enabled on all seven named private tables.",
+    "Verify no new anon/authenticated policies or grants are introduced.",
+    "Verify existing service-role access remains unchanged.",
+    "Run exact-head Memory security adjudication, hardening, secret, observability, and namespace-isolation gates."
+  ],
+  "rollback": "A governed rollback may disable RLS on exactly the seven named tables only after re-confirming the original private-only access boundary; this record does not authorize rollback.",
+  "owner": "THEMIS / Pandora Memory security governance",
+  "truth_boundary": {
+    "source_change_only": true,
+    "production_migration_applied_not_claimed": true,
+    "runtime_acceptance_not_claimed": true,
+    "canonical_memory_promotion_not_claimed": true
+  }
+}
