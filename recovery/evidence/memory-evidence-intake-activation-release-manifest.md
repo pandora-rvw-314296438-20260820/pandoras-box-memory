@@ -2,52 +2,43 @@
 
 Status: **CURRENT LIVE BASELINE / REVIEW-GATED**
 
-Observed during Task 5 / PR #8 preparation on 2026-09-01 (Asia/Manila). This document records provider readback and source invariants. It does not replace fresh provider verification before deployment.
+Observed September 25, 2026 through the Supabase provider and the exact-source Vault-backed release transport. This records component evidence, not deployment or review authority for the candidate below.
 
 ## Current live provider baseline
 
 - Canonical repository: `pandora-rvw-314296438-20260820/pandoras-box-memory`
-- Pre-change Memory main: `ae5aeb6a8a98582df9b4905381d3cff3298cc887`
-- Live Edge Function rollback baseline: `pandora-projectos-bridge@16`
+- Live source commit: `1215efacf47acb08aa463e0863efa51c616a43b3`
+- Live Edge Function rollback baseline: `pandora-projectos-bridge@28`
 - Live Edge status: `ACTIVE`
-- Live Edge package SHA-256: `3c5857fa787cbfc039100722d32aacfea080743ba6c5b998fdf6854d3467a18b`
-- Live Edge auth mode: `verify_jwt=false`; protected operations use the bridge's explicit Vercel OIDC verification and service-principal checks.
-- Production principal: `projectos-mcpmaster-production`
+- Live Edge package SHA-256: `9aaf8151db2fbea0686191cea06a60adb5158e15adbe5b3b3851cdb0b0a13e13`
+- Live index raw SHA-256: `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b`
+- Live Edge auth mode: `verify_jwt=false`; protected operations use explicit Vercel OIDC signature, principal, and project-grant validation.
+- Compatibility production principal: `projectos-mcpmaster-production`
 - Principal scopes: `memory:health`, `memory:read`, `memory:write`
 - Allowed namespace: `real_life`
-- Canonical project key: `mcpmaster-pandoras-box`
+- Historical project alias: `mcpmaster-pandoras-box`; current project key: `pandoras-box`.
 - Canonical project UUID: `7c686cbd-d968-49d5-86cc-918f5e777bd2`
-- Production grant: `can_read=true`, `can_propose=true`, `can_approve=false`, active, not revoked.
-- Live migration history: `20260820113000` is absent from live migration history.
-
-The recovered `check_memory_evidence_activation.mjs` previously assumed that the absent migration and its rollback file were the production activation authority. Fresh provider readback disproves that assumption: the current principal already has `memory:write`, the current project/grant binding is active, and the migration is not recorded as applied. The stale migration-dependent CI contract is therefore retired rather than recreated.
+- Production Box grant: `can_read=true`, `can_propose=true`, `can_approve=false`, active and not revoked.
+- Historical migration observation: `20260820113000` is absent from live migration history; it is not the activation authority.
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b`
-- Current candidate preserves exact-project Memory isolation and requires explicit `approved_by` plus `approved_at` receipts before canonical Memory is retrievable through the bridge, planning context, or ContextPack v2.
-- Search requires explicit canonical project identity plus an active `can_read` project grant.
-- Search returns exact-project `memory_items` only through the service-role-only `memory_projectos_search_scoped_v1` indexed RPC, which independently re-checks user, namespace, project, environment, active read grant, approved canon, current-head status, revocation, and allowed record types.
-- Indexed ProjectOS search migration raw SHA-256: `8a75a5e61e47dec4ec021805e5340ae2cd989621c5b0b2ecd64dbc732634092e`; Git blob: `1c95c8a81a7c9872ce6180eef77ad0825f9ee794`.
-- Evidence-candidate intake remains review-gated and continues to require `memory:write` plus an active `can_propose` project grant.
-- Candidate responses continue to state `canonical_memory_written=false`.
-- One forward migration adds decision/outcome lineage columns and service-role-only binding RPCs; the frozen historical migration baseline is unchanged.
-- **No scope mutation in this PR.**
+- Candidate bridge raw SHA-256: `8906e952f3f9cbb6b1a31f716d9b8331dbf810497c22d9e309b6c8b29d2e22c0`
+- The candidate is not yet deployed. Typed results and approved legacy results are deduplicated and limited by count and UTF-8 bytes. Omitted records are reported as truncation, not absent knowledge.
+- `memory_task_context_v1` retains typed scope, validity, revocation and authority separation. `memory_projectos_search_scoped_v1` independently restricts the legacy path to approved, current, project/namespace/user/grant-matching records.
+- Existing review-gated evidence intake is preserved. Candidate receipts still state `canonical_memory_written=false`.
+- **No scope mutation in this PR.** Typed grants must not be expanded before the reviewed compatibility fix is merged, deployed, and verified.
 
-The Box caller side is already live from merge `a996aa3e116f6ed9659040c2f42b72e7d83246fc` on `mcpmaster.vercel.app`, so strict Memory-side project enforcement can be deployed without a caller compatibility gap.
+## Rollback and concurrent-change safety
 
-## Rollback baseline
+Immediately before deployment re-read `pandora-projectos-bridge@28` and its package digest. Stop and re-baseline if another release changed it. Keep the last verified provider source and config; restore that exact bundle only after a demonstrated regression. Never substitute a decades-old or historical named baseline for the actual preceding release.
 
-Immediately before deployment, re-read the live Edge Function and require the expected pre-change identity `pandora-projectos-bridge@16` with package SHA-256 `3c5857fa787cbfc039100722d32aacfea080743ba6c5b998fdf6854d3467a18b`. If it has changed, stop and re-baseline rather than overwriting concurrent work.
+Preserve current principal scopes and project grants. Do not run stale activation rollback SQL. Verify missing identity, wrong project, wrong namespace, revoked grants, unapproved records and expired records remain denied or omitted. Preserve candidates and review items; never delete or bulk approve them as part of deployment.
 
-If post-deployment verification fails:
+## Historical evidence retained
 
-1. Restore the pre-change bridge provider source corresponding to the v16 rollback baseline and verify provider readback.
-2. Preserve the current principal scopes and project grant; do not run the stale never-applied activation rollback SQL.
-3. Verify health and evidence-candidate intake still fail closed or remain review-gated as appropriate.
-4. Preserve pending candidates/review items. Do not delete, rewrite, approve, or promote them automatically.
-5. Record the failed deployment and rollback evidence before further changes.
+The September 1 manifest previously used `pandora-projectos-bridge@16`, package `3c5857fa787cbfc039100722d32aacfea080743ba6c5b998fdf6854d3467a18b`. That was a historical observation, not the September 25 live state. Version 27 was observed during the audit, then superseded by the exact-source v28 release. Git history preserves the earlier manifest and rollback instructions.
 
 ## Authorization boundary
 
-This manifest is an evidence and rollback contract, not an authorization to approve Memory candidates or promote canonical Memory. **No automatic canonical Memory promotion** is permitted. Fresh provider truth and the current owner execution instruction remain required for consequential production actions.
+**No automatic canonical Memory promotion** is permitted. A genuine independent exact-head review, fresh provider verification, and the current owner instruction are separate requirements. A successful component deployment does not prove beneficial decision influence or physical-device acceptance.

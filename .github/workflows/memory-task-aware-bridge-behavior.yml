@@ -20,4 +20,4 @@ jobs:
           persist-credentials: false
       - run: npm ci --ignore-scripts
       - run: node --test tests/task-aware-bridge-behavior.test.cjs
-      - run: npx --yes deno-bin@2.2.7 check supabase/functions/pandora-projectos-bridge/index.ts
+      - run: npx --yes deno-bin@2.2.7 check --node-modules-dir=none supabase/functions/pandora-projectos-bridge/index.ts

@@ -1,0 +1,28 @@
+{
+    "kind": "component_remediation_evidence",
+    "liveBridge": {
+        "version": 28,
+        "sourceCommit": "1215efacf47acb08aa463e0863efa51c616a43b3",
+        "sourceSha256": "5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b",
+        "packageSha256": "9aaf8151db2fbea0686191cea06a60adb5158e15adbe5b3b3851cdb0b0a13e13",
+        "providerReadback": "Supabase get_edge_function"
+    },
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "schemaVersion": 1,
+    "behaviorEvidence": {
+        "jobId": 107964203105,
+        "sourceCommit": "7dc2c66c66e5ed009cc06914cdfab17a637e1491",
+        "failureReason": "Deno resolved npm dependencies using the Next.js node_modules tree; explicit none mode is the candidate correction",
+        "jobConclusion": "failure",
+        "workflowRunId": 36101318436,
+        "behaviorTestsFailed": 0,
+        "behaviorTestsPassed": 6
+    },
+    "independentReview": "required_not_claimed",
+    "candidateDeployment": "not_deployed",
+    "candidateIndexSha256": "8906e952f3f9cbb6b1a31f716d9b8331dbf810497c22d9e309b6c8b29d2e22c0",
+    "typedGrantActivation": "not_performed",
+    "canonicalMemoryPromotion": "not_performed",
+    "physicalDeviceAcceptance": "not_claimed",
+    "candidateDenoConfigSha256": "33b8c879bcaad7d9a44f4feafbd6c51f6670a0d8948360504c2ffd59f80b0496"
+}

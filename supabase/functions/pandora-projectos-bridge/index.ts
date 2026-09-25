@@ -1,5 +1,5 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import "jsr:@supabase/functions-js@2.117.1/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2.117.1";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "npm:jose@5.10.0";
 
 const PRINCIPAL_KEY = "projectos-mcpmaster-production";
@@ -724,7 +724,7 @@ const searchMemory = async (
     retrieval_truncated: retrievalTruncated,
     legacy_retrieval_mode: "project_scoped_keyword_recency",
     retrieval_reasoning_summary: retrievalMode === "m5_task_aware_bounded_with_legacy"
-      ? "ProjectOS received only task-relevant, bounded, typed Memory already permitted by the exact project grant. Policy Memory is separated from advisory Memory and retrieval does not grant execution authority."
+      ? "Pandora received bounded task-aware Memory alongside permitted, approved legacy knowledge from the exact project. Policy Memory remains separate; legacy records remain advisory and retrieval grants no execution authority."
       : "ProjectOS retained the existing exact-project keyword/recency retrieval because this grant does not yet authorize M5 typed classes; no grant expansion was inferred.",
     warnings,
   });

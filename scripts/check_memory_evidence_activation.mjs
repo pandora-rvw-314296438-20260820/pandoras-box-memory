@@ -51,8 +51,8 @@ assert.ok(
 for (const marker of [
   "CURRENT LIVE BASELINE / REVIEW-GATED",
   "pandora-rvw-314296438-20260820/pandoras-box-memory",
-  "pandora-projectos-bridge@16",
-  "3c5857fa787cbfc039100722d32aacfea080743ba6c5b998fdf6854d3467a18b",
+  "pandora-projectos-bridge@28",
+  "9aaf8151db2fbea0686191cea06a60adb5158e15adbe5b3b3851cdb0b0a13e13",
   "verify_jwt=false",
   "projectos-mcpmaster-production",
   "memory:health`, `memory:read`, `memory:write",
