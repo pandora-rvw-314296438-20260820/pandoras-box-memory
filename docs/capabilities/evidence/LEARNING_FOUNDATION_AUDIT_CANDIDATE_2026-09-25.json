@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "lesson_candidate",
+  "evidence_id": "learning-foundation-audit-candidate-2026-09-25",
+  "recorded_at": "2026-09-25T16:18:23.975190+00:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "source_base_sha": "2d193c0667a037e815f50a1c1c81fd578eaf9d92",
+  "review_state": "pending_review",
+  "approved_canonical": false,
+  "indexed_by_memory_service": false,
+  "training_eligibility": "NOT_EVALUATED_NOT_ADMITTED",
+  "task_ids": [
+    "P0-01",
+    "P0-02",
+    "P0-03"
+  ],
+  "tracker": "https://docs.google.com/spreadsheets/d/19_1tfUVVTOvYGGnWR_mUfuRkiu3l44dGDW01U8ocMlA/edit",
+  "actual_session": "P0-FOUNDATION-20260925",
+  "scope": {
+    "project": "Pandora platform engineering",
+    "namespace": "learning-foundation",
+    "sensitivity": "sanitized engineering evidence; no tenant content or credentials",
+    "permitted_use": "review candidate; scoped engineering reference with freshness and provenance checks",
+    "consent_reference": "owner current explicit execution and authorized Memory-review-path directive",
+    "retention": "subject to existing reviewed Memory retention policy; no new retention authority",
+    "cross_tenant_data_included": false,
+    "raw_polling_or_process_logs_included": false
+  },
+  "provenance": {
+    "implementation_repository": "pandora-rvw-314296438-20260820/pandoras-box",
+    "pull_request": 732,
+    "exact_head": "970dd6c609e712f6ca3974fcd67d4fb8d407b2cc",
+    "reconciled_base_sha": "b63e3a710534aa530ba26f8a654f60aabc6e7a93",
+    "original_inventory_sha": "fd037d0f3329ad295dc8f3b2b84ad473e538ff7d",
+    "memory_inventory_sha": "2d193c0667a037e815f50a1c1c81fd578eaf9d92",
+    "source_authoring_origin": "AI-assisted code and synthetic fixtures authored in the active ChatGPT session; tests and commits do not erase model-generated origin",
+    "provider_model_revision": "NOT_EXPOSED_BY_EXECUTION_RUNTIME",
+    "verification_provider": "Desktop Commander observed commands plus canonical GitHub SSH/API readback",
+    "exact_head_test_receipt": "https://github.com/pandora-rvw-314296438-20260820/pandoras-box/pull/732#issuecomment-5835613980",
+    "release_handoff": "https://github.com/pandora-rvw-314296438-20260820/pandoras-box/issues/714#issuecomment-5835627556",
+    "evidence_paths": [
+      "docs/learning-foundation/evidence/2026-09-25-box.json",
+      "docs/learning-foundation/evidence/2026-09-25-box-reconciled.json",
+      "docs/learning-foundation/evidence/2026-09-25-memory.json",
+      "docs/learning-foundation/evidence/2026-09-25-execution.json"
+    ]
+  },
+  "verification": {
+    "classification": "verified_fact",
+    "command": [
+      "node",
+      "--test",
+      "test/pandora-learning-foundation-audit.test.js",
+      "test/pandora-skills-registry.test.js",
+      "test/pandora-skills-runtime.test.js",
+      "test/pandora-internal-skill-exact-source-contract.test.js"
+    ],
+    "source_sha": "970dd6c609e712f6ca3974fcd67d4fb8d407b2cc",
+    "started_at": "2026-09-25T16:12:10.081191+00:00",
+    "runtime": "Node24.21.0 on Windows Server2025; Git version in source execution receipt",
+    "test_fixture_kind": "synthetic offline Git repositories; no model/provider inference",
+    "sample_size": 41,
+    "passed": 41,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_ms": 17305.1538,
+    "log_sha256": "bb8b160ab02720b9460cad321e2e033e45f58113f62f1e96481492730564c940",
+    "worktree_clean_after_run": true,
+    "same_head_read_back_from_github": true,
+    "independent_verifier": "NOT_YET_REVIEWED",
+    "latency_metric_scope": "local regression suite wall-clock, not inference latency",
+    "incremental_paid_inference_calls": 0,
+    "total_infrastructure_cost": "NOT_MEASURED"
+  },
+  "lessons": [
+    {
+      "lesson_id": "windows-git-null-config-path",
+      "evidence_class": "verified_fact",
+      "problem": "The initial new regression suite failed during fixture setup when Windows Git read GIT_CONFIG_GLOBAL set to the Node os.devNull device-namespace path.",
+      "failed_attempt": "Use the Node portable null-device constant without checking compatibility of the Git subprocess.",
+      "verified_root_cause": "The actual Git build rejected that device-namespace path as an invalid global-config file.",
+      "correction": "Use NUL for Git global-config isolation on Windows and os.devNull elsewhere. Keep global/system config isolation; do not disable the guard to make tests pass.",
+      "outcome": "New offline fixtures23/23 passed; the combined41/41 suite subsequently passed on exact published head.",
+      "applies_when": "A Node tool passes null-device paths to Git on Windows; validate actual subprocess behavior.",
+      "limitations": "Linux compatibility is covered by source branch logic, not a Linux execution performed in this session. No universal Windows Git compatibility claim.",
+      "negative_evidence": {
+        "initial_exit_code": 1,
+        "initial_log_sha256": "e1430ab1a8a1a129f2ec5635c517351ebda7bcf012944a6e1f6f77e0e89606f0",
+        "failure_stage": "fixture setup; individual test bodies were not established"
+      },
+      "positive_evidence": {
+        "focused_log_sha256": "ebb80ad84ea8628b4f3e87aa6b86af8e5fc703d230af771b4d0c8fbcae68b711",
+        "exact_head_log_sha256": "bb8b160ab02720b9460cad321e2e033e45f58113f62f1e96481492730564c940"
+      }
+    },
+    {
+      "lesson_id": "exact-source-inventory-versus-local-state",
+      "evidence_class": "verified_fact",
+      "problem": "Dirty root checkouts and mutable refs could make a source inventory describe the wrong bytes.",
+      "correction": "Use fresh isolated worktrees for edits; require full commit identity and read committed objects for inventory; reject mutable refs; ignore Git replacement refs; prevent network fetching and inherited Git redirection.",
+      "outcome": "Negative offline fixtures prove dirty working-tree text and Git replacement refs do not change the requested exact-source inventory; both canonical repository audits succeeded.",
+      "limitations": "Local origin configuration is not provider attestation. Pair the receipt with current canonical GitHub readback. Metadata inventory does not execute a provider/model or grant authority."
+    },
+    {
+      "lesson_id": "historical-catalog-origin-versus-current-authority",
+      "evidence_class": "verified_fact",
+      "problem": "The existing51-skill57-capability catalog, schema and validator retain a historical now-blacklisted repository binding, while the trust adapter copies its source metadata into EXPERIMENTAL definitions.",
+      "correction": "The auditor reports the mismatch without contacting the blacklisted repository or overwriting historical origin. Future contract repair must separate historical provenance from current exact canonical source authority.",
+      "outcome": "Existing catalog validation and18 relevant tests passed, but the exact-source audit still reports the historical/noncanonical source-binding finding.",
+      "limitations": "No runtime exploit or production incident was demonstrated. No source-identity/trust projection repair or promotion was performed here.",
+      "followup": "P1 existing catalog/schema/source-binding work, separately scoped after dependency and incumbent reconciliation."
+    }
+  ],
+  "owner_decision": {
+    "evidence_class": "owner_decision",
+    "effective_directive": "Current owner execution instruction supplied for this session on2026-09-25",
+    "research_boundary": "RDP may be used for engineering and controlled local-model research; production phone-local/cloud architecture remains unchanged.",
+    "supersession": {
+      "reference": "Memory PR104, head d074e9e089c22740f4dcb0218f0ce2dcc7fbb04c",
+      "scope": "Narrowly supersedes blanket prohibition of controlled research on RDP, not production independence, privacy, spending or safety requirements.",
+      "historical_proposal_preserved": true
+    },
+    "new_model_approval": false,
+    "training_authorization": false,
+    "gpu_or_capacity_spend_authorized": false
+  },
+  "rdp_evidence": {
+    "evidence_class": "provider_evidence",
+    "connector_ping_at": "2026-09-25T16:14:48.466Z",
+    "guest_observed_at": "2026-09-25T16:15:06.8401278Z",
+    "operating_system": "Microsoft Windows Server 2025 Datacenter",
+    "logical_processors": 4,
+    "free_memory_kib": 11821660,
+    "free_disk_bytes": 29942792192,
+    "display_adapter": "Microsoft Basic Display Adapter",
+    "service_status": [
+      {
+        "Name": "AmazonSSMAgent",
+        "Status": "Running"
+      },
+      {
+        "Name": "sshd",
+        "Status": "Running"
+      },
+      {
+        "Name": "TermService",
+        "Status": "Running"
+      }
+    ],
+    "process_identity_check": "Bounded top12 process names/PIDs/start times/working sets observed locally; raw process records intentionally excluded from candidate. No process was inferred to be a usable LLM.",
+    "incumbent": "OPS-INTEGRATION-ROUTER-20260925 lease remains CLAIMED in allowed Facebook tracker; no conflicting source or global resource lease taken.",
+    "hardware_scope": "Connector and Windows guest observations, not refreshed cloud instance billing/type/capacity attestation.",
+    "model_usability_verified": false,
+    "gpu_acceleration_verified": false,
+    "emulator_mutated": false,
+    "rdp_off_production_independence_tested": false
+  },
+  "memory_influence": {
+    "retrieved_source": "docs/capabilities/evidence/OPERATIONS_ROOM_ROUTING_CONTEXT_RECOVERY_2026-09-25.json",
+    "retrieved_source_sha": "2d193c0667a037e815f50a1c1c81fd578eaf9d92",
+    "decision_effect": "Used the existing verified lesson to reconcile provider state before retrying ambiguous actions and preserve exact-head/proof-stage distinctions. Reused existing skill catalog and respected incumbent Memory93.",
+    "outcome_improvement": "No duplicated Router/Memory93 implementation or ambiguous duplicate PR creation; causal speed or quality improvement was not measured."
+  },
+  "boundaries": {
+    "source_pr_merged_at_recording": false,
+    "deployment_performed": false,
+    "provider_or_model_benchmark_run": false,
+    "training_started": false,
+    "runtime_memory_mutation": false,
+    "automatic_canon_promotion": false,
+    "reviewer_independence_self_certified": false,
+    "projectos_dependency_introduced": false,
+    "unknown_processes_terminated": false,
+    "files_deleted": false
+  },
+  "review_requirements": [
+    "Verify referenced exact-source receipts and actual test evidence, including failed setup run.",
+    "Confirm narrow owner boundary supersession without widening production or privacy authority.",
+    "Check current Box732/Memory main before any operational decision; this is a timestamped record.",
+    "Approve or reject through the existing authorized Memory review path; a merged document alone does not prove service indexing or runtime approval.",
+    "Keep dataset admission separate; AI-assisted code and verified Memory evidence are not automatically authorized training material."
+  ]
+}
