@@ -1,48 +1,102 @@
 -- Additive Pandora-native Memory bridge identity and search surface.
 -- Historical migration files remain intact for replay integrity.
+-- PANDORA_SECURITY_ADJUDICATION: reviewed
+-- PANDORA_SECURITY_ACCESS_PATH: Vercel OIDC workload is bound directly to pandora-mcpmaster-production and explicit native project grants; no anon/authenticated/private-schema grant is added. The retired ProjectOS principal is only deactivated, never consulted for authorization.
+-- PANDORA_SECURITY_TEST_PLAN: exact-head bridge behavior, hardening, namespace-isolation, secret-scan, registry evidence, migration replay, and live readback of the existing Pandora-native principal/grants.
+-- PANDORA_SECURITY_ROLLBACK: disable the Pandora-native consumer under governed rollback; preserve native identity/evidence rows and never reactivate the retired ProjectOS principal.
+-- PANDORA_SECURITY_OWNER: THEMIS / Pandora Memory security governance
 
-insert into public.pandora_service_principals (
-  principal_key, provider, issuer, audience, subject, owner_id, project_id,
-  project_name, environment, memory_user_id, allowed_namespaces, scopes, is_active
-)
-select
-  'pandora-mcpmaster-production', provider, issuer, audience, subject, owner_id, project_id,
-  project_name, environment, memory_user_id, allowed_namespaces, scopes, is_active
-from public.pandora_service_principals
-where principal_key = concat('project', 'os-mcpmaster-production')
-on conflict (principal_key) do update set
-  provider = excluded.provider,
-  issuer = excluded.issuer,
-  audience = excluded.audience,
-  subject = excluded.subject,
-  owner_id = excluded.owner_id,
-  project_id = excluded.project_id,
-  project_name = excluded.project_name,
-  environment = excluded.environment,
-  memory_user_id = excluded.memory_user_id,
-  allowed_namespaces = excluded.allowed_namespaces,
-  scopes = excluded.scopes,
-  is_active = excluded.is_active,
-  updated_at = now();
+do $pandora_native$
+declare
+  v_memory_user_id uuid;
+begin
+  if (
+    select count(distinct gp.user_id)
+    from public.gateway_principals gp
+    where gp.principal_type = 'oauth_user_client'
+      and gp.is_active is true
+      and gp.user_id is not null
+  ) <> 1 then
+    raise exception 'Pandora Memory owner identity is not uniquely resolvable' using errcode='42501';
+  end if;
 
-insert into public.pandora_project_grants (
-  principal_key, project_id, environment, allowed_record_types,
-  can_read, can_propose, can_approve, is_active, revoked_at, revocation_reason
-)
-select
-  'pandora-mcpmaster-production', project_id, environment, allowed_record_types,
-  can_read, can_propose, can_approve, is_active, revoked_at, revocation_reason
-from public.pandora_project_grants
-where principal_key = concat('project', 'os-mcpmaster-production')
-on conflict (principal_key, project_id, environment) do update set
-  allowed_record_types = excluded.allowed_record_types,
-  can_read = excluded.can_read,
-  can_propose = excluded.can_propose,
-  can_approve = excluded.can_approve,
-  is_active = excluded.is_active,
-  revoked_at = excluded.revoked_at,
-  revocation_reason = excluded.revocation_reason,
-  updated_at = now();
+  select gp.user_id
+    into v_memory_user_id
+  from public.gateway_principals gp
+  where gp.principal_type = 'oauth_user_client'
+    and gp.is_active is true
+    and gp.user_id is not null
+  limit 1;
+
+  insert into public.pandora_service_principals (
+    principal_key, provider, issuer, audience, subject, owner_id, project_id,
+    project_name, environment, memory_user_id, allowed_namespaces, scopes, is_active
+  ) values (
+    'pandora-mcpmaster-production',
+    'vercel_oidc',
+    'https://oidc.vercel.com/mbanatao',
+    'https://vercel.com/mbanatao',
+    'owner:mbanatao:project:mcpmaster:environment:production',
+    'team_3yw1CN59ce4pj5SwyQGCAqN3',
+    'prj_Y5rZVcq8xJVzHVt4uvfmg9wPvXMk',
+    'mcpmaster',
+    'production',
+    v_memory_user_id,
+    array['real_life']::text[],
+    array['memory:health','memory:read','memory:write']::text[],
+    true
+  )
+  on conflict (principal_key) do update set
+    provider = excluded.provider,
+    issuer = excluded.issuer,
+    audience = excluded.audience,
+    subject = excluded.subject,
+    owner_id = excluded.owner_id,
+    project_id = excluded.project_id,
+    project_name = excluded.project_name,
+    environment = excluded.environment,
+    memory_user_id = excluded.memory_user_id,
+    allowed_namespaces = excluded.allowed_namespaces,
+    scopes = excluded.scopes,
+    is_active = true,
+    updated_at = now();
+
+  insert into public.pandora_project_grants (
+    principal_key, project_id, environment, allowed_record_types,
+    can_read, can_propose, can_approve, is_active, revoked_at, revocation_reason
+  ) values
+    ('pandora-mcpmaster-production','382b924e-7de6-4c28-a080-eb8308caf39c'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null),
+    ('pandora-mcpmaster-production','43f619bb-ecc2-4a9a-bd56-424325eb81ac'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null),
+    ('pandora-mcpmaster-production','60e1e0ac-a131-48ee-8e22-63dfb088bfbb'::uuid,'production',array['project_identity','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null),
+    ('pandora-mcpmaster-production','7c686cbd-d968-49d5-86cc-918f5e777bd2'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth']::text[],true,true,false,true,null,null),
+    ('pandora-mcpmaster-production','a1ca3e16-8897-4c59-9ce1-cf9f8cbc0a4c'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null),
+    ('pandora-mcpmaster-production','b1b09ae4-2def-4952-9e0c-b6538b48a4db'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null),
+    ('pandora-mcpmaster-production','e6d58d44-b77b-43d4-b515-2f62b4b2026b'::uuid,'production',array['project_identity','repository','architecture','decision','roadmap','governance_rule','authentication_model','integration_state','deployment_rule','branding_requirement','source_of_truth','task','risk','artifact']::text[],true,false,false,true,null,null)
+  on conflict (principal_key, project_id, environment) do update set
+    allowed_record_types = excluded.allowed_record_types,
+    can_read = excluded.can_read,
+    can_propose = excluded.can_propose,
+    can_approve = excluded.can_approve,
+    is_active = true,
+    revoked_at = null,
+    revocation_reason = null,
+    updated_at = now();
+
+  -- Retirement cleanup only: never copy authority from or reactivate this legacy principal.
+  update public.pandora_project_grants
+     set is_active = false,
+         revoked_at = coalesce(revoked_at, now()),
+         revocation_reason = coalesce(revocation_reason, 'Retired ProjectOS principal; superseded by Pandora-native bridge'),
+         updated_at = now()
+   where principal_key = 'projectos-mcpmaster-production'
+     and environment = 'production';
+
+  update public.pandora_service_principals
+     set is_active = false,
+         updated_at = now()
+   where principal_key = 'projectos-mcpmaster-production';
+end;
+$pandora_native$;
 
 create or replace function public.memory_pandora_search_scoped_v1(
   p_user_id uuid,
