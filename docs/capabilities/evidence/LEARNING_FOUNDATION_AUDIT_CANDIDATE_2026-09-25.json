@@ -87,7 +87,23 @@
       "negative_evidence": {
         "initial_exit_code": 1,
         "initial_log_sha256": "e1430ab1a8a1a129f2ec5635c517351ebda7bcf012944a6e1f6f77e0e89606f0",
-        "failure_stage": "fixture setup; individual test bodies were not established"
+        "failure_stage": "fixture setup; individual test bodies were not established",
+        "sanitized_artifact": "docs/capabilities/evidence/LEARNING_FOUNDATION_AUDIT_FAILED_SETUP_SANITIZED_2026-09-25.txt",
+        "sanitized_artifact_sha256": "5a8a2220f58dd527f37fc12d3da7d1d7718650e6f44f47bec039b38607866410",
+        "original_log_bytes": 29609,
+        "sanitized_artifact_bytes": 27608,
+        "sanitization": {
+          "removed": "Host-specific temporary fixture/worktree prefixes, subprocess PID and trailing horizontal whitespace only. Test names, durations, errors, status, stack structure and line counts retained.",
+          "replacements": [
+            "Windows temporary fixture root -> <TEMP_FIXTURE_ROOT>",
+            "Task-specific absolute source worktree prefix -> <SOURCE_WORKTREE>",
+            "Subprocess PID value -> [REDACTED_SUBPROCESS_PID]",
+            "Trailing spaces/tabs on each line -> removed; LF line endings retained"
+          ],
+          "hash_semantics": "initial_log_sha256 identifies the private original UTF-8 log; sanitized_artifact_sha256 identifies the committed review-accessible sanitized copy. The two digests are deliberately different.",
+          "raw_original_retained_privately": true,
+          "scope": "One failed setup run as negative evidence, not routine polling or a production-process log."
+        }
       },
       "positive_evidence": {
         "focused_log_sha256": "ebb80ad84ea8628b4f3e87aa6b86af8e5fc703d230af771b4d0c8fbcae68b711",
@@ -180,5 +196,20 @@
     "Check current Box732/Memory main before any operational decision; this is a timestamped record.",
     "Approve or reject through the existing authorized Memory review path; a merged document alone does not prove service indexing or runtime approval.",
     "Keep dataset admission separate; AI-assisted code and verified Memory evidence are not automatically authorized training material."
+  ],
+  "review_repairs": [
+    {
+      "recorded_at": "2026-09-25T16:31:44.912118+00:00",
+      "reviewer": "coderabbitai",
+      "reviewed_head": "63c447fe69b361808d0565f4d8fd4519effc7891",
+      "review_state": "COMMENTED_NOT_APPROVED",
+      "thread_id": "PRRT_kwDOUEBQHM6mE6UU",
+      "comment_id": 4106551525,
+      "finding": "Initial failed-setup log digest lacked a reviewer-accessible artifact.",
+      "verified": "Original private UTF-8 log digest matches the previously published initial_log_sha256.",
+      "change": "Publish sanitized negative artifact alongside the candidate, with separate SHA256 and explicit redaction/hash semantics.",
+      "independent_reverification": "PENDING",
+      "publication_validation": "Initial staged diff check rejected trailing spaces copied from the original log. No commit or push occurred; sanitized copy now explicitly normalizes trailing whitespace. Original private log and its digest are unchanged."
+    }
   ]
 }
