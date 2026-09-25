@@ -1,0 +1,32 @@
+{
+    "after": {
+        "githubOwner": "pandora-rvw-314296438-20260820",
+        "githubRepository": "pandoras-box-memory"
+    },
+    "before": {
+        "githubOwner": "banataosystems",
+        "githubRepository": "pandoras-box-memory"
+    },
+    "namespace": "real_life",
+    "projectId": "43f619bb-ecc2-4a9a-bd56-424325eb81ac",
+    "observedAt": "2026-09-25T06:17:28.084083Z",
+    "projectKey": "memory",
+    "recordType": "provider_evidence",
+    "grantsChanged": false,
+    "schemaVersion": 1,
+    "migrationSha256": "80a72bdec54254dde0442da20e9801889a6caa577cd68aecd33c30e0da30f6a1",
+    "reviewProposals": [
+        "cb05c71c-de6a-4a19-b905-856516826cd1",
+        "9dcf29e3-b0bb-4d7c-8558-f6e9023b41ae",
+        "fa2db7b0-d4d3-44d4-ac86-729be788c749"
+    ],
+    "migrationVersion": "20260925061728",
+    "providerReadback": "Supabase pandora_projects and private.memory_project_binding_receipts",
+    "canonicalMemoryPromoted": false,
+    "priorCandidateVerification": {
+        "headSha": "744f7a1b11c9ce5cce14fab6ad0255d0cc205bc3",
+        "allCompleted": "success",
+        "workflowCount": 13,
+        "physicalDeviceAcceptance": false
+    }
+}

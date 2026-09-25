@@ -16,7 +16,7 @@ Observed September 25, 2026 through the Supabase provider and the exact-source V
 - Compatibility production principal: `projectos-mcpmaster-production`
 - Principal scopes: `memory:health`, `memory:read`, `memory:write`
 - Allowed namespace: `real_life`
-- Historical project alias: `mcpmaster-pandoras-box`; current project key: `pandoras-box`.
+- Provider-verified Box project key: `mcpmaster-pandoras-box`; Memory project key: `memory`. These identities are not interchangeable with repository names.
 - Canonical project UUID: `7c686cbd-d968-49d5-86cc-918f5e777bd2`
 - Production Box grant: `can_read=true`, `can_propose=true`, `can_approve=false`, active and not revoked.
 - Historical migration observation: `20260820113000` is absent from live migration history; it is not the activation authority.
@@ -31,7 +31,7 @@ Observed September 25, 2026 through the Supabase provider and the exact-source V
 
 ## Rollback and concurrent-change safety
 
-Immediately before deployment re-read `pandora-projectos-bridge@28` and its package digest. Stop and re-baseline if another release changed it. Keep the last verified provider source and config; restore that exact bundle only after a demonstrated regression. Never substitute a decades-old or historical named baseline for the actual preceding release.
+Immediately before deployment re-read `pandora-projectos-bridge@28` and its package digest. Stop and re-baseline if another release changed it. Keep the last verified provider source and config; restore that exact bundle only after a demonstrated regression. Never substitute a superseded historical named baseline for the actual preceding release.
 
 Preserve current principal scopes and project grants. Do not run stale activation rollback SQL. Verify missing identity, wrong project, wrong namespace, revoked grants, unapproved records and expired records remain denied or omitted. Preserve candidates and review items; never delete or bulk approve them as part of deployment.
 
