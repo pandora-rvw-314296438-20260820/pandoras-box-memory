@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "recordType": "verified_learning",
+  "recordedAt": "2026-09-25T15:56:00+08:00",
+  "taskId": "FB-002",
+  "scope": "Safe recovery of useful attribution-dashboard work from stale PR #682 into canonical Pandora source and live Supabase provider state.",
+  "source": {
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+    "stalePullRequest": 682,
+    "staleHeadSha": "d68397fd843e22133ea50f25f2fc1540d78eba9d",
+    "staleComparison": {
+      "aheadBy": 4,
+      "behindBy": 249,
+      "status": "diverged"
+    }
+  },
+  "outcome": {
+    "recoveryPullRequest": 712,
+    "recoveryReviewedHeadSha": "ec3d5f63eba5afec89dfc6fabffbcec4ea2a95d9",
+    "recoveryMergeSha": "fc61582634d8e7ab7f6298fa6e7559c0c3422e50",
+    "provenancePullRequest": 713,
+    "provenanceReviewedHeadSha": "2a6c0a0574ad38d0007966afabae6da28441eea0",
+    "finalMainSha": "6f20780765001d1a90ee31800a3948d043551afa",
+    "liveMigrationVersion": "20260925073639",
+    "liveMigrationName": "pandora_tracking_dashboard_recovery_v1"
+  },
+  "recoveredTruth": {
+    "tenantScopeColumns": [
+      "organization_id",
+      "project_id"
+    ],
+    "reportingViews": [
+      "pandora_tracking_campaign_traffic_daily_v2",
+      "pandora_tracking_campaign_financial_daily_v2"
+    ],
+    "projectAuthority": "private.project_canonical_registry(project_id)",
+    "scopeGuard": "private.pandora_tracking_validate_tenant_scope_v2",
+    "legacyPublicValidatorPresent": false,
+    "reportingAccess": "service_role-only application access; postgres owner retained",
+    "preservedCounts": {
+      "tenants": 2,
+      "campaigns": 2,
+      "clicks": 1,
+      "events": 0,
+      "costs": 0
+    }
+  },
+  "dispositionSummary": {
+    "recovered": [
+      "provider-live tenant scope/reporting migration history",
+      "deduplicated traffic reporting",
+      "currency-isolated spend/revenue/CAC/ROAS reporting"
+    ],
+    "alreadyPresent": [
+      "first-party tracking HTTP route aliases already in canonical main"
+    ],
+    "deferred": [
+      "visible attribution dashboard presentation and owner projection integration to FB-034"
+    ],
+    "discarded": [
+      "stale cache-revision-only edits",
+      "stale project workspace cache expectations",
+      "encoding-corrupted/stale UI shell changes"
+    ]
+  },
+  "safetyBoundaries": {
+    "wholesaleMergeOfPr682": false,
+    "projectosRuntimeAuthorityRestored": false,
+    "visibleDashboardActivated": false,
+    "liveAdMutation": false,
+    "spendAuthority": false,
+    "secretsExposed": false
+  },
+  "verification": {
+    "rollbackOnlyLiveSchemaDryRun": "pass",
+    "exactHeadRequiredCi": "pass_or_intentional_no_impact_skip",
+    "workerEReviewPr712": "PASS",
+    "workerEReviewPr713": "PASS",
+    "githubAppApprovalPr712": true,
+    "githubAppApprovalPr713": true,
+    "coordinatorPassAndClaimPr712": true,
+    "coordinatorPassAndClaimPr713": true,
+    "providerReadbackAfterMigration": "pass",
+    "finalMainReadback": "6f20780765001d1a90ee31800a3948d043551afa"
+  },
+  "durableLessons": [
+    "Never merge a stale recovery branch wholesale when current main has moved materially; classify every changed file.",
+    "Provider-live useful work can be recovered with history receipts plus a new forward canonical migration when the old executable carries retired dependencies.",
+    "A compatibility view is not necessarily a valid foreign-key target; verify relation kind and bind to a real canonical table/registry.",
+    "Run new migrations inside BEGIN/ROLLBACK against the live schema before PR review when safe and read-only to persistent state.",
+    "After applying a merged migration, reconcile provider-generated migration versions back into source as no-op history receipts.",
+    "Do not mark the tracker task done until source merge, provider readback, provenance reconciliation, Memory evidence, and final main readback are all complete."
+  ],
+  "provenance": {
+    "github": "PR #712 and #713 exact-head CI/reviews/merges and final main readback",
+    "supabase": "live migration application/readback, schema constraints, trigger, views, ACLs and preserved counts",
+    "memoryClassification": "verified facts and generalized recovery lessons; no secret or customer-private data"
+  }
+}

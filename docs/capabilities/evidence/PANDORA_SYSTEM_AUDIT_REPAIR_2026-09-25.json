@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "pandora.memory.evidence.v1",
+  "recordedAt": "2026-09-25T00:00:00Z",
+  "subject": "Pandora system audit repair September 2026",
+  "classification": "provider_verified_execution",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 692,
+  "sourceHeadSha": "20beba9699379f9d948fcc4c5d64a7746d3ec8ca",
+  "sourceMergeSha": "264de96286c864c4c535683cfb5331649e479c2f",
+  "currentMainObserved": "1a8abe107985be7d5f086d137b7df4714d8be64d",
+  "verifiedFacts": {
+    "ci": "PR 692 required exact-head checks passed.",
+    "liveActivity": "Stale ready jobs older than one hour = 0; completed verified jobs missing terminal state in checked seven-day window = 0.",
+    "liveSourceTruth": "PLP remains on demo/staging organization 2270b266-59da-4c39-bfd9-9f8d08352af0; bootstrap v6 reports demo_staging, customerTenantConnected=false, containsMockData=true, source state stale.",
+    "liveSecurity": "Anonymous EXECUTE revoked for audited Euro-Fish provider-backed RPCs, workspace RPC, and Pandora Vision overview RPC.",
+    "edgeParity": "Audited deployed Edge functions match current canonical main source.",
+    "releaseIdentity": "PLP Android release identity advanced to 0.4.0-rc.14+21.",
+    "localAi": "Automatic local-Qwen prewarm no longer runs synthetic generation/reset loops; warm and timeout handling hardened."
+  },
+  "userConstraint": "Do not connect PLP to the unpaid customer/production Supabase tenant until explicitly authorized after payment.",
+  "remainingAcceptanceBoundaries": [
+    "Physical Redmi acceptance is still required before claiming physical-device verification.",
+    "Production distribution signing material is not configured in GitHub Actions; current PLP artifact remains debug-signed."
+  ]
+}

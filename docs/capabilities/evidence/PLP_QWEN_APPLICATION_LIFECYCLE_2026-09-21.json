@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-21",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 681,
+  "sourceHeadSha": "cef3c2b4369dab75e352bbeee5ac593062164b4d",
+  "mergedMainSha": "b3b40bbb9d1751f1644b1ddd9af8cfe93449e82b",
+  "problem": {
+    "surface": "PLP Pandora Android phone-local Qwen runtime",
+    "symptom": "Qwen prewarm started but navigating away from chat caused self_test failures with 'b00 was cancelled', so eligible turns fell back to Gemini.",
+    "rootCause": "AskPandoraScreen owned cancellation and unload of the process-shared PandoraLocalAi singleton in screen disposal/app lifecycle cleanup, so UI navigation could terminate an application-wide model warm."
+  },
+  "implementation": {
+    "approach": "Move local-model residency and application lifecycle ownership to PandoraLocalAiRuntime at the app root. Screen navigation no longer cancels or unloads Qwen.",
+    "residencyPolicy": "Keep a successfully warmed model resident across Pandora screens and cloud-only turns; use an application-scoped two-minute idle unload window.",
+    "teardownPolicy": "Unload on app background/shutdown or explicit local-AI recovery/failure, not on route disposal.",
+    "version": "0.4.0-rc.13+20",
+    "regressionTest": "Qwen residency is application-owned, not chat-screen-owned."
+  },
+  "verification": {
+    "exactHeadGreen": true,
+    "workflows": {
+      "mobileExactSource": {
+        "runId": 35587308025,
+        "conclusion": "success"
+      },
+      "plpAndroidExactSource": {
+        "runId": 35587307927,
+        "conclusion": "success"
+      },
+      "node24": {
+        "runId": 35587307998,
+        "conclusion": "success"
+      },
+      "dependencyReview": {
+        "runId": 35587308184,
+        "conclusion": "success"
+      },
+      "canonicalReleaseEvidence": {
+        "runId": 35587307970,
+        "conclusion": "success"
+      },
+      "edgeSourceArtifact": {
+        "runId": 35587307999,
+        "conclusion": "success"
+      },
+      "windowsWorkerContract": {
+        "runId": 35587308262,
+        "conclusion": "success"
+      }
+    },
+    "pullRequestMerged": true,
+    "mainReadbackMatchedMergeSha": true,
+    "physicalDeviceTokenGenerationVerified": false,
+    "note": "Exact-source build and merge are verified; local token emission on the physical Redmi remains a post-install acceptance test."
+  },
+  "coordinator": {
+    "initialDirectMergeResult": "blocked",
+    "initialBlockReason": "Required status check Pandora coordinator / integration was expected.",
+    "authoritativeSnapshotGeneration": 13,
+    "authoritativeSnapshotRevision": "gdrive-revision-772",
+    "authoritativeSnapshotSha256": "5ca2ff5e5d283df55e5f8c8bc9eded799e532ccc9a3419a99900a0a45c8218c4",
+    "decision": "PASS",
+    "decisionGeneration": 1,
+    "checkRunId": 106298120188,
+    "mergeClaimId": "ce2e7348-fdfe-466e-bc38-18354aaceb92",
+    "mergeFence": "released"
+  },
+  "artifact": {
+    "appVersion": "0.4.0-rc.13+20",
+    "sourceSha": "cef3c2b4369dab75e352bbeee5ac593062164b4d",
+    "package": "com.banataosystems.pandora.plp",
+    "apkSha256": "6fb9a660e42d720eb9d3ded2c1e4aa7f95f1ac0f66fa5f3b10d98ed66b367c62"
+  },
+  "durableLessons": [
+    "Shared phone-local models must have application-level lifetime ownership; individual screens must never own model residency.",
+    "Navigating between Pandora surfaces is not a reason to cancel or unload a warm local model.",
+    "Cloud fallback for one turn should preserve a healthy warm local model for the next eligible turn.",
+    "Exact-source CI can prove code/build integrity but cannot substitute for physical-phone token-generation acceptance.",
+    "For protected Pandora merges, satisfy the coordinator PASS and merge-fence contract rather than bypassing repository rules."
+  ]
+}

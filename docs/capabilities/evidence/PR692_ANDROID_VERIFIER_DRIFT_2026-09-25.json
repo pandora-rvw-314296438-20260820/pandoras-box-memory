@@ -1,0 +1,63 @@
+
+{
+  "schemaVersion": 1,
+  "recordType": "verified_learning",
+  "recordedAt": "2026-09-25T02:40:00+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "pullRequest": 692,
+  "reviewedHeadSha": "20beba9699379f9d948fcc4c5d64a7746d3ec8ca",
+  "mergeSha": "264de96286c864c4c535683cfb5331649e479c2f",
+  "incident": {
+    "failedHeadSha": "4c2e0bddeac44103673ea870b22a370ae668a3f6",
+    "workflowRunId": 36039143128,
+    "jobId": 107766733171,
+    "failureStep": "Verify PLP package, native ABI, signing, and model separation",
+    "observedBuildIdentity": "0.4.0-rc.14+21",
+    "rootCause": "Android post-build verification hardcoded the previous versionCode 20 and versionName 0.4.0-rc.13 after the app version advanced to 0.4.0-rc.14+21."
+  },
+  "repair": {
+    "workflowFiles": [
+      ".github/workflows/plp-pandora-enterprise-android.yml",
+      ".github/workflows/pandora-mobile-integration.yml"
+    ],
+    "method": "Derive expected Android versionName and versionCode from EXPECTED_APP_VERSION rather than duplicating hardcoded literals.",
+    "repairCommits": [
+      "ddfb8c146d5681e7e940ace11dd1987a9e5de165",
+      "20beba9699379f9d948fcc4c5d64a7746d3ec8ca"
+    ],
+    "transport": "Supabase Vault-backed Github_supabase server-side GitHub API path; credential value was not returned or committed."
+  },
+  "verification": {
+    "exactHeadWorkflowFamiliesGreen": 8,
+    "plpAndroidRunId": 36040887696,
+    "mobileExactSourceRunId": 36040887769,
+    "plpAndroidResult": "success",
+    "mobileAndroidResult": "success",
+    "iosResult": "success",
+    "mergeCoordinatorCheckRunId": 107777849427,
+    "mergeClaimId": "5e699db7-7ee3-4809-9d4c-8fbf7528d927",
+    "providerMergeReadback": "merged",
+    "mainReadbackSha": "264de96286c864c4c535683cfb5331649e479c2f",
+    "mergeFenceFinalState": "released"
+  },
+  "releaseBoundary": {
+    "physicalRedmiAcceptance": "not claimed",
+    "productionSigning": "not claimed"
+  },
+  "knownFollowUp": {
+    "path": ".pandora-verifier/verify.sh",
+    "stateAtMergeSha": "stale",
+    "details": "Standalone verifier still contains EXPECTED_APP_VERSION 0.4.0-rc.13+20 and hardcoded Android versionCode/versionName checks. It was not part of the GitHub exact-head workflow gate that passed PR 692 and should be aligned before relying on that standalone verifier."
+  },
+  "durableLessons": [
+    "A release identity must have one source of truth. Verification code should derive versionCode and versionName from the canonical app version instead of copying literals.",
+    "A successful APK build does not prove the package verification contract; post-build identity checks are a separate gate and must remain exact-source bound.",
+    "When the managed GitHub App cannot mutate workflow files or merge, use the approved Supabase Vault-backed Github_supabase path server-side and still bind every mutation to an exact SHA.",
+    "Protected merges require exact-head green CI, a fresh coordinator PASS, a held merge fence, provider merge readback, coordinator completion, and final main SHA readback."
+  ],
+  "provenance": {
+    "github": "provider readbacks from canonical repository and Actions runs",
+    "supabase": "live coordinator state and Vault-backed GitHub transport",
+    "classification": "verified facts plus explicitly marked follow-up"
+  }
+}
