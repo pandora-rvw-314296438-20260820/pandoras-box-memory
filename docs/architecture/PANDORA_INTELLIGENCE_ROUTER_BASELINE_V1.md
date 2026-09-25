@@ -3,7 +3,7 @@
 Recorded: 2026-09-25. Classification: explicit owner architecture decision, not implementation or deployment proof.
 Implementation repository: pandora-rvw-314296438-20260820/pandoras-box.
 Canonical Memory repository: pandora-rvw-314296438-20260820/pandoras-box-memory.
-Execution dependency: owner explicitly requires protected merge of Box PR #728 first, then remaining Operations Room upgrades and this service.
+Execution dependency: the owner required protected merge of Box PR #728 first. That prerequisite is now satisfied by merge commit `0974b2c4a671197711139dfa098f03c33903b0a3`; remaining Operations Room integrations and this Router service are now eligible to proceed under separate governed implementation.
 
 ## Architecture frozen by the owner
 
@@ -91,4 +91,4 @@ Prove authenticated service reachability and exact tenant/job/worker binding; al
 
 ## Current implementation boundary
 
-At recording, PR #728 foundation is corrected and tested at 8cf811e2b3ce1fe4c164437868793fb84cf9cf3b but unmerged. Intelligence Router source implementation and remaining end-to-end Operations Room integrations have not started under the owner's merge-first sequence. Tracker task INTELLIGENCE-ROUTER-V1-001 explicitly records the prerequisite. This record freezes the requested baseline without falsely claiming activation.
+PR #728 foundation is now merged at source head `50dd5508bded271bda446dd23991a5e9d82065f7` via merge commit `0974b2c4a671197711139dfa098f03c33903b0a3` after exact-head CI, independent Worker E Gemini PASS, authoritative snapshot generation-14 coordinator PASS, governed merge claim and provider completion readback. The source recovery also replaced Operations authorization reliance on retired ProjectOS-backed `pandora_projects` with explicit service-role-only Operations project bindings. Intelligence Router runtime source implementation is still NOT claimed implemented by this record. The merge-first prerequisite is satisfied; Router and remaining Operations Room integrations require new governed tasks, tests, provider readback and Memory evidence.
