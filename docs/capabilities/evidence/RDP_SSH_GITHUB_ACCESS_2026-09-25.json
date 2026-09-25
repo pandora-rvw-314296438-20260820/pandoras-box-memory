@@ -1,0 +1,92 @@
+
+{
+  "schemaVersion": 1,
+  "recordType": "verified_learning",
+  "recordedAt": "2026-09-25T09:11:54Z",
+  "subject": "Pandora RDP SSH access to canonical source and Memory repositories",
+  "host": {
+    "instanceId": "i-0640ad78439133887",
+    "name": "Pandora-Cloud-Dev",
+    "computerName": "EC2AMAZ-SPAE2VG",
+    "platform": "Windows Server 2025"
+  },
+  "repositories": [
+    {
+      "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+      "sshAlias": "github-pandoras-box",
+      "origin": "git@github-pandoras-box:pandora-rvw-314296438-20260820/pandoras-box.git",
+      "deployKeyId": 164405256,
+      "deployKeyFingerprint": "SHA256:MON7z17wl3GsfjR5oK5qCIy97ZypKoLojXrTOTirq0Q",
+      "providerVerified": true,
+      "providerEnabled": true,
+      "writeCapable": true,
+      "providerLastUsedAt": "2026-09-25T09:11:48Z",
+      "lsRemoteHead": "6f20780765001d1a90ee31800a3948d043551afa"
+    },
+    {
+      "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+      "sshAlias": "github-pandoras-box-memory",
+      "origin": "git@github-pandoras-box-memory:pandora-rvw-314296438-20260820/pandoras-box-memory.git",
+      "deployKeyId": 164405263,
+      "deployKeyFingerprint": "SHA256:FMED5g50tHzNuTXWxRPnw5IKmPEkwAL9JUM04GhDa1I",
+      "providerVerified": true,
+      "providerEnabled": true,
+      "writeCapable": true,
+      "providerLastUsedAt": "2026-09-25T09:11:54Z",
+      "lsRemoteHead": "2d193c0667a037e815f50a1c1c81fd578eaf9d92"
+    }
+  ],
+  "ssh": {
+    "host": "github.com",
+    "port22Reachable": true,
+    "pinnedHostKeyFingerprint": "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU",
+    "strictHostKeyChecking": true,
+    "gitSshCommand": "C:/Windows/System32/OpenSSH/ssh.exe -F C:/Users/Administrator/.ssh/config",
+    "privateKeyOwner": "EC2AMAZ-SPAE2VG\\Administrator",
+    "privateKeyAcl": "Administrator read only",
+    "privateKeyMaterialRecorded": false
+  },
+  "verification": {
+    "sourceSshAuthentication": "successfully authenticated",
+    "sourceLsRemote": "success",
+    "memorySshAuthentication": "successfully authenticated",
+    "memoryLsRemote": "success",
+    "originsSwitchedToSsh": true,
+    "finalAclReadback": "both private keys owned by Administrator with only Administrator Read/Synchronize allow ACE"
+  },
+  "failuresAndCorrections": [
+    {
+      "failure": "PowerShell collapsed ssh-keygen empty passphrase arguments and returned Too many arguments.",
+      "correction": "Generate Ed25519 keys through cmd.exe so -N empty is preserved."
+    },
+    {
+      "failure": "Initial private-key ACL included BUILTIN Administrators and Windows OpenSSH rejected the keys as unprotected.",
+      "correction": "Rebuilt the key ACL and transferred final ownership to the exact local Administrator SID only."
+    },
+    {
+      "failure": "Managed GitHub App could not create the Memory evidence branch because repository mutation returned 403 Resource not accessible by integration.",
+      "correction": "Use the existing fixed-scope Supabase Vault-backed Github_supabase broker; no provider credential value leaves Vault."
+    }
+  ],
+  "security": {
+    "githubCredentialPath": "Supabase Vault-backed Github_supabase fixed-scope broker",
+    "githubCredentialExposed": false,
+    "privateKeyExposed": false,
+    "privateKeyCommitted": false,
+    "patCommitted": false,
+    "repositoryScopedKeys": true
+  },
+  "durableLessons": [
+    "Use one dedicated deploy key per canonical repository so RDP Git authority remains repository-scoped.",
+    "Pin the GitHub host key and require StrictHostKeyChecking before switching repository origins to SSH.",
+    "On Windows OpenSSH, validate the private-key ACL against the exact local user SID; membership in BUILTIN Administrators is too broad for a client private key.",
+    "Prove SSH authentication and git ls-remote before changing origin.",
+    "When the managed GitHub App cannot mutate the canonical repositories, use the approved fixed-scope Supabase Vault-backed Github_supabase broker without returning credential material."
+  ],
+  "provenance": {
+    "awsSsmVerificationCommandId": "174b657d-972a-47f1-804b-0c64811c202c",
+    "awsSsmFinalAclCommandId": "c63e77ee-a5be-4c06-8e81-6aad51db6133",
+    "provider": "GitHub deploy-key readback through Supabase Vault-backed fixed-scope broker",
+    "classification": "verified provider/runtime facts and corrections"
+  }
+}
