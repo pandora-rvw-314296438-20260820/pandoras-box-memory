@@ -1,0 +1,195 @@
+{
+    "kind": "implementation_and_verification_evidence",
+    "plan": {
+        "path": "docs/architecture/OPERATIONS_ROOM_MAXIMUM_THROUGHPUT_ARCHITECTURE_V1.md",
+        "rule": "ATHENA coordinates; ChatGPT remains the primary engineering workforce; ARTEMIS verifies independently",
+        "sourceCommit": "d074e9e089c22740f4dcb0218f0ce2dcc7fbb04c",
+        "memoryPullRequest": 104
+    },
+    "source": {
+        "branch": "feat/operations-room-runtime-v1-20260925",
+        "baseSha": "6f20780765001d1a90ee31800a3948d043551afa",
+        "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
+        "treeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+        "newFiles": 20,
+        "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+        "publication": "Existing Supabase Vault-backed Github_supabase broker; independently verified uploaded file digests and exact RDP/GitHub tree equality",
+        "pullRequest": 728,
+        "documentationPath": "docs/operations/OPERATIONS_ROOM_UPGRADE_V1.md",
+        "existingFilesChanged": 0
+    },
+    "status": "source_ci_verified_not_deployed",
+    "taskId": "OPS-UPGRADE-V1-001",
+    "worker": "ChatGPT OPS-UPGRADE-20260925",
+    "lessons": [
+        {
+            "fix": "Use current scope revalidation through the view and private composite workspace foreign keys; mirror the view shape in test fixtures.",
+            "type": "failure_lesson",
+            "finding": "The active canonical project identity is a security-invoker view, not a foreign-key target table.",
+            "verifiedBy": "Full source migration replay and focused PostgreSQL/PGlite behavior tests"
+        },
+        {
+            "fix": "Use explicit aliases, supported regex patterns with independent length bounds, and parenthesized JSON extraction.",
+            "type": "failure_lesson",
+            "finding": "PL/pgSQL variable/alias shadowing, PostgreSQL regex bounds and JSON operator precedence caused executable failures despite plausible source.",
+            "verifiedBy": "Passing migration replay and SQL behavior suites"
+        },
+        {
+            "fix": "Persist a one-sender dispatch transition; require canSend=true and exact task/worker/epoch ACK. Unknown delivery outcomes retain resource claims for reconciliation.",
+            "type": "failure_lesson",
+            "finding": "An idempotent claim alone does not prevent two coordinators from delivering the same worker request.",
+            "verifiedBy": "Separate-session PostgreSQL dispatch race test and unknown-outcome unit cases"
+        },
+        {
+            "fix": "Require a separately registered principal and an existing canonical exact-source verification PASS bound to the task requirements.",
+            "type": "failure_lesson",
+            "finding": "Different worker names do not establish an independent verifier.",
+            "verifiedBy": "Same-principal rejection and canonical PASS consumption tests"
+        },
+        {
+            "fix": "Hash owner inputs plus row/header identity; restrict machine updates to designated columns using literal RAW values.",
+            "type": "failure_lesson",
+            "finding": "Including machine-owned status cells in a spreadsheet input hash breaks the next legitimate sync.",
+            "verifiedBy": "Status-refresh, owner-edit, malformed-row and formula rejection tests"
+        },
+        {
+            "fix": "Keep Antigravity zero-turn authentication failure and offline ADB state explicit; do not claim review or device acceptance. Use approved publication alternatives without widening key permissions.",
+            "type": "procedure_candidate",
+            "finding": "Provider availability and process existence are not execution evidence.",
+            "verifiedBy": "Actual SSM, ADB, Antigravity and GitHub publication readbacks"
+        }
+    ],
+    "observedAt": "2026-09-25T11:31:33.98981+00:00",
+    "coordination": {
+        "lease": "OPS-AREA-UPGRADE-V1",
+        "trackerTask": "OPS-UPGRADE-V1-001",
+        "claimComment": 5830513543,
+        "operationsRoomIssue": 714,
+        "scopeRefinementComment": 5831358261,
+        "incumbentGlobalCoordinatorPreserved": true
+    },
+    "supersession": {
+        "supersedes": "The source documentation and initial PR handoff note that the seven PostgreSQL races had not yet executed.",
+        "replacement": "The seven real multi-connection race tests have now executed successfully in workflow 36128623169.",
+        "historyPreserved": true
+    },
+    "verification": {
+        "rdpExactHead": {
+            "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
+            "treeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+            "nodeVersion": "24.21.0",
+            "npmTestExit": 0,
+            "npmCheckExit": 0,
+            "readbackCommand": "ef4aff44-baa0-44cb-9bd0-31bc93cab687",
+            "rootTestsPassed": 2112,
+            "workingTreeClean": true,
+            "edgeTypecheckExit": 0,
+            "workerTestsPassed": 52,
+            "focusedTestsPassed": 82,
+            "fullMigrationReplayPassed": true,
+            "focusedTestsIncludedInRootTotal": true
+        },
+        "latestObservedCi": {
+            "note": "Workflow success is not an approval, coordinator authorization, deployment or physical-device acceptance",
+            "runIds": [
+                36128623121,
+                36128623112,
+                36128623125,
+                36128623091,
+                36128623118,
+                36128623169,
+                36128623141,
+                36128623089,
+                36128623132,
+                36128620468
+            ],
+            "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
+            "successfulObservedRuns": 10,
+            "allObservedCompletedSuccessfully": true,
+            "qualifyingIndependentReviewObserved": false
+        },
+        "postgresConcurrency": {
+            "cases": [
+                "One task cannot be claimed by different workers concurrently",
+                "Hierarchical resource conflicts serialize",
+                "Independent tasks are both admitted",
+                "Concurrent independent claims cannot overspend budget",
+                "Exact claim replay returns one lease and one charge",
+                "Durable outbox admits only one sender",
+                "Same-organization cross-project resource conflicts serialize"
+            ],
+            "jobId": 108050454047,
+            "proof": "Actual separate PostgreSQL sessions executed in the GitHub-hosted ephemeral test database; not simulated live ChatGPT workers",
+            "checkoutSha": "b5d63c782a619905e4df2a5d721840657f2e7cb0",
+            "testsFailed": 0,
+            "testsPassed": 7,
+            "workflowRun": 36128623169,
+            "checkoutKind": "GitHub synthetic PR merge",
+            "testsSkipped": 0,
+            "clientVersion": "16.15",
+            "serverVersion": "17.6",
+            "checkoutTreeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+            "treeMatchesPublishedHead": true
+        }
+    },
+    "schemaVersion": "1.0.0",
+    "truthBoundary": {
+        "scope": "Source implementation and CI evidence only. External integrations and deployment remain unfinished.",
+        "merged": false,
+        "all42UpgradesLive": false,
+        "independentApproval": false,
+        "edgeFunctionDeployed": false,
+        "vercelProductionPromoted": false,
+        "productionMigrationApplied": false,
+        "canonicalMemoryPromotionClaimed": false,
+        "realParallelChatGPTWorkersSpawned": false
+    },
+    "semanticSource": "observation",
+    "implementedSource": [
+        "Strict task and dependency-graph validation with canonical source and verification-profile binding",
+        "Capacity-aware scheduling proposals, priorities, aging, dependency unlock value, adaptive-concurrency recommendations and acknowledged ChatGPT worker eligibility",
+        "Durable Supabase task/worker state, cost reservation, resource exclusion, generation fencing, idempotent claims and single-sender dispatch outbox",
+        "Authenticated owner overview/ingest/pause/resume/no-production/cancel API with transactional membership recheck",
+        "Builder-to-Release handoff, separate-principal verification against existing canonical PASS, and known-outcome fenced recovery",
+        "Spreadsheet decoded-row ingestion, owner-input fingerprints and literal machine-column-only writeback planning",
+        "Governed GitHub/Supabase/Vercel/ARES action interfaces; bounded ADB argv and explicit emulator readiness checks",
+        "Truthful operational state projection and review-gated selective learning candidates"
+    ],
+    "executionResources": {
+        "rdp": "Existing machine used through authorized SSM for isolated code editing and tests; Desktop Commander transport itself reported offline",
+        "ssh": "Existing Administrator-owned SSH key could not be used from SYSTEM SSM execution. Key contents were not read/copied and ACL/host verification were not weakened. Preauthorized Vault-backed publication succeeded.",
+        "antigravity": {
+            "mode": "bounded read-only sandbox review",
+            "result": "authentication_failed_or_timed_out",
+            "attempted": true,
+            "commandId": "138d7547-0fac-4b49-b618-43fab22ce66b",
+            "completedTurns": 0,
+            "independentReviewProduced": false
+        },
+        "androidEmulator": {
+            "commandId": "ccca612c-8f7c-455d-abc9-7e922e66716f",
+            "apkInstalled": false,
+            "adbGuestState": "offline",
+            "hostReachable": true,
+            "resetPerformed": false,
+            "emulatorAcceptance": false,
+            "physicalDeviceAcceptance": false
+        },
+        "temporaryArtifact": {
+            "cleanup": "Exact staged object deleted after successful canonical publication; HeadObject returned 404",
+            "storage": "Existing private encrypted handoff bucket; temporary source-only transport",
+            "sourcePackageBytes": 177802,
+            "signedUrlsPersisted": false,
+            "sourcePackageSha256": "2cf0e28ead058bf143f33689a91195875ec25b4d74e56ff6cc5ded337120e0a0"
+        }
+    },
+    "remainingIntegration": [
+        "Authenticated ChatGPT worker enrollment/dispatch transport and event-driven wake-up/sweeper",
+        "Complete Google Sheets/XLSX connector I/O and verified two-way synchronization",
+        "Live M3 bindings for GitHub/Supabase/Vercel provider actions with provider-native idempotency and release/rollback proof",
+        "ARES host and emulator lifecycle adapter, exact APK verification and connected-guest acceptance",
+        "Existing mobile/web Operations Room UI and ARES roster integration after incumbent file-area handoff",
+        "Approved Memory retrieval/candidate-persistence integration; no direct self-promotion",
+        "Independent exact-head review, coordinator release gates, source/provider parity and staged paused/no-production deployment"
+    ]
+}
