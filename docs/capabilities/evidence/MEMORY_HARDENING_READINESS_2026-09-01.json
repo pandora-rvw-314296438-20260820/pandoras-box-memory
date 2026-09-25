@@ -18,6 +18,10 @@
       "purpose": "authenticated machine access with OAuth or workload OIDC, capability grants and namespace resource isolation"
     },
     {
+      "slug": "pandora-memory-bridge",
+      "purpose": "Pandora-native Memory health, exact-project search, review-gated evidence intake and verified decision lineage under Vercel OIDC; source-only until separately deployed and provider-read back"
+    },
+    {
       "slug": "pandora-projectos-bridge",
       "purpose": "ProjectOS Memory health, exact-project search and governed evidence intake under Vercel OIDC"
     },
@@ -57,5 +61,20 @@
     "schemaMutationAuthorized": false,
     "crossProjectGeneralizationAuthorized": false,
     "sourceOnlyGate": true
-  }
+  },
+  "lifecycleAdjudications": [
+    {
+      "observedAt": "2026-09-26T06:58:00+08:00",
+      "slug": "pandora-memory-bridge",
+      "disposition": "canonical_source_addition",
+      "runtimePrincipal": "pandora-mcpmaster-production",
+      "legacyPrincipal": "projectos-mcpmaster-production",
+      "legacyDisposition": "deactivate_only; never source authorization from legacy principal",
+      "productionDeploymentAuthorized": false,
+      "schemaMutationAuthorized": false,
+      "edgeDeletionAuthorized": false,
+      "providerReadbackRequiredBeforeActivation": true,
+      "sourceEvidence": "docs/capabilities/evidence/PANDORA_NATIVE_MEMORY_BRIDGE_RETIREMENT_2026-09-26.json"
+    }
+  ]
 }

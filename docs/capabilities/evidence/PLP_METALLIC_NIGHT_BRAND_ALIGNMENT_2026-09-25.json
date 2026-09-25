@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-25",
+  "status": "superseded_by_owner_correction",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourcePullRequest": 699,
+  "sourceBranch": "chatgpt/plp-metallic-night-no-logos-20260925",
+  "sourceBaseSha": "61d07a2cd051072f09eae0559c27b7c5d37325b8",
+  "sourceHeadSha": "acc8a4d98c153c51d5ebc34ce27d6c0653ed5bda",
+  "mergedMainSha": "04c16cebb909fd0ee10ce51b9e7cd18cdfb06c69",
+  "ownerIntent": {
+    "summary": "Align PLP owner-workspace pages with Pandora's metallic black/silver/warm-gold profile-logo design language and remove repeated decorative page logos.",
+    "drawer": "Keep the PLP navigation drawer essentially pure black.",
+    "sharedSidePanel": "Preserve PR #697's pure-black invariant: the shared Pandora side panel and the PLP navigation side panel remain #000000, while the chat canvas remains #000000."
+  },
+  "implementation": {
+    "palette": {
+      "canvas": "#050505",
+      "surface": "#0E0E0F",
+      "primaryText": "#F2EEE7",
+      "mutedText": "#A49D93",
+      "accentGold": "#D6AD63",
+      "divider": "#2C2924",
+      "drawer": "#000000"
+    },
+    "changedFiles": [
+      "apps/pandora-mobile/lib/features/enterprise/plp_editorial_surfaces.dart",
+      "apps/pandora-mobile/lib/features/enterprise/plp_enterprise_home.dart",
+      "apps/pandora-mobile/lib/features/enterprise/plp_guests_screen.dart",
+      "apps/pandora-mobile/lib/features/enterprise/plp_activity_screen.dart",
+      "apps/pandora-mobile/lib/features/enterprise/plp_team_access_screen.dart",
+      "apps/pandora-mobile/lib/app/plp_enterprise_shell.dart",
+      "apps/pandora-mobile/lib/app/plp_navigation_drawer.dart",
+      "apps/pandora-mobile/lib/features/enterprise/plp_team_management_screen.dart"
+    ],
+    "logoPolicy": "Repeated PLP image logos and the drawer PandoraMark were removed from page/header/hero/navigation chrome; functional icons remain. The owners/workspace selector was not changed.",
+    "predecessorInvariant": {
+      "sourcePullRequest": 697,
+      "mergedMainSha": "61d07a2cd051072f09eae0559c27b7c5d37325b8",
+      "sharedPandoraSidePanel": "#000000",
+      "plpNavigationSidePanel": "#000000",
+      "chatCanvas": "#000000",
+      "preserveNavigationSpacingSelectedStatesButtonsDividers": true
+    }
+  },
+  "executionTransport": {
+    "requestedPath": "Supabase Vault-backed GitHub API",
+    "secretName": "Github_supabase",
+    "credentialExposed": false,
+    "provider": "GitHub REST via private.pandora_integration_github_api_20260825",
+    "initialDirectConnectorFailure": {
+      "status": 403,
+      "message": "Resource not accessible by integration",
+      "correction": "Used the existing fixed-scope Supabase Vault-backed Github_supabase broker; no credential value was returned to the model."
+    }
+  },
+  "independentReview": {
+    "provider": "kimi-k3",
+    "transport": "Supabase Vault-backed public.pandora_kimi_chat_request_v1",
+    "providerResponseId": "chatcmpl-6ab5a81ea5884e5e0aaa996c",
+    "candidateSha": "acc8a4d98c153c51d5ebc34ce27d6c0653ed5bda",
+    "decision": "PASS",
+    "criticalHighHoldDispositions": [],
+    "evidenceSummary": "Kimi reviewed the exact unified diff after exact-head CI completed and found the palette inversion internally consistent, logo removals complete in scope, widget structure valid, and behavior-preserving."
+  },
+  "verification": {
+    "exactHeadGreen": true,
+    "workflows": {
+      "node24": {
+        "runId": 36067648241,
+        "conclusion": "success"
+      },
+      "dependencyReview": {
+        "runId": 36067648319,
+        "conclusion": "success"
+      },
+      "windowsWorkerContract": {
+        "runId": 36067648233,
+        "conclusion": "success"
+      },
+      "canonicalReleaseEvidence": {
+        "runId": 36067648208,
+        "conclusion": "success"
+      },
+      "edgeSourceArtifact": {
+        "runId": 36067648327,
+        "conclusion": "success"
+      },
+      "plpAndroidExactSource": {
+        "runId": 36067648247,
+        "jobId": 107861039644,
+        "conclusion": "success"
+      },
+      "mobileExactSource": {
+        "runId": 36067648250,
+        "iosJobId": 107861081110,
+        "androidJobId": 107861081166,
+        "conclusion": "success"
+      }
+    },
+    "mergedMainReadbackMatched": true,
+    "sourceAssertions": {
+      "targetFilesChecked": 8,
+      "plpImageLogoRefsInTargetFiles": 0,
+      "pandoraMarkRefsInDrawer": 0,
+      "drawerPureBlack": true,
+      "paletteReadbackMatched": true,
+      "sharedPandoraSidePanelPureBlack": true,
+      "plpNavigationSidePanelPureBlack": true,
+      "chatCanvasPureBlack": true,
+      "pureBlackRegressionContractPresent": "test/side-panel-pure-black-contract.test.js",
+      "currentMainReadback": {
+        "pandoraChatShell": "Drawer background and _PandoraSidePanel Material both use PandoraV2Colors.canvas.",
+        "pandoraCanvasToken": "PandoraV2Colors.canvas = Color(0xFF000000).",
+        "plpNavigationDrawer": "DecoratedBox background = Color(0xFF000000); legacy 0xF20A0C10 is absent."
+      }
+    },
+    "visualRuntimeAcceptance": {
+      "performed": false,
+      "note": "This record proves source, CI/build, independent diff review, coordinator authorization, merge, and merged-main source readback. It does not claim post-merge physical-device or screenshot-based visual acceptance."
+    }
+  },
+  "coordinator": {
+    "initialMergeResult": "blocked",
+    "initialBlockReason": "Required status check Pandora coordinator / integration was expected.",
+    "authoritativeSnapshotGeneration": 13,
+    "authoritativeSnapshotRevision": "gdrive-revision-772",
+    "authoritativeSnapshotSha256": "5ca2ff5e5d283df55e5f8c8bc9eded799e532ccc9a3419a99900a0a45c8218c4",
+    "decision": "PASS",
+    "decisionGeneration": 1,
+    "checkRunId": 107866373669,
+    "mergeClaimId": "6916dd8e-7fd3-427e-96e9-5e0881881648",
+    "mergeFence": "released"
+  },
+  "durableLessons": [
+    "When the ordinary GitHub integration lacks write scope, use the already-governed Supabase Vault-backed Github_supabase broker rather than exposing or copying credentials.",
+    "A protected merge must satisfy the trusted Pandora coordinator check and merge fence; do not bypass repository rules.",
+    "For a light-to-dark token inversion, dark feature panels whose background used the old ink token must be explicitly remapped to a dark surface token or they will invert to light.",
+    "Removing decorative brand images should preserve semantic navigation and functional icons, and merged-main source readback should confirm no target-file image references remain.",
+    "Exact-source CI and diff review prove source/build integrity but do not substitute for post-merge visual runtime acceptance on the target device.",
+    "Treat PR #697's pure-black side-panel behavior as a preserved visual invariant: shared Pandora side panel #000000, PLP navigation side panel #000000, chat canvas #000000; later brand-alignment work must not regress it.",
+    "PR #699's black PLP content-page interpretation was incorrect and is superseded by PR #701. Do not infer that matching Pandora's black profile mark means making PLP content pages black."
+  ],
+  "supersededBy": {
+    "sourcePullRequest": 701,
+    "sourceHeadSha": "545b3bd0ddff8023ef8ef9669046f2c0e7e69740",
+    "mergedMainSha": "b90be71c7a2bca2498cd8b0d2843c297b3ae9dbf",
+    "correction": "Owner clarified that PLP content pages must remain the approved light/ivory editorial design. Only the shared Pandora side panel and PLP navigation side panel are pure black. Pandora and PLP logos belong in the side panel; repeated decorative logos remain removed from page headers/heroes."
+  },
+  "ownerIntentCorrection": {
+    "plpContentPages": "Light/ivory editorial luxury; not black.",
+    "sharedPandoraSidePanel": "#000000",
+    "plpNavigationSidePanel": "#000000",
+    "sidePanelPandoraMark": "present",
+    "sidePanelPlpLogo": "present",
+    "pageHeaderHeroDecorativeLogos": "removed"
+  }
+}
