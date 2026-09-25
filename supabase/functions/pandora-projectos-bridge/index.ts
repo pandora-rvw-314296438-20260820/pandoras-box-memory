@@ -255,6 +255,34 @@ const warningsFor = (input: {
   return warnings;
 };
 
+// Keep approved legacy knowledge reachable during the typed-memory transition.
+// Neither result class acquires authority by being retrieved.
+export function mergeBoundedMemory(
+  typed: JsonRecord[],
+  legacy: JsonRecord[],
+  maxItems: number,
+  maxBytes = 12 * 1024,
+): { items: JsonRecord[]; skipped: number } {
+  if (!Number.isInteger(maxItems) || maxItems < 1 || maxItems > 50 ||
+      !Number.isInteger(maxBytes) || maxBytes < 2 || maxBytes > 12 * 1024) {
+    throw new Error("retrieval_budget_invalid");
+  }
+  const items: JsonRecord[] = [];
+  const seen = new Set<string>();
+  let skipped = 0;
+  for (const item of [...typed, ...legacy]) {
+    if (!item || typeof item.id !== "string" || !item.id || seen.has(item.id)) continue;
+    seen.add(item.id);
+    if (items.length >= maxItems ||
+        new TextEncoder().encode(JSON.stringify([...items, item])).byteLength > maxBytes) {
+      skipped += 1;
+      continue;
+    }
+    items.push(item);
+  }
+  return { items, skipped };
+}
+
 const PROJECT_SEARCH_KEY_PATTERN = /^[a-z0-9][a-z0-9._-]{1,95}$/;
 const PROJECT_SEARCH_UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -448,6 +476,7 @@ const searchMemory = async (
   let policyMemory: JsonRecord[] = [];
   let advisoryMemory: JsonRecord[] = [];
   let items: JsonRecord[] = [];
+  let retrievalTruncated = false;
 
   if (allowedTypedClasses.length > 0) {
     terms = safeSearchTerms([query, currentTask ?? "", ...requiredCapabilities].join(" "));
@@ -515,7 +544,8 @@ const searchMemory = async (
     taskContext = typedContext as JsonRecord;
     items = [...advisoryMemory, ...policyMemory];
     retrievalMode = "m5_task_aware_bounded";
-  } else {
+  }
+  {
     const { data: indexedItems, error: indexedItemsError } = await supabase.rpc(
       "memory_projectos_search_scoped_v1",
       {
@@ -536,7 +566,12 @@ const searchMemory = async (
       });
       return respond({ ok: false, error: "memory_query_failed" }, 503);
     }
-    items = (indexedItems ?? []) as JsonRecord[];
+    const bounded = mergeBoundedMemory(items, (indexedItems ?? []) as JsonRecord[], maxItems);
+    items = bounded.items;
+    retrievalTruncated = bounded.skipped > 0;
+    if (allowedTypedClasses.length > 0) {
+      retrievalMode = "m5_task_aware_bounded_with_legacy";
+    }
   }
 
   const semanticMatches = items.map((item: JsonRecord) => ({
@@ -602,6 +637,7 @@ const searchMemory = async (
         consequential,
         required_capabilities: [...new Set(requiredCapabilities)],
         retrieval_mode: retrievalMode,
+        retrieval_truncated: retrievalTruncated,
         allowed_typed_classes: allowedTypedClasses,
         returned_profiles: 0,
         returned_open_loops: packOpenLoops.length,
@@ -639,6 +675,9 @@ const searchMemory = async (
     terms,
     contextPack,
   });
+  if (retrievalTruncated) {
+    warnings.push("Memory results were limited by the item or UTF-8 byte budget; omitted items were not treated as absent knowledge.");
+  }
   if (allowedTypedClasses.length === 0) {
     warnings.push(
       "Project grant has no M5 typed classes; Pandora retained legacy scoped retrieval rather than silently expanding authority.",
@@ -682,8 +721,9 @@ const searchMemory = async (
     approved_record_count: approvedCount,
     requested_canon_statuses: canonStatuses,
     retrieval_mode: retrievalMode,
+    retrieval_truncated: retrievalTruncated,
     legacy_retrieval_mode: "project_scoped_keyword_recency",
-    retrieval_reasoning_summary: retrievalMode === "m5_task_aware_bounded"
+    retrieval_reasoning_summary: retrievalMode === "m5_task_aware_bounded_with_legacy"
       ? "ProjectOS received only task-relevant, bounded, typed Memory already permitted by the exact project grant. Policy Memory is separated from advisory Memory and retrieval does not grant execution authority."
       : "ProjectOS retained the existing exact-project keyword/recency retrieval because this grant does not yet authorize M5 typed classes; no grant expansion was inferred.",
     warnings,

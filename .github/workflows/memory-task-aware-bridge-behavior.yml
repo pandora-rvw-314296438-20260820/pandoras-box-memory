@@ -1,0 +1,23 @@
+name: Memory task-aware bridge behavior
+on:
+  pull_request:
+    paths:
+      - 'supabase/functions/pandora-projectos-bridge/**'
+      - 'tests/task-aware-bridge-behavior.test.cjs'
+      - '.github/workflows/memory-task-aware-bridge-behavior.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Memory / task-aware transition behavior
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - run: npm ci --ignore-scripts
+      - run: node --test tests/task-aware-bridge-behavior.test.cjs
+      - run: npx --yes deno-bin@2.2.7 check supabase/functions/pandora-projectos-bridge/index.ts
