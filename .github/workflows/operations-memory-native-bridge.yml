@@ -1,0 +1,62 @@
+name: Operations Memory native bridge
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/*pandora_operations_memory_bridge*'
+      - 'supabase/migrations/20260901184935_pandora_provider_learning_v1.sql'
+      - 'supabase/migrations/20260913143500_m5_task_aware_retrieval_v1.sql'
+      - 'tests/operations-memory/**'
+      - 'scripts/render_operations_memory_test.py'
+      - '.github/workflows/operations-memory-native-bridge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*pandora_operations_memory_bridge*'
+      - 'supabase/migrations/20260901184935_pandora_provider_learning_v1.sql'
+      - 'supabase/migrations/20260913143500_m5_task_aware_retrieval_v1.sql'
+      - 'tests/operations-memory/**'
+      - 'scripts/render_operations_memory_test.py'
+      - '.github/workflows/operations-memory-native-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: operations-memory-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  postgres-native-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: ops_memory_test
+          # Disposable CI fixture only; never a real provider credential.
+          POSTGRES_PASSWORD: ops_memory_fixture_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGDATABASE: ops_memory_test
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ops_memory_fixture_only
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Python syntax
+        run: python3 -m py_compile scripts/render_operations_memory_test.py tests/operations-memory/postgres-races.py
+      - name: Native scoped context, candidate delivery, isolation and receipt truth
+        run: |
+          set -euo pipefail
+          python3 scripts/render_operations_memory_test.py --mode setup | psql -X -v ON_ERROR_STOP=1
+          python3 scripts/render_operations_memory_test.py --mode behavior | psql -X -v ON_ERROR_STOP=1
+      - name: Independent-connection replay and grant races
+        run: python3 tests/operations-memory/postgres-races.py

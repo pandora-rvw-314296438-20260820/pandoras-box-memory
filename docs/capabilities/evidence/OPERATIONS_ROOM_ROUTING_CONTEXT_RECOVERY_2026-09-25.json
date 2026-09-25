@@ -1,0 +1,100 @@
+
+{
+  "schemaVersion": 1,
+  "recordType": "verified_learning",
+  "recordedAt": "2026-09-25T14:46:00+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "pullRequest": 710,
+  "reviewedHeadSha": "94d58115b131299c8fa5eff63df228f0ea3c573f",
+  "mergeSha": "f0d835a409ed13cd00b637557dcd3368621481c9",
+  "scope": "Pandora Operations Room routing, live enterprise-context compatibility, and protected merge recovery",
+  "defects": [
+    {
+      "id": "operations-room-at-room-routing-gap",
+      "verifiedFact": "The UI advertised @room but source had no first-class @room parser. Ambiguous @room requests could therefore fall through to Athena instead of summoning a bounded specialist team.",
+      "repair": "Added case-insensitive operationsRoomRequestsTeam parsing. Ambiguous @room requests now summon HERMES, HEPHAESTUS, and ARTEMIS; explicit specialist mentions retain precedence."
+    },
+    {
+      "id": "operations-room-selected-object-contract-overflow",
+      "verifiedFact": "The mobile Operations Room supplied 13 selectedObject entries while live pandora-intelligence-chat rejects enterprise selectedObject values with more than 8 entries.",
+      "repair": "Reduced selectedObject to exactly eight fields and consolidated architecture/model policy into architecturePolicy and localModel without weakening the phone-local and infrastructure constraints."
+    }
+  ],
+  "sourceChanges": {
+    "files": [
+      "apps/pandora-mobile/lib/features/operations/operations_room_screen.dart",
+      "apps/pandora-mobile/test/features/operations/operations_room_test.dart",
+      "test/pandora-operations-room-contract.test.js"
+    ],
+    "branch": "fix/operations-room-room-contract-20260925",
+    "finalHeadSha": "94d58115b131299c8fa5eff63df228f0ea3c573f"
+  },
+  "independentReview": {
+    "worker": "Worker E",
+    "providerModel": "gemini-3-flash-preview",
+    "exactHeadReviewed": true,
+    "verdict": "PASS",
+    "findings": 0,
+    "githubReviewer": "pandoras-box-mcp[bot]",
+    "githubApprovalBoundToHead": true
+  },
+  "verification": {
+    "prExactHead": {
+      "codeql": "success",
+      "androidExactSource": "success",
+      "iosExactSource": "success",
+      "plpNativeAndroidExactSource": "success",
+      "windowsWorkerContract": "success",
+      "canonicalReleaseContract": "success",
+      "dependencyReview": "success",
+      "node24": "success",
+      "edgeSourceArtifact": "success",
+      "analyzeActions": "success"
+    },
+    "coordinator": {
+      "snapshotGeneration": 13,
+      "snapshotRevision": "gdrive-revision-772",
+      "checkRunId": 107969663120,
+      "decisionGeneration": 2,
+      "mergeClaimId": "1ec61a7e-e765-41a4-bb8b-39f00972368e",
+      "mergeFenceFinalState": "idle",
+      "providerMergeReadback": "merged",
+      "mainReadbackSha": "f0d835a409ed13cd00b637557dcd3368621481c9"
+    }
+  },
+  "coordinatorIncident": {
+    "symptom": "A successful generation-1 provider check was recorded while the repository fence remained stranded in publishing, blocking merge claim. After its expiry, generation 2 hit CHECK_PROGRESS_READBACK_MISMATCH because GitHub preserved completed/success while accepting the new generation external_id instead of regressing a completed check to in_progress.",
+    "recovery": [
+      "Released the stranded generation-1 publishing fence only after exact provider/check/state invariants proved the successful publication receipt had already been recorded.",
+      "Published a fresh generation-2 decision against the unchanged main/head and authoritative snapshot.",
+      "Read back the generation-2 external_id from GitHub and observed the check already in the stronger final completed/success state.",
+      "Reconciled that final provider state into the coordinator ledger with record_publish_v2, released the publication fence, claimed the merge fence, merged the exact reviewed head with SHA guard, and completed the merge from provider readback."
+    ]
+  },
+  "temporaryTransport": {
+    "fact": "A retired Supabase function slot was temporarily used as a hard-bound GitHub App reviewer transport because the ordinary connector authenticated as the PR author and could not satisfy independent approval.",
+    "bounds": "The temporary implementation was fixed to PR 710 and exact head 94d58115b131299c8fa5eff63df228f0ea3c573f, used server-side GitHub App material only, and never returned private key/token material.",
+    "restored": true,
+    "restoredVersion": 48,
+    "restoredSourceState": "canonical retired 410 response with verify_jwt=true"
+  },
+  "releaseBoundary": {
+    "physicalDeviceAcceptance": "not claimed",
+    "newApkInstalledOnPhysicalPhone": false,
+    "productionBackendChangeRequired": false,
+    "note": "The live pandora-intelligence-chat backend already enforced the eight-field contract; the merged mobile source now conforms to it."
+  },
+  "durableLessons": [
+    "UI affordances that advertise orchestration syntax must have deterministic parser coverage; do not rely on prompt wording to make commands such as @room real.",
+    "Client enterprise-context schemas must be contract-tested against the live backend field-count and validation limits; source-only structural tests should catch drift before runtime.",
+    "Post-provider reconciliation must accept a stronger already-terminal provider state when a provider refuses or ignores a status regression but has applied the new exact identity/idempotency metadata.",
+    "A provider mutation can succeed before local orchestration finishes. After any ambiguous post-provider failure, read provider truth first and reconcile; do not blindly retry the mutation.",
+    "Repository fences need explicit recovery for the state where publication receipt is durably recorded but the publishing fence was not released.",
+    "Never weaken protected-branch rules to finish a merge. Satisfy independent review, exact-head checks, coordinator PASS, merge claim, provider SHA-guarded merge, completion readback, and final main SHA verification."
+  ],
+  "provenance": {
+    "github": "PR 710, exact-head check runs, independent GitHub App approvals, provider merge response, and final main readback",
+    "supabase": "live pandora-intelligence-chat source/readback, coordinator state/fence/readback, and Vault-backed GitHub transport",
+    "classification": "verified facts and generalized failure/recovery lessons; no customer/private credential material"
+  }
+}

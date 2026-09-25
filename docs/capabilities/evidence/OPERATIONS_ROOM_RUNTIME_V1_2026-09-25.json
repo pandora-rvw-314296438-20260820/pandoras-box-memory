@@ -1,0 +1,250 @@
+{
+    "kind": "implementation_and_verification_evidence",
+    "plan": {
+        "path": "docs/architecture/OPERATIONS_ROOM_MAXIMUM_THROUGHPUT_ARCHITECTURE_V1.md",
+        "rule": "ATHENA coordinates; ChatGPT remains the primary engineering workforce; ARTEMIS verifies independently",
+        "sourceCommit": "d074e9e089c22740f4dcb0218f0ce2dcc7fbb04c",
+        "memoryPullRequest": 104
+    },
+    "source": {
+        "branch": "feat/operations-room-runtime-v1-20260925",
+        "baseSha": "6f20780765001d1a90ee31800a3948d043551afa",
+        "headSha": "50dd5508bded271bda446dd23991a5e9d82065f7",
+        "treeSha": "fcb36ff0848cf3f17009cb0c95fda82c90b821ac",
+        "newFiles": 20,
+        "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+        "publication": "Final recovery and merge used canonical GitHub reads plus the Supabase Vault-backed Github_supabase transport. No PAT was exposed, no force push or branch-protection bypass was used, and provider readback verified the exact head/tree before merge.",
+        "pullRequest": 728,
+        "documentationPath": "docs/operations/OPERATIONS_ROOM_UPGRADE_V1.md",
+        "existingFilesChanged": 0,
+        "mergeCommitSha": "0974b2c4a671197711139dfa098f03c33903b0a3",
+        "mergedAt": "2026-09-25T14:49:39Z"
+    },
+    "status": "merged_source_verified_not_deployed",
+    "taskId": "OPS-UPGRADE-V1-001",
+    "worker": "ChatGPT OPS-UPGRADE-20260925",
+    "lessons": [
+        {
+            "type": "failure_lesson",
+            "finding": "The neutral-named public.pandora_projects compatibility view still depended on retired ProjectOS storage, so using it for Operations authorization preserved a retired execution dependency.",
+            "fix": "Use an explicit service-role-only private.pandora_ops_project_bindings registry with evidence references. Missing or revoked bindings fail closed across initialize, claim, dispatch, and owner admission; browser/owner calls cannot create bindings.",
+            "verifiedBy": "Final PR #728 source at 50dd5508bded271bda446dd23991a5e9d82065f7 plus Operations Room runtime and Node 24 exact-head CI"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "Concurrent shared-account writers corrupted the PR branch by replacing the complete DB test with placeholder/partial content.",
+            "fix": "Freeze the exact feature branch with a temporary no-bypass ruleset, prepare detached recovery commits, assign one exclusive recovery owner, verify blob/tree identity, remove only the temporary freeze, then perform one non-force fast-forward.",
+            "verifiedBy": "Operations Room issue #714 comments 5833613944, 5833642589, 5833978572, 5834067741 and final head provider readback"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "JavaScript String.replace replacement syntax collapsed intended PostgreSQL $$ function delimiters to a single $, causing migration replay failures across Operations Room, Node24, and Engineering CI.",
+            "fix": "Use function-valued replacements for literal $$ delimiters, verify the published migration bytes contain the two-character delimiter, then rerun exact-head CI.",
+            "verifiedBy": "Failed head df80c6c2ee06479999c53ed5a4c29d991647bcd8 followed by corrected head 50dd5508bded271bda446dd23991a5e9d82065f7 and green migration replay"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "The primary independent Gemini reviewer returned provider HTTP 503 high demand and produced no verdict.",
+            "fix": "Treat provider unavailability as no review result and use the approved Worker E fallback model on the same exact diff. Preserve the 503 as provider evidence rather than retrying blindly.",
+            "verifiedBy": "Worker E fallback gemini-3.1-flash-lite response UIa2at-sGZ6pvr0PrMut-Ao, exact head 50dd5508bded271bda446dd23991a5e9d82065f7, PASS with zero findings"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "An idempotent claim alone does not prevent two coordinators from delivering the same worker request.",
+            "fix": "Persist a one-sender dispatch transition; require canSend=true and exact task/worker/generation ACK. Unknown delivery outcomes retain resource claims for reconciliation.",
+            "verifiedBy": "Operations Room runtime PostgreSQL separate-session race workflow 36148045372"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "Different worker names do not establish an independent verifier.",
+            "fix": "Require a separately registered principal and an existing canonical exact-source verification PASS bound to the task requirements.",
+            "verifiedBy": "Same-principal rejection and canonical PASS consumption tests plus separate Worker E review"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "Including machine-owned status cells in a spreadsheet input hash breaks the next legitimate sync.",
+            "fix": "Hash owner inputs plus row/header identity; restrict machine updates to designated columns using literal RAW values.",
+            "verifiedBy": "Status-refresh, owner-edit, malformed-row and formula rejection tests"
+        }
+    ],
+    "observedAt": "2026-09-25T14:49:39Z",
+    "coordination": {
+        "lease": "OPS-AREA-UPGRADE-V1",
+        "trackerTask": "OPS-UPGRADE-V1-001",
+        "claimComment": 5830513543,
+        "operationsRoomIssue": 714,
+        "scopeRefinementComment": 5831358261,
+        "incumbentGlobalCoordinatorPreserved": true
+    },
+    "supersession": {
+        "supersedes": "Earlier #108 evidence froze the original head 42d6c3175e1f338fa90d320211a72b20cc63ae39 and later pre-recovery #728 heads. Those heads are historical only and were never merged.",
+        "replacement": "Final verified source head 50dd5508bded271bda446dd23991a5e9d82065f7 merged as 0974b2c4a671197711139dfa098f03c33903b0a3 after branch-freeze recovery, exact-head CI, Worker E review, generation-14 coordinator PASS, governed merge claim, and completeMerge readback.",
+        "historyPreserved": true
+    },
+    "verification": {
+        "rdpExactHead": {
+            "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
+            "treeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+            "nodeVersion": "24.21.0",
+            "npmTestExit": 0,
+            "npmCheckExit": 0,
+            "readbackCommand": "ef4aff44-baa0-44cb-9bd0-31bc93cab687",
+            "rootTestsPassed": 2112,
+            "workingTreeClean": true,
+            "edgeTypecheckExit": 0,
+            "workerTestsPassed": 52,
+            "focusedTestsPassed": 82,
+            "fullMigrationReplayPassed": true,
+            "focusedTestsIncludedInRootTotal": true
+        },
+        "latestObservedCi": {
+            "note": "Workflow success is not an approval, coordinator authorization, deployment or physical-device acceptance",
+            "runIds": [
+                36128623121,
+                36128623112,
+                36128623125,
+                36128623091,
+                36128623118,
+                36128623169,
+                36128623141,
+                36128623089,
+                36128623132,
+                36128620468
+            ],
+            "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
+            "successfulObservedRuns": 10,
+            "allObservedCompletedSuccessfully": true,
+            "qualifyingIndependentReviewObserved": false
+        },
+        "postgresConcurrency": {
+            "cases": [
+                "One task cannot be claimed by different workers concurrently",
+                "Hierarchical resource conflicts serialize",
+                "Independent tasks are both admitted",
+                "Concurrent independent claims cannot overspend budget",
+                "Exact claim replay returns one lease and one charge",
+                "Durable outbox admits only one sender",
+                "Same-organization cross-project resource conflicts serialize"
+            ],
+            "jobId": 108050454047,
+            "proof": "Actual separate PostgreSQL sessions executed in the GitHub-hosted ephemeral test database; not simulated live ChatGPT workers",
+            "checkoutSha": "b5d63c782a619905e4df2a5d721840657f2e7cb0",
+            "testsFailed": 0,
+            "testsPassed": 7,
+            "workflowRun": 36128623169,
+            "checkoutKind": "GitHub synthetic PR merge",
+            "testsSkipped": 0,
+            "clientVersion": "16.15",
+            "serverVersion": "17.6",
+            "checkoutTreeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+            "treeMatchesPublishedHead": true
+        },
+        "finalMerged": {
+            "headSha": "50dd5508bded271bda446dd23991a5e9d82065f7",
+            "treeSha": "fcb36ff0848cf3f17009cb0c95fda82c90b821ac",
+            "mergeCommitSha": "0974b2c4a671197711139dfa098f03c33903b0a3",
+            "mergedAt": "2026-09-25T14:49:39Z",
+            "exactHeadWorkflowRuns": {
+                "Pandora Edge source artifact": 36148045637,
+                "Pandora mobile exact-source gate": 36148045398,
+                "Dependency Review": 36148045621,
+                "Canonical release evidence": 36148045418,
+                "Operations Room runtime": 36148045372,
+                "Windows Worker Contract": 36148045500,
+                "Engineering toolchain": 36148045333,
+                "Pandora Node 24": 36148045610,
+                "PLP Pandora Enterprise Android exact-source": 36148045456
+            },
+            "allObservedWorkflowsSuccessful": true,
+            "unresolvedReviewThreads": 0,
+            "independentReview": {
+                "provider": "Gemini Worker E",
+                "primaryAttempt": {
+                    "model": "gemini-3-flash-preview",
+                    "providerStatus": 503,
+                    "verdict": null
+                },
+                "acceptedAttempt": {
+                    "model": "gemini-3.1-flash-lite-preview",
+                    "providerStatus": 200,
+                    "responseId": "UIa2at-sGZ6pvr0PrMut-Ao",
+                    "verdict": "PASS",
+                    "findings": 0
+                }
+            },
+            "coordinator": {
+                "snapshotGeneration": 14,
+                "snapshotRevision": "gdrive-revision-781",
+                "snapshotSha256": "40763b836d3ef4b104c67f70cb6ca495068a0ca0395a4de877759e5b80defac1",
+                "decisionGeneration": 2,
+                "checkRunId": 108120640468,
+                "decision": "PASS",
+                "mergeClaimId": "a51296eb-be19-44d2-92ae-7b7e66ad6bc9",
+                "mergeFenceReleased": true
+            }
+        }
+    },
+    "schemaVersion": "1.0.0",
+    "truthBoundary": {
+        "scope": "Source implementation and CI evidence only. External integrations and deployment remain unfinished.",
+        "merged": true,
+        "all42UpgradesLive": false,
+        "independentApproval": false,
+        "edgeFunctionDeployed": false,
+        "vercelProductionPromoted": false,
+        "productionMigrationApplied": false,
+        "canonicalMemoryPromotionClaimed": false,
+        "realParallelChatGPTWorkersSpawned": false,
+        "independentSourceReview": true,
+        "githubApprovalRequiredAtMerge": false
+    },
+    "semanticSource": "observation",
+    "implementedSource": [
+        "Strict task and dependency-graph validation with canonical source and verification-profile binding",
+        "Capacity-aware scheduling proposals, priorities, aging, dependency unlock value, adaptive-concurrency recommendations and acknowledged ChatGPT worker eligibility",
+        "Durable Supabase task/worker state, cost reservation, resource exclusion, generation fencing, idempotent claims and single-sender dispatch outbox",
+        "Authenticated owner overview/ingest/pause/resume/no-production/cancel API with transactional membership recheck",
+        "Builder-to-Release handoff, separate-principal verification against existing canonical PASS, and known-outcome fenced recovery",
+        "Spreadsheet decoded-row ingestion, owner-input fingerprints and literal machine-column-only writeback planning",
+        "Governed GitHub/Supabase/Vercel/ARES action interfaces; bounded ADB argv and explicit emulator readiness checks",
+        "Truthful operational state projection and review-gated selective learning candidates"
+    ],
+    "executionResources": {
+        "rdp": "Existing machine used through authorized SSM for isolated code editing and tests; Desktop Commander transport itself reported offline",
+        "ssh": "Existing Administrator-owned SSH key could not be used from SYSTEM SSM execution. Key contents were not read/copied and ACL/host verification were not weakened. Preauthorized Vault-backed publication succeeded.",
+        "antigravity": {
+            "mode": "bounded read-only sandbox review",
+            "result": "authentication_failed_or_timed_out",
+            "attempted": true,
+            "commandId": "138d7547-0fac-4b49-b618-43fab22ce66b",
+            "completedTurns": 0,
+            "independentReviewProduced": false
+        },
+        "androidEmulator": {
+            "commandId": "ccca612c-8f7c-455d-abc9-7e922e66716f",
+            "apkInstalled": false,
+            "adbGuestState": "offline",
+            "hostReachable": true,
+            "resetPerformed": false,
+            "emulatorAcceptance": false,
+            "physicalDeviceAcceptance": false
+        },
+        "temporaryArtifact": {
+            "cleanup": "Exact staged object deleted after successful canonical publication; HeadObject returned 404",
+            "storage": "Existing private encrypted handoff bucket; temporary source-only transport",
+            "sourcePackageBytes": 177802,
+            "signedUrlsPersisted": false,
+            "sourcePackageSha256": "2cf0e28ead058bf143f33689a91195875ec25b4d74e56ff6cc5ded337120e0a0"
+        }
+    },
+    "remainingIntegration": [
+        "Provision explicit Operations project bindings through a trusted service-role provisioning path before activating any workspace; no legacy ProjectOS-derived auto-binding.",
+        "Authenticated ChatGPT worker enrollment/dispatch transport and event-driven wake-up/sweeper.",
+        "Complete Google Sheets/XLSX connector I/O and verified two-way synchronization.",
+        "Live governed GitHub/Supabase/Vercel provider adapters with provider-native idempotency, release and rollback proof.",
+        "ARES host and emulator lifecycle adapter, exact APK verification and connected-guest acceptance.",
+        "Existing mobile/web Operations Room UI and ARES roster integration after incumbent file-area handoff.",
+        "Approved Memory retrieval/candidate-persistence integration; no direct self-promotion.",
+        "Paused/no-production staging, provider readback and production rollout remain separate from the merged source foundation."
+    ]
+}
