@@ -23,7 +23,7 @@ Observed September 25, 2026 through the Supabase provider and the exact-source V
 
 ## Candidate source binding
 
-- Candidate bridge raw SHA-256: `8906e952f3f9cbb6b1a31f716d9b8331dbf810497c22d9e309b6c8b29d2e22c0`
+- Candidate bridge raw SHA-256: `f4cab43824b5c68f852801f10ba5353a3eca3458860334caa3f374563c3f895e`
 - The candidate is not yet deployed. Typed results and approved legacy results are deduplicated and limited by count and UTF-8 bytes. Omitted records are reported as truncation, not absent knowledge.
 - `memory_task_context_v1` retains typed scope, validity, revocation and authority separation. `memory_projectos_search_scoped_v1` independently restricts the legacy path to approved, current, project/namespace/user/grant-matching records.
 - Existing review-gated evidence intake is preserved. Candidate receipts still state `canonical_memory_written=false`.
