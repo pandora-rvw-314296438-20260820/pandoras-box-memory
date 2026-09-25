@@ -1,18 +1,9 @@
 name: Capability Registry Gate
 
 on:
+  # This job is a required branch-protection context. It must exist on every PR.
+  # The job itself decides whether the changed paths require a registry co-change.
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - "app/**"
-      - "docs/capabilities/**"
-      - "docs/roadmap/PANDORA_COMPOUNDING_INTELLIGENCE_MASTER_ROADMAP_V2.md"
-      - "lib/**"
-      - "next.config.ts"
-      - "package.json"
-      - "scripts/**"
-      - "supabase/**"
-      - "tsconfig.json"
   push:
     branches:
       - main
