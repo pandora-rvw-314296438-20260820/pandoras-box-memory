@@ -477,6 +477,7 @@ const searchMemory = async (
   let advisoryMemory: JsonRecord[] = [];
   let items: JsonRecord[] = [];
   let retrievalTruncated = false;
+  let retrievalSourceLimitReached = false;
 
   if (allowedTypedClasses.length > 0) {
     terms = safeSearchTerms([query, currentTask ?? "", ...requiredCapabilities].join(" "));
@@ -556,7 +557,7 @@ const searchMemory = async (
         p_environment: principal.environment,
         p_terms: terms,
         p_canon_statuses: canonStatuses,
-        p_limit: maxItems,
+        p_limit: Math.min(maxItems + 1, 50),
       },
     );
     if (indexedItemsError) {
@@ -568,7 +569,9 @@ const searchMemory = async (
     }
     const bounded = mergeBoundedMemory(items, (indexedItems ?? []) as JsonRecord[], maxItems);
     items = bounded.items;
-    retrievalTruncated = bounded.skipped > 0;
+    const completeness = scopedRetrievalState((indexedItems ?? []).length, maxItems, bounded.skipped);
+    retrievalTruncated = completeness.truncated;
+    retrievalSourceLimitReached = completeness.sourceLimitReached;
     if (allowedTypedClasses.length > 0) {
       retrievalMode = "m5_task_aware_bounded_with_legacy";
     }
@@ -638,6 +641,7 @@ const searchMemory = async (
         required_capabilities: [...new Set(requiredCapabilities)],
         retrieval_mode: retrievalMode,
         retrieval_truncated: retrievalTruncated,
+        retrieval_source_limit_reached: retrievalSourceLimitReached,
         allowed_typed_classes: allowedTypedClasses,
         returned_profiles: 0,
         returned_open_loops: packOpenLoops.length,
@@ -675,7 +679,9 @@ const searchMemory = async (
     terms,
     contextPack,
   });
-  if (retrievalTruncated) {
+  if (retrievalSourceLimitReached) {
+    warnings.push("Memory retrieval reached the server row cap. Additional knowledge may exist; completeness is unknown at that cap.");
+  } else if (retrievalTruncated) {
     warnings.push("Memory results were limited by the item or UTF-8 byte budget; omitted items were not treated as absent knowledge.");
   }
   if (allowedTypedClasses.length === 0) {
@@ -1717,3 +1723,13 @@ Deno.serve(async (request: Request) => {
   }
   return respond({ ok: false, error: "unsupported_action" }, 400);
 });
+
+// The scoped RPC has a hard 50-row cap. Below it, fetch one look-ahead row;
+// at the cap, report unknown completeness instead of claiming there is no more.
+export function scopedRetrievalState(rowCount: number, maxItems: number, skipped: number) {
+  const sourceLimitReached = rowCount >= 50;
+  return {
+    sourceLimitReached,
+    truncated: skipped > 0 || rowCount > maxItems || sourceLimitReached,
+  };
+}

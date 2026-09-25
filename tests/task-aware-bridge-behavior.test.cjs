@@ -46,3 +46,23 @@ test('legacy entries never receive typed policy authority', () => {
   assert.equal(row.authorizationEffect, undefined);
   assert.match(source, /authorization_effect: typed \? item.authorizationEffect : "none"/);
 });
+
+
+const completenessNode = ast.statements.find((entry) => ts.isFunctionDeclaration(entry) && entry.name?.text === 'scopedRetrievalState');
+assert.ok(completenessNode, 'Production completeness function must exist');
+vm.runInNewContext(ts.transpileModule(completenessNode.getText(ast), {
+  compilerOptions: {module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022},
+}).outputText, context);
+const completeness = context.exports.scopedRetrievalState;
+test('look-ahead detects extra scoped rows and preserves complete short results', () => {
+  assert.equal(completeness(13,12,0).truncated,true);
+  assert.equal(completeness(12,12,0).truncated,false);
+  assert.equal(completeness(0,12,0).truncated,false);
+  assert.match(source,/p_limit: Math\.min\(maxItems \+ 1, 50\)/);
+});
+test('maximum RPC cap never falsely claims complete knowledge', () => {
+  assert.equal(completeness(50,50,0).sourceLimitReached,true);
+  assert.equal(completeness(50,50,0).truncated,true);
+  assert.equal(completeness(49,50,0).truncated,false);
+  assert.equal(completeness(2,12,1).truncated,true);
+});

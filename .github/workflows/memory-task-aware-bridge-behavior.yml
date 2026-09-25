@@ -60,17 +60,19 @@ jobs:
           import hashlib
           from pathlib import Path
           source = Path('supabase/migrations/20260925061728_memory_canonical_repository_binding_reconciliation.sql').read_bytes()
-          header, body = source.split(b'-- BEGIN EXACT APPLIED SQL\n', 1)
+          body = Path('recovery/migrations/20260925061728.applied.sql').read_bytes()
           assert hashlib.sha256(body).hexdigest() == '80a72bdec54254dde0442da20e9801889a6caa577cd68aecd33c30e0da30f6a1'
+          assert b'-- BEGIN REVIEWED REPLAY SQL' in source
           PY
           psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-fixture.sql
           psql -X -v ON_ERROR_STOP=1 -f "$migration"
           psql -X -v ON_ERROR_STOP=1 -f "$migration"
           psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-behavior.sql
-          psql -X -v ON_ERROR_STOP=1 -c "update public.pandora_projects set github_owner='unexpected-owner' where project_key='memory'"
-          if psql -X -v ON_ERROR_STOP=1 -f "$migration" > unexpected-owner.log 2>&1; then
-            echo 'Unexpected owner was overwritten instead of rejected' >&2
-            exit 1
-          fi
-          grep -F 'Memory repository owner changed' unexpected-owner.log
-          test "$(psql -X -At -c "select github_owner from public.pandora_projects where project_key='memory'")" = 'unexpected-owner'
+          createdb memory_binding_empty
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-fixture.sql
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -c "delete from public.pandora_projects where project_key='memory'"
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          test "$(PGDATABASE=memory_binding_empty psql -X -At -c 'select count(*) from private.memory_project_binding_receipts')" = '0'
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -c "insert into public.pandora_projects values ('10000000-0000-4000-8000-000000000001','memory','banataosystems','pandoras-box-memory','real_life','active',now())"
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          PGDATABASE=memory_binding_empty psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-behavior.sql

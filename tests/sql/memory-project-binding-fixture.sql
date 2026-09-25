@@ -4,7 +4,6 @@ CREATE SCHEMA private;
 CREATE ROLE anon;
 CREATE ROLE authenticated;
 CREATE ROLE service_role BYPASSRLS;
-GRANT USAGE ON SCHEMA private TO service_role;
 CREATE TABLE public.pandora_projects (
  id uuid PRIMARY KEY, project_key text, github_owner text, github_repository text,
  memory_namespace text, lifecycle_status text, updated_at timestamptz DEFAULT now()

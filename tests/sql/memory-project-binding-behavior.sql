@@ -24,3 +24,18 @@ SET ROLE service_role;
 SELECT count(*) AS service_receipt_read FROM private.memory_project_binding_receipts;
 RESET ROLE;
 SELECT 'PASS: canonical binding, replay, independent project, grant preservation, receipt lineage and access' AS result;
+
+DO $test$
+declare rejected boolean:=false;
+begin
+ if not has_schema_privilege('service_role','private','usage') then raise exception 'Service schema access missing'; end if;
+ if has_function_privilege('authenticated','private.memory_enforce_canonical_binding_v2()','execute') then raise exception 'Lifecycle trigger exposed as client RPC'; end if;
+ begin
+  update public.pandora_projects set github_owner='unexpected-owner' where project_key='memory';
+ exception when raise_exception then
+  if sqlerrm not like 'Memory repository owner changed%' then raise; end if;
+  rejected:=true;
+ end;
+ if not rejected then raise exception 'Unexpected owner was not rejected'; end if;
+ if (select github_owner from public.pandora_projects where project_key='memory') is distinct from 'pandora-rvw-314296438-20260820' then raise exception 'Rejected update changed binding'; end if;
+end; $test$;
