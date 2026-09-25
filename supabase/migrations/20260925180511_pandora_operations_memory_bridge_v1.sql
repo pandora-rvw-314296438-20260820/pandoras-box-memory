@@ -1,3 +1,10 @@
+-- PANDORA_SECURITY_ADJUDICATION: reviewed (engineering source-readiness only; independent release review pending).
+-- PANDORA_SECURITY_ACCESS_PATH: Trusted server-only RPC checks current principal/user/project/namespace/environment grants; service-role EXECUTE only; private receipts deny direct client and service writes.
+-- PANDORA_SECURITY_TEST_PLAN: Exact native SQL plus 66 disposable-database assertions, three independent PostgreSQL replay/revocation races, and 57 companion client cases; live provider/tenant proof remains a release gate.
+-- PANDORA_SECURITY_ROLLBACK: Pause the consumer and preserve native candidates, review history and immutable delivery receipts; reconcile unknown outcomes; no destructive history deletion or privilege widening.
+-- PANDORA_SECURITY_OWNER: ChatGPT OPS-MEMORY-INTEGRATION-20260926 under Operations Room issue714; current owner requested integration; independent ARTEMIS/repository release approval still required.
+-- This source metadata is not independent approval or authorization to run production DDL.
+
 -- Operations Room -> existing M5 Memory. CLI-generated source; no activation/seed.
 -- The receipt is delivery evidence, never a second canonical Memory store.
 create table private.pandora_ops_memory_receipts_v1 (

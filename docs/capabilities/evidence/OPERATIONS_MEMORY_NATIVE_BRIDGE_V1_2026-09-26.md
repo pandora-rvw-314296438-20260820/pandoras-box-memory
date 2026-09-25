@@ -30,3 +30,13 @@ Tests extract the existing native ingester directly from `supabase/migrations/20
 No production DDL, Memory grant, Edge deployment, independent approval, hard-canon promotion, live Router adoption, numeric routing-performance learning or physical Android acceptance. The trusted calling runtime must prove the task/lease and canonical verification before invoking this privileged component. Review queue admission is not final Memory approval.
 
 Rollback is consumer pause plus receipt-preserving reconciliation, not deletion or rewriting of native Memory history.
+
+## Published-source CI readback and source-readiness correction
+
+The canonical source pair is Box PR #736 at fd920a66c31ee7569af1fba642a23facb6fa44f9 and Memory PR #114 initially at c0fae566c5779418aa90be8e44b643a02aa47183. All twelve exact GitHub file hashes and both complete candidate trees matched the isolated RDP source. The readback manifest SHA-256 is 844865a06cd52383ffcbfbba07156e0e084330468c8cf6d7085af682db42db0d.
+
+GitHub Memory workflow run 36176289438, job 108207575017, actually executed the 66 native SQL assertions and all three independent PostgreSQL race cases successfully against the PR integration checkout. These repeat the same 66 behavior assertions on PostgreSQL rather than constituting 132 unique cases. Box source validation passed 2414 tests with zero failures and two skips (2416 total, focused57 included), worker52/52, and full source checks/migration replay.
+
+The separate security-adjudication job failed because this new sensitive migration omitted its five required source-readiness comments. The existing contract/checker was read and left unchanged; this follow-up adds explicit access-path, executed-test, rollback and engineering-owner metadata to the new migration. The reviewed marker means engineering source-readiness only, not independent approval or production authorization. Both unchanged checker self-test and base-diff gate passed locally, and the66 native SQL assertions were rerun successfully after this comment-only SQL change. New-head CI remains required; the failed prior gate is retained as history.
+
+No production DDL, grant expansion, canonical promotion, live Router adoption, independent release approval or physical-device acceptance is asserted by this correction.
