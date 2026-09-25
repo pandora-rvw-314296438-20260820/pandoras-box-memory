@@ -44,3 +44,46 @@ No merge, production Supabase migration, new Edge deployment, Vercel promotion, 
 ## What Pandora should learn
 
 Validate privileged SQL inputs independently of JS clients; keep intake-size limits separate from total-project graph limits; make cancellation terminal at each lease-free lifecycle state; preserve bounded domain error identity; and bind tested bytes to exact canonical source before requesting review. A green test suite or comment-only review must never be promoted into a missing formal approval, coordinator gate or deployed-success claim.
+
+
+## Final recovery, independent review, coordinator PASS and merge
+
+The earlier corrected head `8cf811e2b3ce1fe4c164437868793fb84cf9cf3b` is historical only. Concurrent shared-account writers later corrupted the #728 branch by replacing the complete DB test with placeholder/partial content. Operations Room froze the exact feature branch with temporary no-bypass ruleset `24000473`, required one exclusive recovery owner, restored the verified full test blob in detached commit `ff0ab60708898c1c858c41465dcffba2f1013145`, then prepared a native authorization correction before reopening the branch.
+
+Final source candidate:
+- exact head: `50dd5508bded271bda446dd23991a5e9d82065f7`
+- exact tree: `fcb36ff0848cf3f17009cb0c95fda82c90b821ac`
+- base/main at decision time: `6f20780765001d1a90ee31800a3948d043551afa`
+- merge commit: `0974b2c4a671197711139dfa098f03c33903b0a3`
+- merged at: 2026-09-25T14:49:39Z
+
+The final recovery removes Operations authorization dependence on the retired ProjectOS-backed `public.pandora_projects` compatibility view. The migration now creates an explicit service-role-only `private.pandora_ops_project_bindings` registry with evidence references. Missing or revoked bindings fail closed at initialize, claim, dispatch and owner admission. Owner/browser calls cannot create project bindings, and the migration seeds none.
+
+One publication defect was caught by CI during recovery: JavaScript replacement semantics collapsed intended PostgreSQL `$$` function delimiters to a single `$`, causing migration replay failure at detached/recovery head `df80c6c2ee06479999c53ed5a4c29d991647bcd8`. The correction used function-valued replacements, verified literal `$$` in provider-read-back source, and advanced to final head `50dd5508...`.
+
+Final exact-head workflow runs all completed successfully:
+- Edge source artifact `36148045637`
+- mobile exact-source gate `36148045398`
+- Dependency Review `36148045621`
+- canonical release evidence `36148045418`
+- Operations Room runtime `36148045372`
+- Windows Worker Contract `36148045500`
+- Engineering toolchain `36148045333`
+- Node 24 `36148045610`
+- PLP native Android exact-source `36148045456`
+
+Independent Worker E review used the complete exact PR diff. Primary `gemini-3-flash-preview` returned provider HTTP 503 high demand and no verdict. Approved fallback `gemini-3.1-flash-lite-preview` returned HTTP 200, response ID `UIa2at-sGZ6pvr0PrMut-Ao`, exact candidate/tree match, verdict PASS, zero findings. The 503 is retained as provider-availability evidence rather than erased.
+
+Coordinator generation 2 bound the final candidate to authoritative Sheet snapshot generation 14 / `gdrive-revision-781` / SHA-256 `40763b836d3ef4b104c67f70cb6ca495068a0ca0395a4de877759e5b80defac1`. GitHub App 4785021 published required check `108120640468` PASS. Governed merge claim `a51296eb-be19-44d2-92ae-7b7e66ad6bc9` revalidated exact head/base/snapshot/check identity. Vault-backed GitHub merge used expected head with no force/bypass. `completeMerge` provider readback recorded merge SHA `0974b2c4...` and released the merge fence.
+
+## Updated Pandora lessons
+
+- Shared canonical credentials do not identify the source writer. When competing writes corrupt a branch, freeze that exact branch, assign one exclusive recovery owner, prepare detached source, verify objects, then reopen only for a bounded non-force fast-forward.
+- A neutral name does not make retired storage an acceptable authority dependency. Authorization must bind to an explicit current Pandora-owned authority surface.
+- JavaScript replacement strings interpret `$$`; when source must literally contain `$$`, use a function replacement or another byte-safe construction and provider-read back the result before trusting it.
+- Provider 503/high demand is no review verdict. Use only an approved fallback, on the same exact evidence, and preserve both attempts.
+- Exact-head CI, independent source review, coordinator snapshot binding, merge claim, provider merge readback, and fence release are separate evidence layers. None substitutes for another.
+
+## Final non-claims
+
+PR #728 source is merged, but the Operations Room is not thereby fully deployed or all 42 upgrades live. No production migration apply, Edge deployment, automatic project binding, real ChatGPT worker pool, Router runtime implementation, physical-device acceptance, or canonical Memory promotion is implied by the source merge.
