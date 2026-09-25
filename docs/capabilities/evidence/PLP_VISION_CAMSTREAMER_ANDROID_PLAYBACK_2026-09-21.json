@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "draft_provider_evidence",
+  "canonicalPromotionPerformed": false,
+  "recordedAt": "2026-09-21",
+  "task": "PLP Vision Android CamStreamer playback repair combined with Qwen/OpenRouter main",
+  "sourceRepository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "memoryRepository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "source": {
+    "priorMain": "128a3b9eb0cc45899842404c5195923e6d04bbd0",
+    "pullRequest": 672,
+    "exactHead": "338c6518d5aea19bf007bcce8645c9d5f8def75c",
+    "exactTree": "a0f7e9a83025d5358844720fc5cf73aa53d93208",
+    "mergeMain": "8f8096ba685074b2bf3e12b5deb33e5a007a64a4",
+    "mergeParents": [
+      "128a3b9eb0cc45899842404c5195923e6d04bbd0",
+      "338c6518d5aea19bf007bcce8645c9d5f8def75c"
+    ]
+  },
+  "verifiedFacts": [
+    "The Vision fix was replayed directly onto the already-merged Qwen/OpenRouter main rather than merging the stale PR head.",
+    "Only MainActivity.kt and two Vision regression tests changed.",
+    "All seven exact-head workflow families passed.",
+    "The dedicated PLP native Android APK build passed package, ABI, signing, model-separation, evidence-binding and provider-locator steps.",
+    "Generic Android and iOS exact-source validation passed.",
+    "Trusted Pandora coordinator App 4785021 published PASS on the exact head.",
+    "The expected-head merge completed and GitHub main readback equals the merge SHA."
+  ],
+  "governance": {
+    "sheetSnapshotGeneration": 10,
+    "sheetRevision": "gdrive-revision-764",
+    "sheetXlsxSha256": "c5949432abdee5de918361b8c5a2ae8940aa8c08880444c542bf0094ef633fd4",
+    "coordinatorCheckRunId": 106189999132,
+    "coordinatorMergeClaim": "2c33c446-f136-46d8-9f80-96836d1ed164",
+    "mergeClaimConsumed": true,
+    "branchProtectionBypassed": false,
+    "directIntegrationMergeResult": "403_resource_not_accessible",
+    "approvedFallback": "Supabase Vault-backed Github_supabase exact-head merge"
+  },
+  "implementation": {
+    "rootCause": "Android native WebView top-level CamStreamer allowlist was also cancelling secure nested media-frame navigation needed by the provider player; embedded media support was incomplete.",
+    "fix": [
+      "Keep top-level navigation restricted to HTTPS CamStreamer hosts.",
+      "Permit HTTPS nested-frame navigation required by the provider-controlled player.",
+      "Enable WebChromeClient for embedded HTML5 media.",
+      "Enable third-party cookies for the nested media session.",
+      "Protect the behavior with Node and Flutter regression assertions."
+    ]
+  },
+  "unresolvedAcceptance": [
+    "Physical-phone Vision playback is not verified yet.",
+    "Do not infer that the black camera panel is physically fixed from CI or APK build success alone.",
+    "Final acceptance requires installing the exact merged APK and observing the live Vision feed on the phone."
+  ],
+  "lessons": [
+    "Do not apply a top-level WebView host allowlist blindly to provider-controlled subframes; preserve top-level restrictions while handling secure nested playback explicitly.",
+    "When a fix branch is stale behind main, reconstruct the minimal patch on the exact current main and rerun exact-source CI instead of merging historical ancestry.",
+    "A successful APK build proves source/build integrity, not physical media playback; keep physical acceptance separate.",
+    "If direct GitHub integration merge authority fails closed, use only the approved Vault-backed fallback after the trusted coordinator check and merge claim are live."
+  ],
+  "provenance": [
+    "GitHub provider readback",
+    "GitHub Actions exact-head CI",
+    "GitHub App 4785021 coordinator check",
+    "Supabase coordinator state/readback",
+    "Google Sheet revision 764 XLSX export hash",
+    "Supabase Vault-backed GitHub merge transport"
+  ]
+}

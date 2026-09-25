@@ -1,0 +1,48 @@
+
+{
+  "schemaVersion": 1,
+  "recordType": "verified_build_evidence",
+  "recordedAt": "2026-09-25T03:05:00+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+  "sourceSha": "3ac81d6d1e6753da48d18e785eb642f6e821cce5",
+  "sourceTree": "7be61cf9511eca82ae67842f5a6b85a415469769",
+  "appVersion": "0.4.0-rc.14+21",
+  "generalAndroid": {
+    "workflowRunId": 36043620337,
+    "result": "success",
+    "artifactId": 10827808455,
+    "artifactName": "pandora-mobile-android-validation-3ac81d6d1e6753da48d18e785eb642f6e821cce5",
+    "artifactDigestSha256": "4a77ef3029d9cb638115568b6864338c246442640ec46121fd410f2d5f859c87",
+    "apkSha256": "78866c0f017bd43a974af4efdad02ddf9fcade2f948a6253c4e4cf29fb044e08",
+    "apkSizeBytes": 152486276,
+    "package": "com.banataosystems.pandora_mobile",
+    "versionCode": 21,
+    "versionName": "0.4.0-rc.14",
+    "signing": "Android Debug certificate, APK Signature Scheme v2",
+    "productionRelease": false
+  },
+  "plpAndroid": {
+    "workflowRunId": 36044089148,
+    "result": "success",
+    "artifactId": 10827559434,
+    "artifactName": "plp-pandora-enterprise-3ac81d6d1e6753da48d18e785eb642f6e821cce5",
+    "artifactDigestSha256": "33335ed485e4e2f64423f5aee5c2ad138e6db3487cf640027761412eb3aa7cca",
+    "apkSha256": "34c8f1d435d626a3a6ed5346ec087bd1c39253735d8308e81908bbc9547c7d02",
+    "apkSizeBytes": 70884481,
+    "package": "com.banataosystems.pandora.plp",
+    "applicationLabel": "PLP Pandora Enterprise",
+    "versionCode": 21,
+    "versionName": "0.4.0-rc.14",
+    "targetAbi": "arm64-v8a",
+    "localAiModelBundled": false,
+    "recommendedLocalModel": "qwen2.5-3b-instruct-q4_k_m.gguf",
+    "signing": "Android Debug certificate, APK Signature Scheme v2",
+    "productionRelease": false
+  },
+  "releaseBoundary": {
+    "physicalDeviceVerified": false,
+    "offlineQwenAcceptanceVerified": false,
+    "productionSigningVerified": false
+  },
+  "durableLesson": "Canonical-main build evidence must bind source SHA, package identity, APK hash, artifact digest, and signing state. Debug-signed CI success is not production signing or physical-device acceptance."
+}

@@ -1,0 +1,57 @@
+name: Operations approved performance read
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/*pandora_operations_performance_read*'
+      - 'tests/operations-performance/**'
+      - 'scripts/render_operations_performance_test.py'
+      - '.github/workflows/operations-performance-read.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*pandora_operations_performance_read*'
+      - 'tests/operations-performance/**'
+      - 'scripts/render_operations_performance_test.py'
+      - '.github/workflows/operations-performance-read.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: operations-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  approved-performance-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: ops_performance_test
+          # Disposable CI database only, not a provider credential.
+          POSTGRES_PASSWORD: ops_performance_fixture_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGDATABASE: ops_performance_test
+      PGUSER: postgres
+      PGPASSWORD: ops_performance_fixture_only
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Python syntax
+        run: python3 -m py_compile scripts/render_operations_performance_test.py tests/operations-performance/postgres-race.py
+      - name: Exact SQL in one isolated connection
+        run: |
+          set -euo pipefail
+          python3 scripts/render_operations_performance_test.py | psql -X -v ON_ERROR_STOP=1
+      - name: Separate PostgreSQL sessions prove revocation fencing
+        run: python3 tests/operations-performance/postgres-race.py
