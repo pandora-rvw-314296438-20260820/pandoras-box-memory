@@ -9,57 +9,65 @@
     "source": {
         "branch": "feat/operations-room-runtime-v1-20260925",
         "baseSha": "6f20780765001d1a90ee31800a3948d043551afa",
-        "headSha": "42d6c3175e1f338fa90d320211a72b20cc63ae39",
-        "treeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
+        "headSha": "50dd5508bded271bda446dd23991a5e9d82065f7",
+        "treeSha": "fcb36ff0848cf3f17009cb0c95fda82c90b821ac",
         "newFiles": 20,
         "repository": "pandora-rvw-314296438-20260820/pandoras-box",
-        "publication": "Existing Supabase Vault-backed Github_supabase broker; independently verified uploaded file digests and exact RDP/GitHub tree equality",
+        "publication": "Final recovery and merge used canonical GitHub reads plus the Supabase Vault-backed Github_supabase transport. No PAT was exposed, no force push or branch-protection bypass was used, and provider readback verified the exact head/tree before merge.",
         "pullRequest": 728,
         "documentationPath": "docs/operations/OPERATIONS_ROOM_UPGRADE_V1.md",
-        "existingFilesChanged": 0
+        "existingFilesChanged": 0,
+        "mergeCommitSha": "0974b2c4a671197711139dfa098f03c33903b0a3",
+        "mergedAt": "2026-09-25T14:49:39Z"
     },
-    "status": "source_ci_verified_not_deployed",
+    "status": "merged_source_verified_not_deployed",
     "taskId": "OPS-UPGRADE-V1-001",
     "worker": "ChatGPT OPS-UPGRADE-20260925",
     "lessons": [
         {
-            "fix": "Use current scope revalidation through the view and private composite workspace foreign keys; mirror the view shape in test fixtures.",
             "type": "failure_lesson",
-            "finding": "The active canonical project identity is a security-invoker view, not a foreign-key target table.",
-            "verifiedBy": "Full source migration replay and focused PostgreSQL/PGlite behavior tests"
+            "finding": "The neutral-named public.pandora_projects compatibility view still depended on retired ProjectOS storage, so using it for Operations authorization preserved a retired execution dependency.",
+            "fix": "Use an explicit service-role-only private.pandora_ops_project_bindings registry with evidence references. Missing or revoked bindings fail closed across initialize, claim, dispatch, and owner admission; browser/owner calls cannot create bindings.",
+            "verifiedBy": "Final PR #728 source at 50dd5508bded271bda446dd23991a5e9d82065f7 plus Operations Room runtime and Node 24 exact-head CI"
         },
         {
-            "fix": "Use explicit aliases, supported regex patterns with independent length bounds, and parenthesized JSON extraction.",
             "type": "failure_lesson",
-            "finding": "PL/pgSQL variable/alias shadowing, PostgreSQL regex bounds and JSON operator precedence caused executable failures despite plausible source.",
-            "verifiedBy": "Passing migration replay and SQL behavior suites"
+            "finding": "Concurrent shared-account writers corrupted the PR branch by replacing the complete DB test with placeholder/partial content.",
+            "fix": "Freeze the exact feature branch with a temporary no-bypass ruleset, prepare detached recovery commits, assign one exclusive recovery owner, verify blob/tree identity, remove only the temporary freeze, then perform one non-force fast-forward.",
+            "verifiedBy": "Operations Room issue #714 comments 5833613944, 5833642589, 5833978572, 5834067741 and final head provider readback"
         },
         {
-            "fix": "Persist a one-sender dispatch transition; require canSend=true and exact task/worker/epoch ACK. Unknown delivery outcomes retain resource claims for reconciliation.",
+            "type": "failure_lesson",
+            "finding": "JavaScript String.replace replacement syntax collapsed intended PostgreSQL $$ function delimiters to a single $, causing migration replay failures across Operations Room, Node24, and Engineering CI.",
+            "fix": "Use function-valued replacements for literal $$ delimiters, verify the published migration bytes contain the two-character delimiter, then rerun exact-head CI.",
+            "verifiedBy": "Failed head df80c6c2ee06479999c53ed5a4c29d991647bcd8 followed by corrected head 50dd5508bded271bda446dd23991a5e9d82065f7 and green migration replay"
+        },
+        {
+            "type": "failure_lesson",
+            "finding": "The primary independent Gemini reviewer returned provider HTTP 503 high demand and produced no verdict.",
+            "fix": "Treat provider unavailability as no review result and use the approved Worker E fallback model on the same exact diff. Preserve the 503 as provider evidence rather than retrying blindly.",
+            "verifiedBy": "Worker E fallback gemini-3.1-flash-lite response UIa2at-sGZ6pvr0PrMut-Ao, exact head 50dd5508bded271bda446dd23991a5e9d82065f7, PASS with zero findings"
+        },
+        {
             "type": "failure_lesson",
             "finding": "An idempotent claim alone does not prevent two coordinators from delivering the same worker request.",
-            "verifiedBy": "Separate-session PostgreSQL dispatch race test and unknown-outcome unit cases"
+            "fix": "Persist a one-sender dispatch transition; require canSend=true and exact task/worker/generation ACK. Unknown delivery outcomes retain resource claims for reconciliation.",
+            "verifiedBy": "Operations Room runtime PostgreSQL separate-session race workflow 36148045372"
         },
         {
-            "fix": "Require a separately registered principal and an existing canonical exact-source verification PASS bound to the task requirements.",
             "type": "failure_lesson",
             "finding": "Different worker names do not establish an independent verifier.",
-            "verifiedBy": "Same-principal rejection and canonical PASS consumption tests"
+            "fix": "Require a separately registered principal and an existing canonical exact-source verification PASS bound to the task requirements.",
+            "verifiedBy": "Same-principal rejection and canonical PASS consumption tests plus separate Worker E review"
         },
         {
-            "fix": "Hash owner inputs plus row/header identity; restrict machine updates to designated columns using literal RAW values.",
             "type": "failure_lesson",
             "finding": "Including machine-owned status cells in a spreadsheet input hash breaks the next legitimate sync.",
+            "fix": "Hash owner inputs plus row/header identity; restrict machine updates to designated columns using literal RAW values.",
             "verifiedBy": "Status-refresh, owner-edit, malformed-row and formula rejection tests"
-        },
-        {
-            "fix": "Keep Antigravity zero-turn authentication failure and offline ADB state explicit; do not claim review or device acceptance. Use approved publication alternatives without widening key permissions.",
-            "type": "procedure_candidate",
-            "finding": "Provider availability and process existence are not execution evidence.",
-            "verifiedBy": "Actual SSM, ADB, Antigravity and GitHub publication readbacks"
         }
     ],
-    "observedAt": "2026-09-25T11:31:33.98981+00:00",
+    "observedAt": "2026-09-25T14:49:39Z",
     "coordination": {
         "lease": "OPS-AREA-UPGRADE-V1",
         "trackerTask": "OPS-UPGRADE-V1-001",
@@ -69,8 +77,8 @@
         "incumbentGlobalCoordinatorPreserved": true
     },
     "supersession": {
-        "supersedes": "The source documentation and initial PR handoff note that the seven PostgreSQL races had not yet executed.",
-        "replacement": "The seven real multi-connection race tests have now executed successfully in workflow 36128623169.",
+        "supersedes": "Earlier #108 evidence froze the original head 42d6c3175e1f338fa90d320211a72b20cc63ae39 and later pre-recovery #728 heads. Those heads are historical only and were never merged.",
+        "replacement": "Final verified source head 50dd5508bded271bda446dd23991a5e9d82065f7 merged as 0974b2c4a671197711139dfa098f03c33903b0a3 after branch-freeze recovery, exact-head CI, Worker E review, generation-14 coordinator PASS, governed merge claim, and completeMerge readback.",
         "historyPreserved": true
     },
     "verification": {
@@ -130,19 +138,65 @@
             "serverVersion": "17.6",
             "checkoutTreeSha": "fa70c645651dbbf821e0c00eea2d9c472d556af6",
             "treeMatchesPublishedHead": true
+        },
+        "finalMerged": {
+            "headSha": "50dd5508bded271bda446dd23991a5e9d82065f7",
+            "treeSha": "fcb36ff0848cf3f17009cb0c95fda82c90b821ac",
+            "mergeCommitSha": "0974b2c4a671197711139dfa098f03c33903b0a3",
+            "mergedAt": "2026-09-25T14:49:39Z",
+            "exactHeadWorkflowRuns": {
+                "Pandora Edge source artifact": 36148045637,
+                "Pandora mobile exact-source gate": 36148045398,
+                "Dependency Review": 36148045621,
+                "Canonical release evidence": 36148045418,
+                "Operations Room runtime": 36148045372,
+                "Windows Worker Contract": 36148045500,
+                "Engineering toolchain": 36148045333,
+                "Pandora Node 24": 36148045610,
+                "PLP Pandora Enterprise Android exact-source": 36148045456
+            },
+            "allObservedWorkflowsSuccessful": true,
+            "unresolvedReviewThreads": 0,
+            "independentReview": {
+                "provider": "Gemini Worker E",
+                "primaryAttempt": {
+                    "model": "gemini-3-flash-preview",
+                    "providerStatus": 503,
+                    "verdict": null
+                },
+                "acceptedAttempt": {
+                    "model": "gemini-3.1-flash-lite-preview",
+                    "providerStatus": 200,
+                    "responseId": "UIa2at-sGZ6pvr0PrMut-Ao",
+                    "verdict": "PASS",
+                    "findings": 0
+                }
+            },
+            "coordinator": {
+                "snapshotGeneration": 14,
+                "snapshotRevision": "gdrive-revision-781",
+                "snapshotSha256": "40763b836d3ef4b104c67f70cb6ca495068a0ca0395a4de877759e5b80defac1",
+                "decisionGeneration": 2,
+                "checkRunId": 108120640468,
+                "decision": "PASS",
+                "mergeClaimId": "a51296eb-be19-44d2-92ae-7b7e66ad6bc9",
+                "mergeFenceReleased": true
+            }
         }
     },
     "schemaVersion": "1.0.0",
     "truthBoundary": {
         "scope": "Source implementation and CI evidence only. External integrations and deployment remain unfinished.",
-        "merged": false,
+        "merged": true,
         "all42UpgradesLive": false,
         "independentApproval": false,
         "edgeFunctionDeployed": false,
         "vercelProductionPromoted": false,
         "productionMigrationApplied": false,
         "canonicalMemoryPromotionClaimed": false,
-        "realParallelChatGPTWorkersSpawned": false
+        "realParallelChatGPTWorkersSpawned": false,
+        "independentSourceReview": true,
+        "githubApprovalRequiredAtMerge": false
     },
     "semanticSource": "observation",
     "implementedSource": [
@@ -184,12 +238,13 @@
         }
     },
     "remainingIntegration": [
-        "Authenticated ChatGPT worker enrollment/dispatch transport and event-driven wake-up/sweeper",
-        "Complete Google Sheets/XLSX connector I/O and verified two-way synchronization",
-        "Live M3 bindings for GitHub/Supabase/Vercel provider actions with provider-native idempotency and release/rollback proof",
-        "ARES host and emulator lifecycle adapter, exact APK verification and connected-guest acceptance",
-        "Existing mobile/web Operations Room UI and ARES roster integration after incumbent file-area handoff",
-        "Approved Memory retrieval/candidate-persistence integration; no direct self-promotion",
-        "Independent exact-head review, coordinator release gates, source/provider parity and staged paused/no-production deployment"
+        "Provision explicit Operations project bindings through a trusted service-role provisioning path before activating any workspace; no legacy ProjectOS-derived auto-binding.",
+        "Authenticated ChatGPT worker enrollment/dispatch transport and event-driven wake-up/sweeper.",
+        "Complete Google Sheets/XLSX connector I/O and verified two-way synchronization.",
+        "Live governed GitHub/Supabase/Vercel provider adapters with provider-native idempotency, release and rollback proof.",
+        "ARES host and emulator lifecycle adapter, exact APK verification and connected-guest acceptance.",
+        "Existing mobile/web Operations Room UI and ARES roster integration after incumbent file-area handoff.",
+        "Approved Memory retrieval/candidate-persistence integration; no direct self-promotion.",
+        "Paused/no-production staging, provider readback and production rollout remain separate from the merged source foundation."
     ]
 }
