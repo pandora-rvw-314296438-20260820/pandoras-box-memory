@@ -14,7 +14,7 @@ Metadata includes provider/model/revision, task class, routing policy, real occu
 
 - Companion Box client: 57/57 executable cases, Node 24.21.0, mocked RPC transport.
 - This migration plus exact native M5 context and model-outcome SQL: 66/66 assertions passed in a disposable PGlite database on the authorized RDP.
-- Native PostgreSQL independent-session workflow is included; its three race cases are not claimed passed until actual CI execution returns successful evidence.
+- All three native PostgreSQL independent-session race cases passed in CI run 36176289438, job 108207575017 (see Published-source CI readback below). New source heads require their own CI evidence.
 - Neither PGlite nor mocked client transport is production runtime acceptance.
 
 Initial SQL tests exposed an unparenthesized CASE expression, PostgreSQL's bounded-regex repetition limit, and incomplete metric readback. Those failures were corrected and the exact SQL suite rerun successfully. The metric-drift negative control failed before full status/metric/evidence readback was added and passed afterward. History of failed runs is retained in the RDP evidence directory rather than presented as success.
@@ -40,3 +40,11 @@ GitHub Memory workflow run 36176289438, job 108207575017, actually executed the 
 The separate security-adjudication job failed because this new sensitive migration omitted its five required source-readiness comments. The existing contract/checker was read and left unchanged; this follow-up adds explicit access-path, executed-test, rollback and engineering-owner metadata to the new migration. The reviewed marker means engineering source-readiness only, not independent approval or production authorization. Both unchanged checker self-test and base-diff gate passed locally, and the66 native SQL assertions were rerun successfully after this comment-only SQL change. New-head CI remains required; the failed prior gate is retained as history.
 
 No production DDL, grant expansion, canonical promotion, live Router adoption, independent release approval or physical-device acceptance is asserted by this correction.
+
+## Independent-review correction on 2026-09-26
+
+CodeRabbit review on exact Memory head e7c0fab4e59e7e0075d9f07ac3104882cc18ad0a identified a missing bridge maxBytes range check and stale race-status wording. The original native helper rejected out-of-range sizes, but the wrapper leaked its helper error or an integer-overflow error instead of OPS_MEMORY_CONTEXT_INVALID. Twenty explicit boundary cases reproduced eight wrong-error results on the unchanged migration (12 passed); no unauthorized data read was demonstrated.
+
+The bridge now checks 4096 through 16384 using numeric arithmetic before any integer cast or native delegation. Fifteen invalid-type/range/overflow cases and five accepted-boundary cases are part of the SQL regression suite. The corrected exact SQL passed 86 assertions on disposable PGlite with Node 24.21.0; the same twenty boundary checks independently repeated successfully and are not additional unique cases. Historical 66-assertion and three-race CI results above remain history; the new head must pass its own native PostgreSQL and repository gates.
+
+Only this evidence file, the unpublished bridge migration and its behavior test changed. Operations Room source claim: Box714 comment5838215488. Existing principal/grant checks, candidate/receipt lineage, RLS, native M5 functions and review/promotion authority remain unchanged. No production migration, grant expansion, review self-approval or Router/ARES source change occurred.

@@ -90,6 +90,11 @@ begin
       or not coalesce(p_payload->>'maxBytes' ~ '^[0-9]+$',false)) then
       raise exception 'OPS_MEMORY_CONTEXT_INVALID' using errcode = '22023';
     end if;
+    -- Range-check before the integer cast so oversized JSON numbers stay a bounded input error.
+    if p_payload ? 'maxBytes'
+      and (p_payload->>'maxBytes')::numeric not between 4096 and 16384 then
+      raise exception 'OPS_MEMORY_CONTEXT_INVALID' using errcode = '22023';
+    end if;
     reply := public.memory_task_context_v1(p_memory_user_id,p_namespace,p_project_id,p_principal_key,p_environment,
       p_payload->>'intent',p_payload->>'actionMode',coalesce((p_payload->>'consequential')::boolean,false),
       array(select jsonb_array_elements_text(coalesce(p_payload->'terms','[]'))),

@@ -132,4 +132,39 @@ update public.memory_review_queue_items set source_metadata=source_metadata||'{"
 select pg_temp.reject((select jsonb_build_object('sourceRunId',body->>'sourceRunId','expectedPayload',body) from ops_memory_input),'review project drift detected','readback');
 update public.memory_review_queue_items set source_metadata=source_metadata||'{"projectId":"33333333-3333-4333-8333-333333333333"}';
 select pg_temp.check((select count(*)=2 from public.memory_items),'no canonical memory rows written');
+
+-- The bridge owns input errors, including overflow before native helper delegation.
+create function pg_temp.reject_context_size(v jsonb, label text) returns void language plpgsql as $size_test$
+begin
+ begin
+  perform pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',v),'context');
+ exception when sqlstate '22023' then
+  if sqlerrm <> 'OPS_MEMORY_CONTEXT_INVALID' then
+   raise exception 'WRONG_CONTEXT_SIZE_ERROR: % %',sqlstate,sqlerrm;
+  end if;
+  perform pg_temp.check(true,label); return;
+ end;
+ raise exception 'CONTEXT_SIZE_NOT_REJECTED: %',label;
+end $size_test$;
+select pg_temp.reject_context_size('-1'::jsonb,'maxBytes negative');
+select pg_temp.reject_context_size('0'::jsonb,'maxBytes zero');
+select pg_temp.reject_context_size('1'::jsonb,'maxBytes one');
+select pg_temp.reject_context_size('4095'::jsonb,'maxBytes below minimum');
+select pg_temp.reject_context_size('16385'::jsonb,'maxBytes above maximum');
+select pg_temp.reject_context_size('2147483647'::jsonb,'maxBytes int maximum');
+select pg_temp.reject_context_size('2147483648'::jsonb,'maxBytes int overflow');
+select pg_temp.reject_context_size('9007199254740992'::jsonb,'maxBytes unsafe integer');
+select pg_temp.reject_context_size('1e100'::jsonb,'maxBytes huge exponent');
+select pg_temp.reject_context_size('4096.5'::jsonb,'maxBytes fraction');
+select pg_temp.reject_context_size('"4096"'::jsonb,'maxBytes numeric string');
+select pg_temp.reject_context_size('null'::jsonb,'maxBytes null');
+select pg_temp.reject_context_size('true'::jsonb,'maxBytes boolean');
+select pg_temp.reject_context_size('{}'::jsonb,'maxBytes object');
+select pg_temp.reject_context_size('[]'::jsonb,'maxBytes array');
+select pg_temp.check(pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',4096),'context')->>'kind'='task_context','maxBytes accepted 4096');
+select pg_temp.check(pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',4097),'context')->>'kind'='task_context','maxBytes accepted 4097');
+select pg_temp.check(pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',12288),'context')->>'kind'='task_context','maxBytes accepted 12288');
+select pg_temp.check(pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',16383),'context')->>'kind'='task_context','maxBytes accepted 16383');
+select pg_temp.check(pg_temp.call(jsonb_build_object('intent','coding_building','actionMode','read_only','maxBytes',16384),'context')->>'kind'='task_context','maxBytes accepted 16384');
+
 select count(*)::integer as passed_assertions from ops_memory_assertions;
