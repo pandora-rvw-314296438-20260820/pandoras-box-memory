@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "task": "PLP Alfred verified-learning gateway",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "branch": "chatgpt/plp-alfred-verified-learning-20260918",
+  "baseMainSha": "ebadd9a804735634baa5b93984c67520d2494337",
+  "purpose": "Allow PLP Alfred to propose lessons only from verified execution outcomes while preserving review-governed Memory promotion and zero execution-authority effect.",
+  "learningLoop": [
+    "do",
+    "verify",
+    "learn",
+    "remember",
+    "improve"
+  ],
+  "acceptedLearningKinds": [
+    "fact",
+    "procedure",
+    "failure_lesson",
+    "outcome"
+  ],
+  "authorityBoundary": {
+    "verifiedSuccessRequired": true,
+    "failureLessonRequiresIndependentIncidentVerification": true,
+    "directCanonicalMemoryWrite": false,
+    "reviewRequired": true,
+    "authorizationEffect": "none",
+    "credentialLikeMaterialRejected": true,
+    "crossTenantMaterialRejectedByGatewayScope": true,
+    "capabilityRegistrationEnabledByMigration": false,
+    "principalGrantCreatedByMigration": false
+  },
+  "implementation": {
+    "gatewayTool": "memory_verified_learning_propose",
+    "gatewayAction": "verified_learning.propose",
+    "memoryIngestRpc": "memory_ingest_verified_execution_learning_v1",
+    "acceptedExecutionContract": "pandora-continuous-execution-v2"
+  },
+  "verification": {
+    "machineGatewayDenoCheck": "PASS",
+    "memoryAndVerifiedLearningTests": "11/11 PASS",
+    "m5VerifiedExecutionLearningVerifier": "PASS",
+    "exactTreePublicationRequired": true,
+    "providerReadbackRequired": true,
+    "productionActivationPerformed": false
+  },
+  "safety": {
+    "productionMutationPerformed": false,
+    "credentialsIncluded": false,
+    "canonicalMemoryWrittenDuringVerification": false,
+    "silentSelfTrainingEnabled": false
+  }
+}
