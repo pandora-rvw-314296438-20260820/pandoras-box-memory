@@ -1,7 +1,6 @@
-
 {
   "schemaVersion": 1,
-  "recordType": "verified_learning",
+  "recordType": "historical_verified_learning",
   "recordedAt": "2026-09-25T09:11:54Z",
   "subject": "Pandora RDP SSH access to canonical source and Memory repositories",
   "host": {
@@ -77,16 +76,28 @@
     "repositoryScopedKeys": true
   },
   "durableLessons": [
-    "Use one dedicated deploy key per canonical repository so RDP Git authority remains repository-scoped.",
-    "Pin the GitHub host key and require StrictHostKeyChecking before switching repository origins to SSH.",
-    "On Windows OpenSSH, validate the private-key ACL against the exact local user SID; membership in BUILTIN Administrators is too broad for a client private key.",
-    "Prove SSH authentication and git ls-remote before changing origin.",
-    "When the managed GitHub App cannot mutate the canonical repositories, use the approved fixed-scope Supabase Vault-backed Github_supabase broker without returning credential material."
+    "Historical SSH lesson: one repository-scoped deploy key per repository limits credential blast radius when such access is explicitly needed.",
+    "Historical SSH lesson: pin the GitHub host key and require StrictHostKeyChecking before changing an SSH origin.",
+    "Historical Windows OpenSSH lesson: validate private-key ACLs against the exact local user SID.",
+    "Current Pandora source authority is direct GitHub plus the approved Supabase Vault-backed Github_supabase broker; RDP SSH is not a current authorization dependency.",
+    "When the managed GitHub App cannot mutate a canonical repository, use the approved fixed-scope Supabase Vault-backed Github_supabase broker without exposing credential material."
   ],
   "provenance": {
     "awsSsmVerificationCommandId": "174b657d-972a-47f1-804b-0c64811c202c",
     "awsSsmFinalAclCommandId": "c63e77ee-a5be-4c06-8e81-6aad51db6133",
     "provider": "GitHub deploy-key readback through Supabase Vault-backed fixed-scope broker",
     "classification": "verified provider/runtime facts and corrections"
+  },
+  "status": "historical_superseded",
+  "currentAuthorityBoundary": {
+    "effectiveDate": "2026-09-26",
+    "rdpSshIsCurrentExecutionAuthority": false,
+    "currentPreferredSourceWorkflow": [
+      "direct GitHub",
+      "Supabase Vault-backed Github_supabase",
+      "Vercel"
+    ],
+    "projectOSRetired": true,
+    "note": "Retain this record only as historical evidence that the named RDP had repository-scoped SSH access on 2026-09-25. Do not use it as current Pandora execution authorization, architecture preference, or a requirement for source work."
   }
 }
