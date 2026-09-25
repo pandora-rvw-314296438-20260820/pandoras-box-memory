@@ -1,3 +1,11 @@
+-- PANDORA_SECURITY_ADJUDICATION: reviewed (operator source assessment; independent PR approval is still required)
+-- PANDORA_SECURITY_ACCESS_PATH: owner/service-only project metadata and private receipt; no new RPC, client privilege, namespace or approval grant.
+-- PANDORA_SECURITY_TEST_PLAN: isolated PostgreSQL legacy-to-canonical transition, idempotent replay, grant preservation, unexpected-owner denial and receipt access tests; live binding/receipt readback.
+-- PANDORA_SECURITY_ROLLBACK: use the private before/after receipt only after verified regression and exact current-binding comparison; retain receipt history and do not regrant clients.
+-- PANDORA_SECURITY_OWNER: Pandora owner authorized audit remediation on 2026-09-25; implementation by ChatGPT, independent review pending on PR 93.
+-- Applied SQL body SHA-256: 80a72bdec54254dde0442da20e9801889a6caa577cd68aecd33c30e0da30f6a1
+-- Source annotation only: the body below is byte-identical to provider migration 20260925061728.
+-- BEGIN EXACT APPLIED SQL
 -- The owner-defined canonical repository supersedes the historical owner binding.
 -- This changes project metadata only: no user, namespace, or approval grants.
 create table if not exists private.memory_project_binding_receipts (

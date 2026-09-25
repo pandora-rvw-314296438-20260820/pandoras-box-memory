@@ -4,6 +4,8 @@ on:
     paths:
       - 'supabase/functions/pandora-projectos-bridge/**'
       - 'tests/task-aware-bridge-behavior.test.cjs'
+      - 'tests/sql/memory-project-binding-*.sql'
+      - 'supabase/migrations/20260925061728_memory_canonical_repository_binding_reconciliation.sql'
       - '.github/workflows/memory-task-aware-bridge-behavior.yml'
   workflow_dispatch:
 permissions:
@@ -21,3 +23,54 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node --test tests/task-aware-bridge-behavior.test.cjs
       - run: npx --yes deno-bin@2.2.7 check --node-modules-dir=none supabase/functions/pandora-projectos-bridge/index.ts
+
+  project-binding:
+    name: Memory / project binding behavior
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.6@sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929
+        env:
+          POSTGRES_PASSWORD: disposable-fixture-only
+          POSTGRES_DB: memory_binding_fixture
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: disposable-fixture-only
+      PGDATABASE: memory_binding_fixture
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact applied SQL body, then exercise replay and preservation
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration=supabase/migrations/20260925061728_memory_canonical_repository_binding_reconciliation.sql
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          source = Path('supabase/migrations/20260925061728_memory_canonical_repository_binding_reconciliation.sql').read_bytes()
+          header, body = source.split(b'-- BEGIN EXACT APPLIED SQL\n', 1)
+          assert hashlib.sha256(body).hexdigest() == '80a72bdec54254dde0442da20e9801889a6caa577cd68aecd33c30e0da30f6a1'
+          PY
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-fixture.sql
+          psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          psql -X -v ON_ERROR_STOP=1 -f "$migration"
+          psql -X -v ON_ERROR_STOP=1 -f tests/sql/memory-project-binding-behavior.sql
+          psql -X -v ON_ERROR_STOP=1 -c "update public.pandora_projects set github_owner='unexpected-owner' where project_key='memory'"
+          if psql -X -v ON_ERROR_STOP=1 -f "$migration" > unexpected-owner.log 2>&1; then
+            echo 'Unexpected owner was overwritten instead of rejected' >&2
+            exit 1
+          fi
+          grep -F 'Memory repository owner changed' unexpected-owner.log
+          test "$(psql -X -At -c "select github_owner from public.pandora_projects where project_key='memory'")" = 'unexpected-owner'
