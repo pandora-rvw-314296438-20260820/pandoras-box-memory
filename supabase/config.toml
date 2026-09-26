@@ -1,0 +1,5 @@
+# Native Operations-only entrypoint; authenticates actual Vercel OIDC inside the function.
+# Do not deploy the historical full index.ts route catalogue under this release.
+[functions.pandora-memory-bridge]
+verify_jwt = false
+entrypoint = "./functions/pandora-memory-bridge/operations-entrypoint.ts"

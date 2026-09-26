@@ -1,0 +1,35 @@
+
+name: Operations Workload Memory
+on:
+  pull_request:
+  push:
+    branches: [main, feat/operations-workload-memory-20260926]
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  EXPECTED_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+jobs:
+  operations-workload-memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.EXPECTED_HEAD }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify exact source and execute HTTP/RPC boundary tests
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          node --check supabase/functions/pandora-memory-bridge/operations-bridge.mjs
+          node --test test/operations-workload-memory.test.mjs
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        with:
+          deno-version: v2.4.3
+      - name: Check actual native Edge entrypoint
+        run: |
+          deno check --config supabase/functions/pandora-memory-bridge/deno.json supabase/functions/pandora-memory-bridge/index.ts supabase/functions/pandora-memory-bridge/operations-entrypoint.ts
+          deno test --config supabase/functions/pandora-memory-bridge/deno.json --node-modules-dir=none --allow-env --allow-read supabase/functions/pandora-memory-bridge/test/operations-workload-auth.test.ts

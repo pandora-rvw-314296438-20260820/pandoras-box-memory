@@ -1,6 +1,7 @@
+import { authorize } from "./workload-auth.ts";
+import { handleOperationsMemory, readBridgeBody } from "./operations-bridge.mjs";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "npm:jose@5.10.0";
 
 const PRINCIPAL_KEY = "pandora-mcpmaster-production";
 const MAX_BODY_BYTES = 64 * 1024;
@@ -17,11 +18,6 @@ const STOP_TERMS = new Set([
   "the", "their", "them", "there", "these", "this", "was", "were", "what",
   "when", "which", "with", "you", "your",
 ]);
-const GLOBAL_JWKS = createRemoteJWKSet(
-  new URL("https://oidc.vercel.com/.well-known/jwks"),
-);
-const issuerJwks = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
-
 type JsonRecord = Record<string, unknown>;
 type AdminClient = ReturnType<typeof createClient<any>>;
 type Principal = {
@@ -66,129 +62,6 @@ const sha256 = async (value: string): Promise<string> => {
   return Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
-};
-
-const workloadToken = (request: Request): string | null => {
-  const internal = request.headers.get("x-pandora-vercel-oidc")?.trim();
-  if (internal) return internal;
-  const authorization = request.headers.get("authorization") ?? "";
-  const [scheme, token] = authorization.split(" ");
-  return scheme?.toLowerCase() === "bearer" && token ? token : null;
-};
-
-const exactAudience = (payload: JWTPayload): string | undefined =>
-  Array.isArray(payload.aud) ? payload.aud[0] : payload.aud;
-
-const jwksForIssuer = (issuer: string) => {
-  const url = new URL(issuer);
-  if (
-    url.protocol !== "https:" ||
-    url.hostname !== "oidc.vercel.com" ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash ||
-    !/^\/[A-Za-z0-9_-]+$/.test(url.pathname)
-  ) {
-    throw new Error("principal_issuer_invalid");
-  }
-  const normalized = url.toString().replace(/\/$/, "");
-  let jwks = issuerJwks.get(normalized);
-  if (!jwks) {
-    jwks = createRemoteJWKSet(new URL(`${normalized}/.well-known/jwks`));
-    issuerJwks.set(normalized, jwks);
-  }
-  return jwks;
-};
-
-const mayRetryGlobal = (error: unknown): boolean => {
-  const code = errorCode(error);
-  return code === "ERR_JWS_SIGNATURE_VERIFICATION_FAILED" ||
-    code === "ERR_JWKS_NO_MATCHING_KEY" ||
-    code.startsWith("ERR_JWKS");
-};
-
-const verificationFailure = (error: unknown): Response => {
-  const code = errorCode(error);
-  if (code.startsWith("ERR_JWKS")) {
-    return respond({ ok: false, error: "identity_key_unavailable" }, 502);
-  }
-  if (code === "ERR_JWT_CLAIM_VALIDATION_FAILED") {
-    return respond({ ok: false, error: "identity_claim_invalid" }, 403);
-  }
-  if (code === "ERR_JWT_EXPIRED") {
-    return respond({ ok: false, error: "identity_expired" }, 401);
-  }
-  if (code === "ERR_JWS_SIGNATURE_VERIFICATION_FAILED") {
-    return respond({ ok: false, error: "identity_signature_invalid" }, 498);
-  }
-  if (code === "ERR_JOSE_NOT_SUPPORTED") {
-    return respond({ ok: false, error: "identity_algorithm_unsupported" }, 501);
-  }
-  return respond({ ok: false, error: "invalid_identity" }, 499);
-};
-
-const verifyVercelToken = async (token: string, principal: Principal) => {
-  const options = {
-    issuer: principal.issuer,
-    audience: principal.audience,
-    subject: principal.subject,
-    clockTolerance: 30,
-  };
-  try {
-    return await jwtVerify(token, jwksForIssuer(principal.issuer), options);
-  } catch (error) {
-    if (!mayRetryGlobal(error)) throw error;
-    return await jwtVerify(token, GLOBAL_JWKS, options);
-  }
-};
-
-const authorize = async (
-  request: Request,
-  supabase: AdminClient,
-): Promise<AuthorizationResult> => {
-  const token = workloadToken(request);
-  if (!token) {
-    return { ok: false, error: respond({ ok: false, error: "unauthorized" }, 401) };
-  }
-
-  const { data, error } = await supabase
-    .from("pandora_service_principals")
-    .select(
-      "issuer,audience,subject,owner_id,project_id,project_name,environment,memory_user_id,allowed_namespaces,scopes,is_active",
-    )
-    .eq("principal_key", PRINCIPAL_KEY)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (error || !data) {
-    return {
-      ok: false,
-      error: respond({ ok: false, error: "principal_unavailable" }, 503),
-    };
-  }
-  const principal = data as Principal;
-
-  try {
-    const { payload } = await verifyVercelToken(token, principal);
-    const matches =
-      payload.owner_id === principal.owner_id &&
-      payload.project_id === principal.project_id &&
-      payload.project === principal.project_name &&
-      payload.environment === principal.environment &&
-      payload.iss === principal.issuer &&
-      exactAudience(payload) === principal.audience &&
-      payload.sub === principal.subject;
-    if (!matches) {
-      return {
-        ok: false,
-        error: respond({ ok: false, error: "identity_not_allowed" }, 403),
-      };
-    }
-  } catch (error) {
-    return { ok: false, error: verificationFailure(error) };
-  }
-  return { ok: true, principal };
 };
 
 const safeSearchTerm = (query: string): string =>
@@ -1647,9 +1520,13 @@ Deno.serve(async (request: Request) => {
   const authorization = await authorize(request, supabase);
   if (!authorization.ok) return authorization.error;
 
-  const body = await request.json().catch(() => null) as JsonRecord | null;
+  const body = await readBridgeBody(request).catch(() => null) as JsonRecord | null;
   if (!body) return respond({ ok: false, error: "invalid_json" }, 400);
 
+  if (body.action === "operations") {
+    const result = await handleOperationsMemory(body, authorization.principal, supabase, { signal: request.signal });
+    return respond(result.body, result.status);
+  }
   if (body.action === "health") {
     if (!authorization.principal.scopes.includes("memory:health")) {
       return respond({ ok: false, error: "scope_not_allowed" }, 403);
