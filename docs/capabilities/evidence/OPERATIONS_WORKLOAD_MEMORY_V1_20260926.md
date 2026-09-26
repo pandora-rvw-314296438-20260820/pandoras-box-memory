@@ -1,0 +1,11 @@
+# Operations workload Memory bridge: source evidence and limitations
+
+Task OPS-RUNTIME-SEAMS-20260926; Memory PR118; canonical base56b45a937242cadd720fb290cff497027ae2c5aa. This extends the existing Pandora-native Vercel-authenticated bridge with four bounded Operations actions and preserves server-derived caller identity and native project/type grant checks. No deployment, new grant, new principal, credential copy or canon promotion is made by this change.
+
+Actual GitHub run36211482515/job108318779218 on exact head35d14bd5bb83cc0cf6f9db101c1498d4168d0341 executed42 behavioral tests successfully,0fail/skip. These cover actual handler code with synthetic transports; they do not establish production identity or end-to-end execution. The subsequent real Deno entrypoint check failedTS2353 because JavaScript inferred the options object without its optional AbortSignal. This correction adds an explicit JSDoc options contract without removing cancellation or weakening the typecheck; new-head results are pending until observed.
+
+The evidence-registry check job108318779336 correctly rejected that source head because this required evidence record was missing. The gate is unchanged. Existing runtime dependencies were not silently upgraded by source; the original unpinned JSR imports resolved to2.117.2 in that observed CI and are not represented as a frozen dependency build. Production release still requires dependency/source reconciliation, exact-head independent review, protected merge and real workload verification.
+
+Acceptance requires the native Memory service receiving a genuine current Vercel JWT from production mcpmaster, context/performance under its actual project grants, and reviewed outcome delivery with independent readback. Fixture tokens/metrics are never production evidence. Request queueing, callback acknowledgement, output verification and task acceptance remain separate. No automatic canonical learning is claimed.
+
+Provider evidence: https://github.com/pandora-rvw-314296438-20260820/pandoras-box-memory/actions/runs/36211482515/job/108318779218 and https://github.com/pandora-rvw-314296438-20260820/pandoras-box-memory/actions/runs/36211482488/job/108318779336 . Coordination is Operations714/tracker42; raw operational history in Memory115, useful lessons await normal review.

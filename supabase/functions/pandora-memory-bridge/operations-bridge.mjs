@@ -41,7 +41,13 @@ export async function readBridgeBody(request, {maxBytes = 65536, timeoutMs = 500
     try { reader.releaseLock(); } catch { /* cancelled pending reader owns its cleanup */ }
   }
 }
-export async function handleOperationsMemory(body, principal, client, {signal, timeoutMs = 12000} = {}) {
+/** @param {any} body
+ * @param {any} principal
+ * @param {any} client
+ * @param {{ signal?: AbortSignal, timeoutMs?: number }} [options]
+ */
+export async function handleOperationsMemory(body, principal, client, options = {}) {
+  const {signal, timeoutMs = 12000} = options;
   let submitted = false;
   const mutation = body?.operation === 'propose_outcome';
   try {
