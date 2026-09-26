@@ -1,6 +1,6 @@
 
 import {generateKeyPair,exportJWK,SignJWT} from 'npm:jose@5.10.0';
-import {authorize} from '../supabase/functions/pandora-memory-bridge/workload-auth.ts';
+import {authorize} from '../workload-auth.ts';
 const pair=await generateKeyPair('RS256');
 const key={...await exportJWK(pair.publicKey),kid:'operations-unit-fixture',alg:'RS256',use:'sig'};
 const originalFetch=globalThis.fetch;
