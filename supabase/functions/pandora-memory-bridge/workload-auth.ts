@@ -108,6 +108,8 @@ const verifyVercelToken = async (token: string, principal: Principal) => {
     audience: principal.audience,
     subject: principal.subject,
     clockTolerance: 30,
+    algorithms: ["RS256"],
+    requiredClaims: ["exp", "iat", "iss", "aud", "sub"],
   };
   try {
     return await jwtVerify(token, jwksForIssuer(principal.issuer), options);

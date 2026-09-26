@@ -30,4 +30,6 @@ jobs:
         with:
           deno-version: v2.4.3
       - name: Check actual native Edge entrypoint
-        run: deno check --config supabase/functions/pandora-memory-bridge/deno.json supabase/functions/pandora-memory-bridge/index.ts
+        run: |
+          deno check --config supabase/functions/pandora-memory-bridge/deno.json supabase/functions/pandora-memory-bridge/index.ts supabase/functions/pandora-memory-bridge/operations-entrypoint.ts
+          deno test --allow-env --allow-read test/operations-workload-auth.test.ts

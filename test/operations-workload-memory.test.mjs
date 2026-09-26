@@ -92,5 +92,33 @@ test('native entrypoint authenticates before operations delegation and keeps exi
  const boundary=text.indexOf('Deno.serve('),auth=text.indexOf('if (!authorization.ok) return authorization.error;',boundary),delegate=text.indexOf('await handleOperationsMemory(',boundary);
  assert.ok(boundary>=0&&auth>boundary&&delegate>auth);assert.ok(text.includes('authorization.principal, supabase, { signal: request.signal }'));
  for(const action of ['health','search','submit_evidence_candidate','record_decision_influence','record_decision_outcome']) assert.ok(text.includes(`body.action === "${action}"`));
- assert.ok(text.includes('await readBridgeBody(request)'));assert.ok(text.includes('payload.owner_id === principal.owner_id'));assert.ok(text.includes('payload.project_id === principal.project_id'));
+ assert.ok(text.includes('await readBridgeBody(request)'));const shared=await readFile(new URL('../supabase/functions/pandora-memory-bridge/workload-auth.ts',import.meta.url),'utf8');assert.ok(shared.includes('payload.owner_id === principal.owner_id'));assert.ok(shared.includes('payload.project_id === principal.project_id'));
+});
+
+for(const method of ['GET','PUT','DELETE','OPTIONS'])test(`narrow deployed handler refuses ${method}`,async()=>{
+ const {createOperationsEndpoint}=await import('../supabase/functions/pandora-memory-bridge/operations-http.mjs');
+ const h=createOperationsEndpoint({authorize:()=>assert.fail('auth should not run'),client:client()});
+ assert.equal((await h(new Request('https://memory.invalid',{method}))).status,405);
+});
+test('narrow endpoint refuses browser origin and missing workload identity before native calls',async()=>{
+ const {createOperationsEndpoint}=await import('../supabase/functions/pandora-memory-bridge/operations-http.mjs');const h=createOperationsEndpoint({authorize:()=>assert.fail(),client:client()});
+ assert.equal((await h(new Request('https://memory.invalid',{method:'POST',headers:{origin:'https://mcpmaster.vercel.app'}}))).status,403);
+ assert.equal((await h(new Request('https://memory.invalid',{method:'POST'}))).status,401);
+});
+for(const action of ['search','health','submit_evidence_candidate','approve','record_decision_outcome'])test(`new deployment does not activate historical ${action} route`,async()=>{
+ const {createOperationsEndpoint}=await import('../supabase/functions/pandora-memory-bridge/operations-http.mjs');const c=client(()=>assert.fail());
+ const h=createOperationsEndpoint({authorize:async()=>({ok:true,principal:principal()}),client:c});
+ const r=await h(new Request('https://memory.invalid',{method:'POST',headers:{'x-pandora-vercel-oidc':'fixture'.repeat(10)},body:JSON.stringify({action})}));assert.equal(r.status,403);assert.equal(c.calls.length,0);
+});
+test('new entrypoint is bound to narrow handler and shared authentication, not historical main',async()=>{
+ const text=await readFile(new URL('../supabase/functions/pandora-memory-bridge/operations-entrypoint.ts',import.meta.url),'utf8');
+ const cfg=await readFile(new URL('../supabase/config.toml',import.meta.url),'utf8');
+ assert.ok(text.includes('createOperationsEndpoint({authorize,client})'));assert.ok(text.includes('./workload-auth.ts'));assert.ok(!text.includes('./index.ts'));
+ assert.ok(cfg.includes('operations-entrypoint.ts'));assert.ok(text.includes('supabase-js@2.57.2'));
+});
+test('narrow authenticated handler preserves native write uncertainty',async()=>{
+ const {createOperationsEndpoint}=await import('../supabase/functions/pandora-memory-bridge/operations-http.mjs');const c=client(async()=>{throw new Error('lost response');});
+ const h=createOperationsEndpoint({authorize:async()=>({ok:true,principal:principal()}),client:c});
+ const r=await h(new Request('https://memory.invalid',{method:'POST',headers:{'x-pandora-vercel-oidc':'fixture'.repeat(10)},body:JSON.stringify(body('propose_outcome'))}));
+ assert.equal(r.status,503);assert.equal((await r.json()).outcomeUnknown,true);assert.equal(c.calls.length,1);
 });
