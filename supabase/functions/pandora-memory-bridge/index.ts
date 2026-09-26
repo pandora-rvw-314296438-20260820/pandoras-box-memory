@@ -1,3 +1,4 @@
+import { handleOperationsMemory, readBridgeBody } from "./operations-bridge.mjs";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "npm:jose@5.10.0";
@@ -1647,9 +1648,13 @@ Deno.serve(async (request: Request) => {
   const authorization = await authorize(request, supabase);
   if (!authorization.ok) return authorization.error;
 
-  const body = await request.json().catch(() => null) as JsonRecord | null;
+  const body = await readBridgeBody(request).catch(() => null) as JsonRecord | null;
   if (!body) return respond({ ok: false, error: "invalid_json" }, 400);
 
+  if (body.action === "operations") {
+    const result = await handleOperationsMemory(body, authorization.principal, supabase, { signal: request.signal });
+    return respond(result.body, result.status);
+  }
   if (body.action === "health") {
     if (!authorization.principal.scopes.includes("memory:health")) {
       return respond({ ok: false, error: "scope_not_allowed" }, 403);
