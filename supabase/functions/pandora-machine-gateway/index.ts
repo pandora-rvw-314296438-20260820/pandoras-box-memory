@@ -8,9 +8,9 @@ import {
   applyMemoryHealthScope,
   buildMemorySearchNamespacedRpcArgs,
   buildMemorySearchRpcArgs,
-  memorySearchResource,
   MEMORY_SEARCH_AUTHORITY,
   MEMORY_SEARCH_RESOURCE,
+  memorySearchResource,
   normalizeMemorySearchNamespace,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";

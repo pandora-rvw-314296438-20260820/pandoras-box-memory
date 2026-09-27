@@ -49,7 +49,6 @@ export function buildMemorySearchRpcArgs(
   } as const;
 }
 
-
 export type MemorySearchNamespace = "real_life" | "au" | "all";
 
 export function normalizeMemorySearchNamespace(

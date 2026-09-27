@@ -2,13 +2,13 @@ import {
   applyMemoryHealthScope,
   buildMemorySearchNamespacedRpcArgs,
   buildMemorySearchRpcArgs,
-  memorySearchResource,
   MEMORY_DECISION_AUTHORITY,
   MEMORY_SEARCH_ALL_RESOURCE,
   MEMORY_SEARCH_AUTHORITY,
   MEMORY_SEARCH_CANON_STATUSES,
   MEMORY_SEARCH_NAMESPACE,
   MEMORY_SEARCH_RESOURCE,
+  memorySearchResource,
   normalizeMemorySearchNamespace,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";
@@ -90,7 +90,11 @@ Deno.test("memory_search RPC args are bounded and principal-scoped", () => {
 
 Deno.test("namespaced search maps all to wildcard resource and null RPC filter", () => {
   assertEquals(normalizeMemorySearchNamespace("all"), "all", "all namespace");
-  assertEquals(memorySearchResource("all"), MEMORY_SEARCH_ALL_RESOURCE, "all resource");
+  assertEquals(
+    memorySearchResource("all"),
+    MEMORY_SEARCH_ALL_RESOURCE,
+    "all resource",
+  );
   assertEquals(
     buildMemorySearchNamespacedRpcArgs("owner-a", "orchard status", 200, "all"),
     {
