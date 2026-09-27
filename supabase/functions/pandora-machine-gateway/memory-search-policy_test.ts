@@ -1,11 +1,15 @@
 import {
   applyMemoryHealthScope,
+  buildMemorySearchNamespacedRpcArgs,
   buildMemorySearchRpcArgs,
   MEMORY_DECISION_AUTHORITY,
+  MEMORY_SEARCH_ALL_RESOURCE,
   MEMORY_SEARCH_AUTHORITY,
   MEMORY_SEARCH_CANON_STATUSES,
   MEMORY_SEARCH_NAMESPACE,
   MEMORY_SEARCH_RESOURCE,
+  memorySearchResource,
+  normalizeMemorySearchNamespace,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";
 
@@ -81,6 +85,35 @@ Deno.test("memory_search RPC args are bounded and principal-scoped", () => {
     buildMemorySearchRpcArgs("owner-a", "orchard status", 200),
     { p_user_id: "owner-a", p_query: "orchard status", p_limit: 20 },
     "search RPC args",
+  );
+});
+
+Deno.test("namespaced search maps all to wildcard resource and null RPC filter", () => {
+  assertEquals(normalizeMemorySearchNamespace("all"), "all", "all namespace");
+  assertEquals(
+    memorySearchResource("all"),
+    MEMORY_SEARCH_ALL_RESOURCE,
+    "all resource",
+  );
+  assertEquals(
+    buildMemorySearchNamespacedRpcArgs("owner-a", "orchard status", 200, "all"),
+    {
+      p_user_id: "owner-a",
+      p_query: "orchard status",
+      p_namespace: null,
+      p_limit: 20,
+    },
+    "all-namespace search RPC args",
+  );
+  assertEquals(
+    buildMemorySearchNamespacedRpcArgs("owner-a", "orchard status", 5, "au"),
+    {
+      p_user_id: "owner-a",
+      p_query: "orchard status",
+      p_namespace: "au",
+      p_limit: 5,
+    },
+    "AU search RPC args",
   );
 });
 
