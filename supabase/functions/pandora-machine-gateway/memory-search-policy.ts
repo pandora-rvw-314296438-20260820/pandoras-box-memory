@@ -1,6 +1,7 @@
 export const MEMORY_SEARCH_NAMESPACE = "real_life" as const;
 export const MEMORY_SEARCH_RESOURCE =
   `namespace:${MEMORY_SEARCH_NAMESPACE}` as const;
+export const MEMORY_SEARCH_ALL_RESOURCE = "namespace:*" as const;
 export const MEMORY_SEARCH_CANON_STATUSES = [
   "hard_canon",
   "soft_canon",
@@ -44,6 +45,37 @@ export function buildMemorySearchRpcArgs(
   return {
     p_user_id: userId,
     p_query: safeQuery,
+    p_limit: boundedLimit,
+  } as const;
+}
+
+export type MemorySearchNamespace = "real_life" | "au" | "all";
+
+export function normalizeMemorySearchNamespace(
+  value: unknown,
+): MemorySearchNamespace {
+  return value === "au" || value === "all" || value === "real_life"
+    ? value
+    : MEMORY_SEARCH_NAMESPACE;
+}
+
+export function memorySearchResource(namespace: MemorySearchNamespace): string {
+  if (namespace === "all") return MEMORY_SEARCH_ALL_RESOURCE;
+  if (namespace === MEMORY_SEARCH_NAMESPACE) return MEMORY_SEARCH_RESOURCE;
+  return `namespace:${namespace}`;
+}
+
+export function buildMemorySearchNamespacedRpcArgs(
+  userId: string,
+  safeQuery: string,
+  limit: number,
+  namespace: MemorySearchNamespace,
+) {
+  const boundedLimit = Math.max(1, Math.min(20, Math.trunc(limit || 10)));
+  return {
+    p_user_id: userId,
+    p_query: safeQuery,
+    p_namespace: namespace === "all" ? null : namespace,
     p_limit: boundedLimit,
   } as const;
 }

@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "lesson_candidate",
+  "evidence_id": "bedrock-runtime-truth-2026-09-27",
+  "recorded_at": "2026-09-27T08:28:00Z",
+  "review_state": "pending_review",
+  "approved_canonical": false,
+  "training_eligibility": "NOT_EVALUATED_NOT_ADMITTED",
+  "scope": {
+    "project": "Pandora Intelligence Router",
+    "namespace": "provider-runtime-truth",
+    "sensitivity": "sanitized engineering/provider evidence; no credentials or user content"
+  },
+  "owner_decision": {
+    "directive": "Add GPT-6 Astra via a model-attested ChatGPT worker and add the AWS Bedrock reasoning fleet.",
+    "safety_interpretation": "Discovery is not runtime proof. Models remain non-routable until a real provider invocation is accepted."
+  },
+  "source_evidence": {
+    "box_pr_781": {
+      "merge_sha": "d0454220e609a3f01be29d54ee52c53066d9fcaf",
+      "purpose": "Bedrock fleet integration"
+    },
+    "box_pr_784": {
+      "merge_sha": "8490687ebfc7236efb78b339a8ab51470678c06f",
+      "purpose": "Durable provider hold after live canary failures"
+    },
+    "bedrock_catalog": {
+      "region": "us-east-1",
+      "discovered_models": 72,
+      "providers": 15
+    },
+    "aws_role": {
+      "arn": "arn:aws:iam::792289066859:role/PandoraVercelBedrockInferenceV2",
+      "authentication": "Vercel workload OIDC",
+      "managed_policies": 0,
+      "allowed_actions": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ]
+    }
+  },
+  "verified_outcome": {
+    "bedrock_router_state": "held",
+    "bedrock_models_registered": 72,
+    "bedrock_models_routable": 0,
+    "chatgpt_astra_worker_state": "awaiting_live_model_attestation",
+    "chatgpt_astra_worker_routable": false,
+    "exact_provider_findings": [
+      {
+        "model": "openai.gpt-6-astra",
+        "result": "account_denied",
+        "evidence": "Bedrock Converse returned AccessDeniedException: model not available for this account."
+      },
+      {
+        "models": [
+          "moonshotai.kimi-k3",
+          "xai.grok-4.6"
+        ],
+        "result": "account_denied",
+        "evidence": "Bedrock Converse returned AccessDeniedException: model not available for this account."
+      },
+      {
+        "provider": "Anthropic",
+        "result": "onboarding_required",
+        "evidence": "Bedrock Converse reported model use-case details have not been submitted for this account."
+      },
+      {
+        "models": [
+          "amazon.nova-micro-v1:0",
+          "deepseek.v3.2",
+          "openai.gpt-oss-20b-1:0",
+          "qwen.qwen3-coder-next"
+        ],
+        "result": "throttled_or_quota_blocked",
+        "evidence": "Bedrock Converse returned daily-token throttling during bounded probes."
+      }
+    ],
+    "astra_quota_truth": {
+      "applied_global_cross_region_tokens_per_minute": 0,
+      "aws_default_global_cross_region_tokens_per_minute": 4000000,
+      "applied_cross_region_tokens_per_minute": 0,
+      "aws_default_cross_region_tokens_per_minute": 4000000,
+      "conclusion": "Account-specific applied quotas can contradict AWS defaults and model availability metadata; Service Quotas could not request a value below or equal to the AWS default."
+    }
+  },
+  "durable_lessons": [
+    "Never equate ListFoundationModels/GetFoundationModelAvailability authorization metadata with executable runtime availability.",
+    "A model becomes routable only after an actual provider invocation canary succeeds under the production identity path.",
+    "Provider catalog discovery and runtime admission are separate states; preserve discovered inventory while fail-closing routing.",
+    "Model-attested ChatGPT workers must not self-certify their model identity; keep Astra worker routing disabled until independently attested.",
+    "Account-specific quota values and provider onboarding gates must be read back separately from AWS defaults.",
+    "When live provider truth contradicts planned configuration, preserve evidence, fail closed, and make the hold canonical in GitHub rather than leaving an out-of-band hotfix."
+  ],
+  "boundaries": {
+    "static_aws_credentials_stored": false,
+    "bedrock_spend_authority_granted": false,
+    "bedrock_routing_enabled": false,
+    "generic_chatgpt_worker_labeled_as_astra": false,
+    "raw_provider_payload_promoted": false,
+    "projectos_dependency": false
+  },
+  "review_requirements": [
+    "Verify Box PR #781 and #784 merge/provider readback.",
+    "Verify live Bedrock routing_eligible=false and policy availableCount=0.",
+    "Verify the new AWS role remains least-privilege.",
+    "Promote only after normal Memory review; this candidate does not self-promote."
+  ]
+}

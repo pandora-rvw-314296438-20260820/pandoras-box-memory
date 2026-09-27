@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "lesson_candidate",
+  "evidence_id": "operations-rdp-worker-acceptance-2026-09-27",
+  "recorded_at": "2026-09-27T06:39:07+00:00",
+  "review_state": "pending_review",
+  "approved_canonical": false,
+  "indexed_by_memory_service": false,
+  "training_eligibility": "NOT_EVALUATED_NOT_ADMITTED",
+  "scope": {
+    "project": "Pandora Operations Room",
+    "namespace": "operations-rdp-worker",
+    "sensitivity": "sanitized engineering evidence; no credentials or tenant content",
+    "permitted_use": "review candidate for worker routing, Windows execution, recovery and verification decisions",
+    "raw_polling_or_process_logs_included": false
+  },
+  "owner_decision": {
+    "evidence_class": "owner_decision",
+    "directive": "Add the authorized Windows RDP as an Operations Room execution worker rather than relying only on model/provider workers.",
+    "authority_boundary": "RDP is execution capacity only; it is not merge, deploy, spend, approval, credential, scheduler, or canonical Memory authority."
+  },
+  "provenance": {
+    "source_repository": "pandora-rvw-314296438-20260820/pandoras-box",
+    "initial_worker_pr": 774,
+    "initial_worker_merge_sha": "2abc9d763b4cb9ac66aa4f96a00247596ee0aff7",
+    "source_binding_fix_pr": 775,
+    "source_binding_fix_merge_sha": "edfde2f1c2238ae9b46c7210d2426af185a801b5",
+    "java_stderr_fix_pr": 778,
+    "accepted_worker_source_sha": "470132a88e8508a727e83d631e902fb84a26f689",
+    "migration": "20260927050137_operations_rdp_worker_v1",
+    "supabase_control_readback": "mcpmaster-supabase-control ACTIVE version 79 from governed main",
+    "machine": "EC2AMAZ-SPAE2VG",
+    "scheduled_task": "Pandora-Operations-RDP-Worker",
+    "worker_key": "pandora-rdp-windows-01",
+    "worker_engine": "rdp",
+    "capacity": 1,
+    "lanes": [
+      "reliability",
+      "mobile"
+    ],
+    "capabilities": [
+      "rdp.execute",
+      "rdp.toolchain.verify",
+      "rdp.github_runner.verify",
+      "rdp.android.verify",
+      "rdp.flutter.verify",
+      "worker.reconcile"
+    ],
+    "credential_boundary": "Raw RDP worker token remains machine-local; Supabase Vault stores only its SHA-256 verifier."
+  },
+  "verified_outcome": {
+    "evidence_class": "verified_fact",
+    "worker_state": "READY and heartbeating",
+    "active_rdp_leases": 0,
+    "toolchain_canary": {
+      "task_id": "OPS-RDP-TOOLCHAIN-CANARY-V1",
+      "status": "complete",
+      "generation": 1,
+      "source_sha": "470132a88e8508a727e83d631e902fb84a26f689",
+      "tests": [
+        "Node toolchain executable PASS",
+        "Python toolchain executable PASS",
+        "Java toolchain executable PASS",
+        "Flutter toolchain executable PASS",
+        "ADB toolchain executable PASS"
+      ],
+      "machine_proof_sha256": "b7ec5cecfe4d4f4b20c70713625247d5197aa108b1da6153e231d54ae507c15c",
+      "stdout_sha256": "08fed1b61b26d4b2e1c95d31d4979003c1f84675b2919563c6c44ed22a24fa8f",
+      "verification_run_id": "e1aaf815-ffd0-4fa0-815d-25f14f837763",
+      "independent_readback": {
+        "node": "v24.21.0",
+        "python": "Python 3.13.7",
+        "java": "openjdk 17.0.20.1",
+        "flutter": "3.47.0",
+        "adb": "1.0.41"
+      }
+    },
+    "runner_canary": {
+      "task_id": "OPS-RDP-RUNNER-CANARY-V1",
+      "status": "complete",
+      "generation": 1,
+      "source_sha": "470132a88e8508a727e83d631e902fb84a26f689",
+      "runner_name": "pandora-ci-windows-01",
+      "runner_repository": "https://github.com/pandora-rvw-314296438-20260820/pandoras-box",
+      "machine_proof_sha256": "139941532b8bd7e55c1255882662ce26c8d0b4b948b8fa6d35b73df342cbfc65",
+      "stdout_sha256": "bc8b0772f0c5f36a152dd7c5ed9829131ddffb530db85437e939477dd7b5bcf9",
+      "verification_run_id": "e089d991-d12e-45ea-9476-b630c6de1040"
+    }
+  },
+  "failures_and_corrections": [
+    {
+      "lesson_id": "powershell-native-stderr-is-not-failure",
+      "evidence_class": "verified_fact",
+      "failed_task": "OPS-RDP-WORKER-CANARY-V1",
+      "failure": "The first canary entered RDP_EXECUTION_FAILED even though the Java runtime was installed and healthy.",
+      "verified_root_cause": "On Windows PowerShell 5.1 with ErrorActionPreference=Stop, java -version writes successful version text to stderr and the capture pipeline surfaced it as a RemoteException although the native exit code was zero.",
+      "correction": "Command-Text temporarily uses ErrorActionPreference=Continue, captures stdout/stderr, treats LASTEXITCODE as execution truth, and restores the prior preference.",
+      "correction_pr": 778,
+      "correction_merge_sha": "470132a88e8508a727e83d631e902fb84a26f689",
+      "independent_system_diagnostic": "PASS|EXIT=0|HAS_VERSION=True",
+      "durable_rule": "For Windows native-command workers, do not equate stderr output with failure; gate on the native exit code and preserve stderr as evidence."
+    },
+    {
+      "lesson_id": "acceptance-must-match-executed-profile",
+      "evidence_class": "verified_fact",
+      "superseded_task": "OPS-RDP-WORKER-CANARY-V2",
+      "observed_problem": "V2 selected github_runner_verify and produced a valid runner-only handoff while its acceptance text also required toolchain probes.",
+      "correction": "Do not stretch narrow evidence to satisfy broader acceptance. Cancel the over-broad task and split acceptance into separate toolchain and runner canaries.",
+      "outcome": "OPS-RDP-TOOLCHAIN-CANARY-V1 and OPS-RDP-RUNNER-CANARY-V1 independently completed and were independently verified.",
+      "durable_rule": "Execution profile, evidence and acceptance criteria must align exactly; split canaries when one profile cannot truthfully prove every criterion."
+    },
+    {
+      "lesson_id": "rdp-worker-fail-closed-recovery",
+      "evidence_class": "verified_fact",
+      "behavior": "V1 failure entered reconciliation and retained its lease. The scheduled worker was stopped, its heartbeat aged beyond the 60-second freshness fence, provider outcome was established, and recovery released the lease as failed_verified.",
+      "outcome": "No blind retry and no stranded RDP lease."
+    }
+  ],
+  "boundaries": {
+    "source_write_capability_granted": false,
+    "merge_authority_granted": false,
+    "deploy_authority_granted": false,
+    "spend_authority_granted": false,
+    "approval_authority_granted": false,
+    "canonical_memory_write_authority_granted": false,
+    "secrets_committed": false,
+    "physical_device_acceptance_claimed": false,
+    "raw_logs_promoted_to_memory": false
+  },
+  "review_requirements": [
+    "Verify Box PRs 774, 775 and 778 and the exact merge/source SHAs.",
+    "Verify Operations task statuses and verification receipts for the toolchain and runner canaries.",
+    "Confirm the RDP remains a bounded worker and does not gain release or credential authority.",
+    "Approve or reject through the existing Memory review path; this candidate is not self-promoted to canonical Memory."
+  ]
+}
