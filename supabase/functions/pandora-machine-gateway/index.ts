@@ -9,6 +9,7 @@ import {
   buildMemorySearchNamespacedRpcArgs,
   buildMemorySearchRpcArgs,
   MEMORY_SEARCH_AUTHORITY,
+  MEMORY_SEARCH_NAMESPACE,
   MEMORY_SEARCH_RESOURCE,
   memorySearchResource,
   normalizeMemorySearchNamespace,
