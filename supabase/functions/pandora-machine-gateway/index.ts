@@ -6,9 +6,12 @@ import {
 } from "npm:jose@5.10.0";
 import {
   applyMemoryHealthScope,
+  buildMemorySearchNamespacedRpcArgs,
   buildMemorySearchRpcArgs,
+  memorySearchResource,
   MEMORY_SEARCH_AUTHORITY,
   MEMORY_SEARCH_RESOURCE,
+  normalizeMemorySearchNamespace,
   sanitizeMemorySearchQuery,
 } from "./memory-search-policy.ts";
 import {
@@ -487,7 +490,7 @@ function toolList() {
     {
       name: "memory_search",
       description:
-        "Search canonical Pandora Memory belonging to the authenticated principal. Results are discovery-only; decision authority uses approved hard-canon project context.",
+        "Search canonical Pandora Memory belonging to the authenticated principal. Namespace defaults to real_life; all requires an explicit all-namespace grant. Results are discovery-only; decision authority uses approved hard-canon project context.",
       inputSchema: {
         type: "object",
         properties: {
@@ -495,6 +498,13 @@ function toolList() {
             type: "string",
             minLength: 1,
             maxLength: MAX_QUERY,
+          },
+          namespace: {
+            type: "string",
+            enum: ["real_life", "au", "all"],
+            default: "real_life",
+            description:
+              "Memory namespace to search. all requires an explicit all-namespace grant.",
           },
           limit: {
             type: "integer",
@@ -693,19 +703,32 @@ async function callTool(req: Request, body: RpcRequest) {
     const safe = sanitizeMemorySearchQuery(query);
     if (!safe) return rpcError(body.id, -32602, "query_required");
 
+    const namespace = normalizeMemorySearchNamespace(args.namespace);
+    const resource = memorySearchResource(namespace);
+
     const identity = await authenticate(
       req,
       "pandora_memory",
       "search",
-      MEMORY_SEARCH_RESOURCE,
+      resource,
     );
     if (identity instanceof Response) return identity;
 
     const searchStarted = performance.now();
-    const { data, error } = await admin.rpc(
-      "memory_search_scoped_v1",
-      buildMemorySearchRpcArgs(identity.userId, safe, limit),
-    );
+    const { data, error } = namespace === MEMORY_SEARCH_NAMESPACE
+      ? await admin.rpc(
+        "memory_search_scoped_v1",
+        buildMemorySearchRpcArgs(identity.userId, safe, limit),
+      )
+      : await admin.rpc(
+        "memory_search_namespaced_v1",
+        buildMemorySearchNamespacedRpcArgs(
+          identity.userId,
+          safe,
+          limit,
+          namespace,
+        ),
+      );
     const queryMs = Math.max(
       0,
       Math.round((performance.now() - searchStarted) * 100) / 100,
@@ -718,7 +741,7 @@ async function callTool(req: Request, body: RpcRequest) {
         identity.authMode,
         "pandora_memory",
         "search",
-        MEMORY_SEARCH_RESOURCE,
+        resource,
         "error",
         "downstream_query_error",
         Date.now() - started,
@@ -732,7 +755,7 @@ async function callTool(req: Request, body: RpcRequest) {
       identity.authMode,
       "pandora_memory",
       "search",
-      MEMORY_SEARCH_RESOURCE,
+      resource,
       "allow",
       "authorized",
       Date.now() - started,
@@ -746,6 +769,7 @@ async function callTool(req: Request, body: RpcRequest) {
           count: data?.length || 0,
           candidate_count: data?.length || 0,
           query_ms: queryMs,
+          namespace,
           authority: MEMORY_SEARCH_AUTHORITY,
           decision_authoritative: false,
         }),
