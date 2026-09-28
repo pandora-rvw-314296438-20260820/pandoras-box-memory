@@ -1,5 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.9";
+import {
+  GROWTH_LEARNING_KIND,
+  GROWTH_MAX_BODY_BYTES,
+  GrowthLearningError,
+  parseGrowthLearningPayload,
+  validateGrowthLearningReceipt,
+} from "./growth-learning.ts";
 
 const INTEGRATION_KEY = "projectos-learning-bridge";
 const PRODUCT_KEY = "projectos";
@@ -615,7 +622,9 @@ Deno.serve(async (request: Request) => {
   }
 
   const declaredLength = Number(request.headers.get("content-length") || 0);
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+  if (
+    Number.isFinite(declaredLength) && declaredLength > GROWTH_MAX_BODY_BYTES
+  ) {
     return json(413, { ok: false, error: "payload_too_large" });
   }
 
@@ -626,7 +635,8 @@ Deno.serve(async (request: Request) => {
   }
 
   const rawBody = await request.text();
-  if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+  const rawBodyBytes = new TextEncoder().encode(rawBody).byteLength;
+  if (rawBodyBytes > GROWTH_MAX_BODY_BYTES) {
     return json(413, { ok: false, error: "payload_too_large" });
   }
 
@@ -635,6 +645,13 @@ Deno.serve(async (request: Request) => {
     payload = record(JSON.parse(rawBody));
   } catch {
     return json(400, { ok: false, error: "invalid_json" });
+  }
+
+  if (
+    payload.learning_kind !== GROWTH_LEARNING_KIND &&
+    rawBodyBytes > MAX_BODY_BYTES
+  ) {
+    return json(413, { ok: false, error: "payload_too_large" });
   }
 
   if (
@@ -750,6 +767,55 @@ Deno.serve(async (request: Request) => {
   }
 
   if (payload.learning_kind !== undefined) {
+    if (payload.learning_kind === GROWTH_LEARNING_KIND) {
+      let parsed;
+      try {
+        parsed = await parseGrowthLearningPayload(payload);
+      } catch (error) {
+        if (
+          error instanceof GrowthLearningError &&
+          error.code === "growth_source_scope_denied"
+        ) {
+          return json(403, { ok: false, error: error.code });
+        }
+        return json(400, {
+          ok: false,
+          error: error instanceof GrowthLearningError
+            ? error.code
+            : "invalid_growth_learning",
+        });
+      }
+      const { data, error } = await admin.rpc(
+        "memory_ingest_growth_learning_v1",
+        {
+          p_memory_user_id: memoryUserId,
+          p_payload: parsed.payload,
+        },
+      );
+      if (error) {
+        if (error.message.includes("GROWTH_LEARNING_IDEMPOTENCY_CONFLICT")) {
+          return json(409, { ok: false, error: "idempotency_conflict" });
+        }
+        if (
+          error.message.includes("GROWTH_LEARNING_SCOPE_DENIED") ||
+          error.message.includes("GROWTH_LEARNING_SOURCE_SCOPE_DENIED") ||
+          error.message.includes("GROWTH_LEARNING_GRANT_DENIED")
+        ) {
+          return json(403, { ok: false, error: "growth_learning_denied" });
+        }
+        return json(500, { ok: false, error: "growth_learning_intake_failed" });
+      }
+      let receipt;
+      try {
+        receipt = validateGrowthLearningReceipt(parsed, data);
+      } catch {
+        return json(500, {
+          ok: false,
+          error: "growth_learning_receipt_invalid",
+        });
+      }
+      return json(receipt.deduplicated === true ? 200 : 202, receipt);
+    }
     if (payload.learning_kind !== VISIBLE_LEARNING_KIND) {
       return json(400, { ok: false, error: "unsupported_learning_kind" });
     }

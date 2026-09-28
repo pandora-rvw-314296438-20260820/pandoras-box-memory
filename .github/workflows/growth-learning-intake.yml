@@ -1,0 +1,86 @@
+name: Growth learning intake
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'supabase/functions/pandora-projectos-learning/index.ts'
+      - 'supabase/functions/pandora-projectos-learning/growth-learning.ts'
+      - 'supabase/functions/pandora-projectos-learning/growth-learning_test.ts'
+      - 'supabase/migrations/20260929030000_growth_learning_intake_v1.sql'
+      - 'tests/sql/growth_learning_intake_baseline.sql'
+      - 'tests/sql/growth_learning_intake_behavior.sql'
+      - '.github/workflows/growth-learning-intake.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/pandora-projectos-learning/index.ts'
+      - 'supabase/functions/pandora-projectos-learning/growth-learning.ts'
+      - 'supabase/functions/pandora-projectos-learning/growth-learning_test.ts'
+      - 'supabase/migrations/20260929030000_growth_learning_intake_v1.sql'
+      - 'tests/sql/growth_learning_intake_baseline.sql'
+      - 'tests/sql/growth_learning_intake_behavior.sql'
+      - '.github/workflows/growth-learning-intake.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  edge-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+          persist-credentials: false
+      - name: Verify exact source checkout
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Set up Deno
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v2.x
+      - name: Check and test exact adapter contract
+        run: |
+          deno fmt --check supabase/functions/pandora-projectos-learning/index.ts supabase/functions/pandora-projectos-learning/growth-learning.ts supabase/functions/pandora-projectos-learning/growth-learning_test.ts
+          deno check --no-lock --node-modules-dir=auto supabase/functions/pandora-projectos-learning/index.ts
+          deno test supabase/functions/pandora-projectos-learning/growth-learning_test.ts
+      - name: Reject literal secrets
+        run: bash scripts/check_no_literal_secrets.sh
+      - name: Verify clean source patch
+        run: git diff --check "$EXPECTED_SHA^" "$EXPECTED_SHA"
+
+  postgres-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+          persist-credentials: false
+      - name: Verify exact source checkout
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Start isolated PostgreSQL 16
+        run: |
+          docker run -d --name growth-learning-postgres -e POSTGRES_PASSWORD=postgres postgres:16
+          for i in $(seq 1 30); do
+            if docker exec growth-learning-postgres pg_isready -U postgres >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs growth-learning-postgres
+          exit 1
+      - name: Create production-shaped baseline
+        run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/growth_learning_intake_baseline.sql
+      - name: Apply additive Phase A intake migration
+        run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260929030000_growth_learning_intake_v1.sql
+      - name: Exercise atomic intake, replay, conflict, ACL, and no-canon behavior
+        run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/growth_learning_intake_behavior.sql
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f growth-learning-postgres >/dev/null 2>&1 || true
