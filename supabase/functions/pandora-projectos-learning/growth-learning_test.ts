@@ -689,7 +689,6 @@ Deno.test("authenticated handler keeps growth markers out of generic intake", as
   }
 });
 
-
 Deno.test("rejects credential-like decoded string values and object keys", async () => {
   const sensitive = String.fromCharCode(
     65,
