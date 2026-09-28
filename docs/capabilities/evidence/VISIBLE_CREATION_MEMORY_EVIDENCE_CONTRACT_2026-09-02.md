@@ -33,3 +33,10 @@ The lifecycle payload contains only bounded enums, UUIDs, timestamps, counters a
   - Raw SHA-256: `1b0856d71c679e824051f2ef03a9be0561da58901c3bfae9b4789499de33f554`
 
 Acceptance remains fail-closed until exact-head CI passes, PR #22 merges, the changed Edge functions are deployed from merged source, and live readback confirms the deployed contract.
+
+
+## Source-only refresh for growth intake PR #126 — 2026-09-29
+
+The earlier bindings above remain historical evidence. At base `602e8d02293b7439934c45a8531688412712504e`, the unchanged bridge has raw SHA-256 `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b`. PR #126 adds a separate review-only growth intake branch to the learning handler, whose current raw SHA-256 is `7bc75666158dacabf02f57720e1d0824b4900e99a8cde68e12d7ba1d504d0b1e`.
+
+The existing Visible Creation taxonomy, metadata-only privacy boundary, project/grant checks, and pending-review behavior remain intact. These are source bindings only. They do not update the historical deployed baseline, authorize activation, or claim runtime parity. See `GROWTH_LEARNING_INTAKE_PHASE_A_2026-09-29.md` for the bounded growth source proof and remaining release requirements.

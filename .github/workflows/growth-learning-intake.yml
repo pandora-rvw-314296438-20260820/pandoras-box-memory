@@ -37,6 +37,7 @@ jobs:
         with:
           ref: ${{ env.EXPECTED_SHA }}
           persist-credentials: false
+          fetch-depth: 2
       - name: Verify exact source checkout
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Set up Deno
@@ -64,6 +65,7 @@ jobs:
         with:
           ref: ${{ env.EXPECTED_SHA }}
           persist-credentials: false
+          fetch-depth: 2
       - name: Verify exact source checkout
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Start isolated PostgreSQL 16

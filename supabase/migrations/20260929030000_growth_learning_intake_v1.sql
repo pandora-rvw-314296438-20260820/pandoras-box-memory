@@ -1,3 +1,9 @@
+-- PANDORA_SECURITY_ADJUDICATION: reviewed
+-- PANDORA_SECURITY_ACCESS_PATH: Existing HMAC learning Edge calls one service_role-only RPC; private canonical/digest helpers remain non-client-executable; no project grant changes.
+-- PANDORA_SECURITY_TEST_PLAN: Independent v3 source/ACL review and real-pgcrypto baseline/migration/behavior PASS; 18 real producer content/context hashes match; forged digest writes zero rows; client EXECUTE denied.
+-- PANDORA_SECURITY_ROLLBACK: Before activation keep ingress unsupported; after separately authorized activation disable only this new intake path and preserve candidates/reviews and existing grants. No destructive down migration.
+-- PANDORA_SECURITY_OWNER: Memory Program source review by execution_route and root coordinator; production release remains separately authorized.
+
 -- FB026 Phase A: accept the exact growth_learning_v1 contract into the existing
 -- candidate/review workflow. This migration never writes canonical Memory,
 -- grants authority, promotes a candidate, or makes it retrievable.
