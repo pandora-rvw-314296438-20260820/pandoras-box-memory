@@ -404,3 +404,287 @@ Deno.test("accepts only the exact PR804 pending-review receipt", async () => {
     );
   }
 });
+
+// Load the actual request handler, replacing only the external client, env and
+// listener boundaries. Authentication, parsing and dispatch execute unchanged.
+Deno.test("authenticated handler keeps growth markers out of generic intake", async (t) => {
+  const secret = "synthetic-growth-handler-hmac-fixture";
+  const calls: string[] = [];
+  let handler: (request: Request) => Promise<Response>;
+  const globals = globalThis as unknown as Record<string, unknown>;
+  const slot = `__growth_handler_fixture_${crypto.randomUUID()}`;
+  const query = {
+    select: () => query,
+    eq: () => query,
+    maybeSingle: () =>
+      Promise.resolve({
+        data: { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" },
+        error: null,
+      }),
+  };
+  globals[slot] = {
+    env: () => "synthetic-service-configuration",
+    serve: (value: typeof handler) => {
+      handler = value;
+    },
+    createClient: () => ({
+      rpc: (name: string, args?: Record<string, unknown>) => {
+        calls.push(name);
+        if (name === "pandora_integration_credential") {
+          return Promise.resolve({
+            data: {
+              secret_value: secret,
+              memory_user_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+              allowed_product_keys: ["projectos"],
+              is_active: true,
+            },
+            error: null,
+          });
+        }
+        if (name !== "memory_ingest_growth_learning_v1") {
+          throw new Error(`unexpected RPC ${name}`);
+        }
+        const payload = args!.p_payload as Awaited<ReturnType<typeof fixture>>;
+        return Promise.resolve({
+          data: {
+            ok: true,
+            status: "pending_review",
+            source_event_id: payload.source_event_id,
+            learning_id: payload.growth_learning.candidate.source_event_id,
+            content_hash: payload.growth_learning.candidate.content_hash,
+            candidate_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            review_item_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+            review_required: true,
+            canonical_memory_written: false,
+            promotion_status: "not_promoted",
+            retrieval_status: "not_retrievable",
+            deduplicated: false,
+          },
+          error: null,
+        });
+      },
+      from: (table: string) => {
+        calls.push(`table:${table}`);
+        return query;
+      },
+    }),
+  };
+  const boundary = `globalThis[${JSON.stringify(slot)}]`;
+  const original = await Deno.readTextFile(
+    new URL("./index.ts", import.meta.url),
+  );
+  const source = original
+    .replace('import "jsr:@supabase/functions-js/edge-runtime.d.ts";', "")
+    .replace(
+      'import { createClient } from "npm:@supabase/supabase-js@2.110.9";',
+      `const createClient = ${boundary}.createClient;`,
+    )
+    .replace(
+      '"./growth-learning.ts"',
+      JSON.stringify(new URL("./growth-learning.ts", import.meta.url).href),
+    )
+    .replace("Deno.serve(", `${boundary}.serve(`)
+    .replaceAll("Deno.env.get(", `${boundary}.env(`);
+  assert(!source.includes("Deno.serve("), "listener seam not replaced");
+  assert(!source.includes("npm:@supabase"), "client seam not replaced");
+  await import(`data:application/typescript,${encodeURIComponent(source)}`);
+  const sign = async (payload: Record<string, unknown>, timestamp: string) => {
+    const fields = [
+      "source_event_id",
+      "source_request_id",
+      "organization_id",
+      "intake_id",
+      "project_id",
+      "project_key",
+      "tool",
+      "risk",
+      "outcome_status",
+      "duration_ms",
+      "completed_at",
+      "context_status",
+      "context_hash",
+      "result_fingerprint",
+      "error_fingerprint",
+    ];
+    const basis = [
+      "projectos-learning-v1",
+      ...fields.map((key) => payload[key] ?? ""),
+    ].join("\n");
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const bytes = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      new TextEncoder().encode(`${timestamp}.${basis}`),
+    );
+    return Array.from(new Uint8Array(bytes)).map((byte) =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+  };
+  const send = async (payload: Record<string, unknown>, signed = payload) => {
+    calls.length = 0;
+    const timestamp = String(Date.now());
+    const response = await handler!(
+      new Request("https://fixture.invalid/learning", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-pandora-timestamp": timestamp,
+          "x-pandora-signature": await sign(signed, timestamp),
+        },
+        body: JSON.stringify(payload),
+      }),
+    );
+    return { status: response.status, body: await response.json() };
+  };
+  try {
+    await t.step(
+      "valid six-class payload reaches only typed pending intake",
+      async () => {
+        for (const kind of Object.keys(authority)) {
+          const result = await send(await fixture(kind));
+          assert(
+            result.status === 202,
+            `valid ${kind}: ${JSON.stringify(result)}`,
+          );
+          assert(result.body.status === "pending_review", "wrong receipt");
+          assert(
+            calls.join(",") ===
+              "pandora_integration_credential,memory_ingest_growth_learning_v1",
+            "wrong route",
+          );
+        }
+      },
+    );
+    const variants: [string, (p: Record<string, unknown>) => void][] = [
+      ["kind removed", (p) => {
+        delete p.learning_kind;
+      }],
+      ["kind and binding removed", (p) => {
+        delete p.learning_kind;
+        delete p.growth_learning;
+      }],
+      ["kind null", (p) => {
+        p.learning_kind = null;
+      }],
+      ["kind empty", (p) => {
+        p.learning_kind = "";
+      }],
+      ["kind changed", (p) => {
+        p.learning_kind = "visible_creation_evidence_v1";
+      }],
+      ["binding removed", (p) => {
+        delete p.growth_learning;
+      }],
+      ["binding null", (p) => {
+        p.growth_learning = null;
+      }],
+      ["binding array", (p) => {
+        p.growth_learning = [];
+      }],
+      ["binding scalar", (p) => {
+        p.growth_learning = "missing";
+      }],
+    ];
+    for (const [name, mutate] of variants) {
+      await t.step(name, async () => {
+        const signed = await fixture();
+        const payload: Record<string, unknown> = structuredClone(signed);
+        mutate(payload);
+        const result = await send(payload, signed);
+        assert(
+          result.status === 400 &&
+            result.body.error === "growth_marker_mismatch",
+          JSON.stringify(result),
+        );
+        assert(
+          calls.join(",") === "pandora_integration_credential",
+          "unexpected intake write/read",
+        );
+      });
+    }
+    await t.step(
+      "changed signed tool fails authentication before classification",
+      async () => {
+        const signed = await fixture();
+        const result = await send(
+          { ...signed, tool: "operations.fixture" },
+          signed,
+        );
+        assert(
+          result.status === 401 && result.body.error === "invalid_signature",
+          JSON.stringify(result),
+        );
+        assert(
+          calls.join(",") === "pandora_integration_credential",
+          "unexpected intake call",
+        );
+      },
+    );
+    await t.step(
+      "generic event remains generic but extra growth marker rejects",
+      async () => {
+        const payload: Record<string, unknown> = {
+          ...await fixture(),
+          tool: "operations.fixture",
+        };
+        delete payload.learning_kind;
+        delete payload.growth_learning;
+        const clean = await send(payload);
+        assert(
+          clean.status === 200 &&
+            clean.body.status === "aggregated_existing_summary",
+          JSON.stringify(clean),
+        );
+        assert(
+          calls.includes("table:memory_session_digests"),
+          "generic route not exercised",
+        );
+        for (
+          const marker of [{ growth_learning: {} }, {
+            learning_kind: "growth_learning_v1",
+          }]
+        ) {
+          const result = await send({ ...payload, ...marker }, payload);
+          assert(
+            result.status === 400 &&
+              result.body.error === "growth_marker_mismatch",
+            JSON.stringify(result),
+          );
+          assert(
+            calls.join(",") === "pandora_integration_credential",
+            "generic persistence reached",
+          );
+        }
+      },
+    );
+    await t.step(
+      "fixed unsigned envelope fields reject before credential read",
+      async () => {
+        for (
+          const changed of [{ schema_version: 2 }, { product_key: "other" }, {
+            privacy_policy: "other",
+          }]
+        ) {
+          const signed = await fixture();
+          const result = await send({ ...signed, ...changed }, signed);
+          assert(
+            result.status === 400 && result.body.error === "unsupported_schema",
+            JSON.stringify(result),
+          );
+          assert(
+            calls.length === 0,
+            "unexpected credential or persistence call",
+          );
+        }
+      },
+    );
+  } finally {
+    delete globals[slot];
+  }
+});

@@ -27,7 +27,15 @@ The reduced SQL baseline does not replay every production foreign key, RLS polic
 
 Initial CI found a missing parent commit in the shallow checkout, omitted security-adjudication metadata, and missing source-evidence updates. The follow-up fetches two commits for the parent diff, records the completed source security review in migration comments, and appends current source bindings without overwriting historical deployment evidence. The SQL executable body and all three Edge files remain byte-identical to the reviewed v3 package.
 
-The unchanged bridge raw SHA-256 is `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b`. The learning-handler raw SHA-256 is `7bc75666158dacabf02f57720e1d0824b4900e99a8cde68e12d7ba1d504d0b1e`.
+At commit `de1a43c709a097010515b98b018d6d5052681d2a`, the unchanged bridge raw SHA-256 is `5e1f1bcdf5e18e96ac433ab836e97f4e532d1c5d11ce85da20ff5d5324eaf64b` and the learning-handler raw SHA-256 is `7bc75666158dacabf02f57720e1d0824b4900e99a8cde68e12d7ba1d504d0b1e`.
+
+## Authenticated routing correction
+
+A separate integration audit found that the existing HMAC binds `tool` and `context_hash`, but not the outer routing markers. Removing `learning_kind` from a signed growth envelope could therefore enter the generic aggregate path and lose the six-class proposal semantics. A disposable actual-handler request test reproduced that fallback; no deployed request or Memory write was performed.
+
+The handler now checks marker consistency after signature validation and before any intake call. Any growth tool, growth binding property or growth kind requires the exact growth tool/kind and an object binding. Invalid markers return `growth_marker_mismatch`; the unchanged strict parser then authenticates the full nested binding against the signed context hash. Generic events without growth markers retain their prior route.
+
+The final handler raw SHA-256 is `f9aad93caab86e216bb9cd94406d77cd9345db6b4b3cb7d50c810f5a2790669b`. Deno passes 12 tests with 13 request-level steps, including six valid classes, marker stripping, malformed bindings, signed-tool tampering, generic compatibility and fixed envelope fields. The harness replaces only the client, environment and listener boundaries of the actual handler. Its read permission is limited to this function directory; it makes no network or provider call. Formatting, type checking, literal-secret and diff checks pass. SQL and parser behavior are unchanged from the previously reviewed package.
 
 ## Remaining release boundary
 

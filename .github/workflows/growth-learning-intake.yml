@@ -48,7 +48,7 @@ jobs:
         run: |
           deno fmt --check supabase/functions/pandora-projectos-learning/index.ts supabase/functions/pandora-projectos-learning/growth-learning.ts supabase/functions/pandora-projectos-learning/growth-learning_test.ts
           deno check --no-lock --node-modules-dir=auto supabase/functions/pandora-projectos-learning/index.ts
-          deno test supabase/functions/pandora-projectos-learning/growth-learning_test.ts
+          deno test --allow-read=supabase/functions/pandora-projectos-learning supabase/functions/pandora-projectos-learning/growth-learning_test.ts
       - name: Reject literal secrets
         run: bash scripts/check_no_literal_secrets.sh
       - name: Verify clean source patch

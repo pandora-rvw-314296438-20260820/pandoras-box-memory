@@ -766,6 +766,22 @@ Deno.serve(async (request: Request) => {
     return json(401, { ok: false, error: "invalid_signature" });
   }
 
+  // The HMAC binds tool and context_hash. Unsigned routing markers must not
+  // downgrade a signed growth event into generic or visible-evidence intake.
+  const hasGrowthMarker = tool === "facebook.growth_learning" ||
+    Object.hasOwn(payload, "growth_learning") ||
+    payload.learning_kind === GROWTH_LEARNING_KIND;
+  if (
+    hasGrowthMarker &&
+    (tool !== "facebook.growth_learning" ||
+      payload.learning_kind !== GROWTH_LEARNING_KIND ||
+      payload.growth_learning === null ||
+      typeof payload.growth_learning !== "object" ||
+      Array.isArray(payload.growth_learning))
+  ) {
+    return json(400, { ok: false, error: "growth_marker_mismatch" });
+  }
+
   if (payload.learning_kind !== undefined) {
     if (payload.learning_kind === GROWTH_LEARNING_KIND) {
       let parsed;
