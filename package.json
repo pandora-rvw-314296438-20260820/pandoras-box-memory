@@ -11,7 +11,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "verify:bridge-url": "node scripts/verify_projectos_bridge_url_contract.mjs",
-    "verify:migration-authority": "node scripts/verify_migration_authority.mjs"
+    "verify:migration-authority": "node scripts/verify_migration_authority.mjs",
+    "verify:growth-memory-context": "node scripts/verify_growth_memory_context_contract.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

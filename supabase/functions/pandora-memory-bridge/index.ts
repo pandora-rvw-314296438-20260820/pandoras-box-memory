@@ -4,6 +4,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const PRINCIPAL_KEY = "pandora-mcpmaster-production";
+const GROWTH_MEMORY_PROJECT_ID = "7c686cbd-d968-49d5-86cc-918f5e777bd2";
+const GROWTH_MEMORY_PROJECT_KEY = "mcpmaster-pandoras-box";
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_QUERY_LENGTH = 4_000;
 const MAX_ITEMS = 50;
@@ -191,6 +193,113 @@ const ingestGrowthLearning = async (
     ok: true,
     project: "pandora-memory-engine",
     action: "growth_learning",
+    data,
+  });
+};
+
+const growthApprovedContext = async (
+  body: JsonRecord,
+  principal: Principal,
+  supabase: AdminClient,
+): Promise<Response> => {
+  const allowed = new Set(["action", "project_id", "project_key", "terms", "max_bytes"]);
+  if (Object.keys(body).some((key) => !allowed.has(key))) {
+    return respond({ ok: false, error: "unexpected_field" }, 400);
+  }
+  if (!principal.scopes.includes("memory:read")) {
+    return respond({ ok: false, error: "scope_not_allowed" }, 403);
+  }
+  if (!principal.allowed_namespaces.includes("real_life")) {
+    return respond({ ok: false, error: "namespace_not_allowed" }, 403);
+  }
+
+  const projectId = typeof body.project_id === "string" ? body.project_id.trim() : "";
+  const projectKey = typeof body.project_key === "string" ? body.project_key.trim() : "";
+  if (projectId !== GROWTH_MEMORY_PROJECT_ID || projectKey !== GROWTH_MEMORY_PROJECT_KEY) {
+    return respond({ ok: false, error: "growth_project_not_allowed" }, 403);
+  }
+
+  const rawTerms = body.terms == null ? ["facebook", "marketing", "growth"] : body.terms;
+  if (!Array.isArray(rawTerms) || rawTerms.length < 1 || rawTerms.length > MAX_SEARCH_TERMS) {
+    return respond({ ok: false, error: "growth_terms_invalid" }, 400);
+  }
+  const terms = rawTerms.map((entry) =>
+    typeof entry === "string" ? entry.trim().toLowerCase() : ""
+  );
+  if (terms.some((term) =>
+    term.length < MIN_TERM_LENGTH || term.length > MAX_TERM_LENGTH ||
+    !/^[a-z0-9][a-z0-9._ -]*$/.test(term)
+  )) {
+    return respond({ ok: false, error: "growth_terms_invalid" }, 400);
+  }
+  const maxBytes = body.max_bytes == null ? 8192 : Number(body.max_bytes);
+  if (!Number.isInteger(maxBytes) || maxBytes < 6144 || maxBytes > 16384) {
+    return respond({ ok: false, error: "growth_max_bytes_invalid" }, 400);
+  }
+
+  const { data, error } = await supabase.rpc("memory_growth_approved_context_v1", {
+    p_user_id: principal.memory_user_id,
+    p_project_id: GROWTH_MEMORY_PROJECT_ID,
+    p_principal_key: PRINCIPAL_KEY,
+    p_terms: [...new Set(terms)],
+    p_max_bytes: maxBytes,
+    p_as_of: new Date().toISOString(),
+  });
+  if (error) {
+    const code = errorCode(error);
+    const status = code === "42501" ? 403 : code === "22023" ? 400 : 503;
+    return respond({
+      ok: false,
+      error: status === 403 ? "growth_context_denied"
+        : status === 400 ? "growth_context_invalid"
+        : "growth_context_unavailable",
+    }, status);
+  }
+
+  if (!isRecord(data)) {
+    return respond({ ok: false, error: "growth_context_receipt_invalid" }, 503);
+  }
+  const invariants = isRecord(data.invariants) ? data.invariants : {};
+  const records = Array.isArray(data.records) ? data.records : [];
+  const validRecords = records.length <= 50 && records.every((value) => {
+    if (!isRecord(value)) return false;
+    return typeof value.memoryRecordId === "string" &&
+      typeof value.memoryVersionId === "string" &&
+      typeof value.reviewItemId === "string" &&
+      /^[0-9a-f-]{36}$/i.test(value.memoryRecordId) &&
+      /^[0-9a-f-]{36}@[0-9a-f]{64}$/i.test(value.memoryVersionId) &&
+      /^[0-9a-f-]{36}$/i.test(value.reviewItemId) &&
+      typeof value.recordSha256 === "string" &&
+      /^[0-9a-f]{64}$/i.test(value.recordSha256) &&
+      value.status === "approved_current";
+  });
+  const valid = data.schemaVersion === "growth.approved-memory-context.v1" &&
+    data.status === "available" &&
+    data.namespace === "real_life" &&
+    typeof data.querySha256 === "string" && /^[0-9a-f]{64}$/i.test(data.querySha256) &&
+    typeof data.contextSha256 === "string" && /^[0-9a-f]{64}$/i.test(data.contextSha256) &&
+    invariants.approvedCurrentOnly === true &&
+    invariants.pendingExcluded === true &&
+    invariants.rejectedExcluded === true &&
+    invariants.revokedExcluded === true &&
+    invariants.supersededExcluded === true &&
+    invariants.retrievalDoesNotGrantExecutionAuthority === true &&
+    invariants.canAuthorizeSpend === false &&
+    invariants.canMutateCampaigns === false &&
+    invariants.canPublish === false &&
+    invariants.operationsRoomRequired === false &&
+    validRecords;
+  if (!valid || new TextEncoder().encode(JSON.stringify(data)).byteLength > 20000) {
+    return respond({ ok: false, error: "growth_context_receipt_invalid" }, 503);
+  }
+
+  return respond({
+    ok: true,
+    project: "pandora-memory-engine",
+    action: "growth_context",
+    project_id: GROWTH_MEMORY_PROJECT_ID,
+    project_key: GROWTH_MEMORY_PROJECT_KEY,
+    namespace: "real_life",
     data,
   });
 };
@@ -1568,6 +1677,9 @@ Deno.serve(async (request: Request) => {
   }
   if (body.action === "growth_learning") {
     return ingestGrowthLearning(body, authorization.principal, supabase);
+  }
+  if (body.action === "growth_context") {
+    return growthApprovedContext(body, authorization.principal, supabase);
   }
   if (body.action === "health") {
     if (!authorization.principal.scopes.includes("memory:health")) {
