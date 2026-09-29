@@ -27,3 +27,9 @@ Acceptance after merge requires:
 3. `pandora-memory-bridge` deployed from the merged source;
 4. a typed growth-learning test receipt returns pending review without canonical write;
 5. retrieval excludes the pending candidate until a separate human review/promotion action.
+
+
+Follow-up deployment correction:
+- PR #128 merged as `9acbb5566a76688645188041e2266115ce9ca2b2`.
+- Live migration apply failed before any schema change because the final SQL comment string was truncated in source.
+- This follow-up repairs only that unapplied migration tail; no authority or intake semantics are widened.
