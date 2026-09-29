@@ -66,7 +66,7 @@ begin
   select coalesce(jsonb_agg(
     e.item || jsonb_strip_nulls(jsonb_build_object(
       'memoryRecordId',m.id,
-      'memoryVersionId',m.id::text||'@'||coalesce(m.effective_at,m.updated_at,m.created_at)::text,
+      'memoryVersionId',m.id::text||'@'||encode(extensions.digest(convert_to(coalesce(m.effective_at,m.updated_at,m.created_at)::text,'utf8'),'sha256'),'hex'),
       'reviewItemId',m.metadata->>'reviewItemId',
       'recordSha256',encode(extensions.digest(convert_to(e.item::text,'utf8'),'sha256'),'hex'),
       'status','approved_current'
