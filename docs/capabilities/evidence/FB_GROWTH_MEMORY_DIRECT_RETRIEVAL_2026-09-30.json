@@ -1,0 +1,29 @@
+{
+  "evidenceVersion": "fb-growth-memory-direct-v1",
+  "date": "2026-09-30",
+  "source": "direct-github",
+  "operationsRoomRequired": false,
+  "taskIds": [
+    "FB-030",
+    "FB-031",
+    "FB-032"
+  ],
+  "stage": "source_implemented",
+  "claims": [
+    "Growth Memory retrieval is workload-authenticated and separate from the Operations Room route.",
+    "Only approved-current, non-revoked, non-superseded M5 Memory is eligible.",
+    "Retrieval cannot authorize spend, campaign mutation, publishing, or grant expansion.",
+    "Review lineage uses the persisted memory_items metadata reviewItemId."
+  ],
+  "sourcePaths": [
+    "supabase/migrations/20260930013000_growth_approved_memory_context_v1.sql",
+    "supabase/functions/pandora-memory-bridge/index.ts",
+    "scripts/verify_growth_memory_context_contract.mjs",
+    "test/growth-approved-context-bridge.test.mjs"
+  ],
+  "verification": {
+    "status": "ci_required",
+    "productionDeployed": false,
+    "canonicalMemoryWrittenByRetrieval": false
+  }
+}
