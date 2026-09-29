@@ -12,6 +12,7 @@ on:
       - "scripts/verify_projectos_bridge_project_scope.py"
       - "scripts/verify_projectos_bridge_url_contract.mjs"
       - "scripts/verify_migration_authority.mjs"
+      - "scripts/verify_growth_memory_context_contract.mjs"
       - "docs/migrations/migration-authority-manifest.json"
       - "lib/services/projectos-memory-bridge-client.ts"
       - "package.json"
@@ -62,6 +63,8 @@ jobs:
         run: npm run verify:bridge-url
       - name: Verify migration authority classification
         run: npm run verify:migration-authority
+      - name: Verify growth Memory review and retrieval contract
+        run: npm run verify:growth-memory-context
       - name: Install exact machine-gateway dependencies
         run: npm ci --ignore-scripts --prefix supabase/functions/pandora-machine-gateway
       - name: Re-prove machine-gateway namespace isolation
