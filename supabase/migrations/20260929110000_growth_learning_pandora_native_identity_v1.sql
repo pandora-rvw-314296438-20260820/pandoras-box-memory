@@ -433,6 +433,6 @@ grant execute on function public.memory_ingest_growth_learning_v1(uuid,jsonb)
   to service_role;
 
 comment on function public.memory_ingest_growth_learning_v1(uuid,jsonb) is
-  'Service-only FB026 Phase A growth_learning_v1 intake. Atomically creates one review-required candidate and review item;
+  'Service-only FB026 Phase A growth_learning_v1 intake. Atomically creates one review-required candidate and review item; exact replay is idempotent, changed content conflicts, and canonical Memory/promotion/retrieval are never written. Structural and credential-pattern checks do not certify arbitrary text as free of personal data; trusted Pandora callers must supply only the bounded learning statement and provenance contract.';
 
 commit;
