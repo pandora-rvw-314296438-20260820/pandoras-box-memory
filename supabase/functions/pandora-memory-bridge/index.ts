@@ -156,6 +156,45 @@ const M1_INTENTS = new Set([
 const M1_ACTION_MODES = new Set(["no_action", "read_only", "state_change"]);
 const M1_CAPABILITY_PATTERN = /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/;
 
+const ingestGrowthLearning = async (
+  body: JsonRecord,
+  principal: Principal,
+  supabase: AdminClient,
+): Promise<Response> => {
+  if (!principal.scopes.includes("memory:write")) {
+    return respond({ ok: false, error: "scope_not_allowed" }, 403);
+  }
+  const payload = body.payload;
+  if (!isRecord(payload) || Object.keys(body).some((key) => !["action", "payload"].includes(key))) {
+    return respond({ ok: false, error: "growth_learning_payload_invalid" }, 400);
+  }
+  const { data, error } = await supabase.rpc("memory_ingest_growth_learning_v1", {
+    p_memory_user_id: principal.memory_user_id,
+    p_payload: payload,
+  });
+  if (error) {
+    const code = errorCode(error);
+    const status = code === "42501" ? 403 : code === "22023" ? 400 : code === "23505" ? 409 : 503;
+    return respond({
+      ok: false,
+      error: status === 403 ? "growth_learning_denied"
+        : status === 400 ? "growth_learning_invalid"
+        : status === 409 ? "growth_learning_conflict"
+        : "growth_learning_unavailable",
+    }, status);
+  }
+  if (!isRecord(data) || data.ok !== true || data.status !== "pending_review" ||
+      data.canonical_memory_written !== false || data.review_required !== true) {
+    return respond({ ok: false, error: "growth_learning_receipt_invalid" }, 503);
+  }
+  return respond({
+    ok: true,
+    project: "pandora-memory-engine",
+    action: "growth_learning",
+    data,
+  });
+};
+
 const searchMemory = async (
   body: JsonRecord,
   principal: Principal,
@@ -1526,6 +1565,9 @@ Deno.serve(async (request: Request) => {
   if (body.action === "operations") {
     const result = await handleOperationsMemory(body, authorization.principal, supabase, { signal: request.signal });
     return respond(result.body, result.status);
+  }
+  if (body.action === "growth_learning") {
+    return ingestGrowthLearning(body, authorization.principal, supabase);
   }
   if (body.action === "health") {
     if (!authorization.principal.scopes.includes("memory:health")) {
