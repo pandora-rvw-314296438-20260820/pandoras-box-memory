@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-01T04:00:00+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "migration": "20260930210543_pandora_growth_m5_outcome_read_compatibility_v1",
+  "principalKey": "pandora-mcpmaster-production",
+  "projectId": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+  "environment": "production",
+  "change": {
+    "allowedRecordTypeAdded": "outcome",
+    "canRead": true,
+    "canApprove": false,
+    "executionAuthorityGranted": false,
+    "spendAuthorityGranted": false
+  },
+  "approvedGrowthMemory": {
+    "reviewItemId": "e82135bd-fb7d-4e75-b18c-f82cd9f82c9a",
+    "reviewDecisionId": "68a4dde4-5913-439f-b829-0e8160c2ee94",
+    "memoryItemId": "d6eb2ee3-f8cc-4a10-a28b-0487014da004",
+    "recordType": "outcome",
+    "knowledgeSchemaVersion": "m5.v1",
+    "authorityKind": "verified_evidence",
+    "canonStatus": "soft_canon"
+  },
+  "retrieval": {
+    "status": "available",
+    "returned": 1,
+    "querySha256": "b03f9771ec9bde576010187023d61a208344cdf2bcf9ef08708c72d1cafb91e3",
+    "primaryReceiptId": "6fa925c3-5cf7-4853-8f23-98a2f7eb9faa",
+    "canAuthorizeSpend": false,
+    "canMutateCampaigns": false,
+    "canPublish": false,
+    "grantExpansionPerformed": false
+  }
+}
