@@ -1,0 +1,45 @@
+
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-01T10:56:46+08:00",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "migration": "20261001025633_pandora_native_advisory_learning_read_compatibility_v1",
+  "principalKey": "pandora-mcpmaster-production",
+  "projectId": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+  "environment": "production",
+  "incident": {
+    "symptom": "M5 task-aware retrieval returned zero advisory Memory for a consequential coding/building query even though current failure_lesson records existed.",
+    "rootCause": "The native Pandora production grant allowed only outcome and provider_performance among M5 advisory classes; fact, pattern, procedure and failure_lesson were not readable.",
+    "before": {
+      "eligibleAdvisory": 0,
+      "returnedAdvisory": 0,
+      "allowedTypedClasses": ["outcome", "provider_performance"]
+    },
+    "after": {
+      "eligibleAdvisory": 2,
+      "returnedAdvisory": 2,
+      "allowedTypedClasses": [
+        "fact",
+        "failure_lesson",
+        "outcome",
+        "pattern",
+        "procedure",
+        "provider_performance"
+      ]
+    }
+  },
+  "authorityBoundary": {
+    "canRead": true,
+    "canPropose": true,
+    "canApprove": false,
+    "policyClassGranted": false,
+    "retrievalDoesNotGrantExecutionAuthority": true
+  },
+  "providerReadback": {
+    "memoryProjectRef": "ivmvufhcsezyhczzondn",
+    "migrationApplied": true,
+    "taskAwareRetrievalStatus": "available",
+    "degraded": false,
+    "returnedFailureLessons": 2
+  }
+}
