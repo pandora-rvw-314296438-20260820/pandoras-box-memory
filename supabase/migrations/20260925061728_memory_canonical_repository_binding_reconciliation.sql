@@ -1,3 +1,9 @@
+-- PANDORA_SECURITY_ADJUDICATION: reviewed
+-- PANDORA_SECURITY_ACCESS_PATH: source-parity restoration only; preserves the provider-applied service/private boundary and adds no client grant.
+-- PANDORA_SECURITY_TEST_PLAN: exact-head security adjudication, migration lineage, disposable PostgreSQL checks, and Supabase Preview source-parity readback.
+-- PANDORA_SECURITY_ROLLBACK: revert only these source annotations if governance metadata is proven incorrect; do not alter the already-applied production migration or widen privileges.
+-- PANDORA_SECURITY_OWNER: THEMIS / Pandora Memory production-readiness reconciliation
+
 -- The owner-defined canonical repository supersedes the historical owner binding.
 -- This changes project metadata only: no user, namespace, or approval grants.
 create table if not exists private.memory_project_binding_receipts (
