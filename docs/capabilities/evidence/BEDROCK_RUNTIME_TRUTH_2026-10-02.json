@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "lesson_candidate",
+  "evidence_id": "lane-f-bedrock-runtime-truth-2026-10-02",
+  "recorded_at": "2026-10-02T13:47:23.965Z",
+  "review_state": "pending_review",
+  "approved_canonical": false,
+  "training_eligibility": "NOT_EVALUATED_NOT_ADMITTED",
+  "scope": {
+    "project": "Pandora Model Control / Lane F",
+    "namespace": "provider-runtime-truth",
+    "sensitivity": "sanitized engineering/provider evidence; no credentials or user content"
+  },
+  "owner_decision": {
+    "directive": "Auto routing remains default; exact-model manual selection is supported by the central router; Bedrock catalog uses live AWS truth; phone-local AI is optional and OFF by default.",
+    "probe_authorization": "One bounded runtime invocation per conversational Bedrock model, smallest prompt, minimal provider-valid max tokens, one attempt each, no retry/load loops."
+  },
+  "source_evidence": {
+    "canonical_repo": "pandora-rvw-314296438-20260820/pandoras-box",
+    "final_main_sha": "60decc6b9584127be887c390d1317197489a7f47",
+    "pull_requests": {
+      "model_control": {
+        "number": 906,
+        "merge_sha": "13c57f47db0feb17274bd4f8b393c370938e1880"
+      },
+      "sigv4_fix": {
+        "number": 916,
+        "merge_sha": "ae05e3fda037c85c4812304570fab47ed815b5d6"
+      },
+      "probe_contract": {
+        "number": 918,
+        "merge_sha": "4ff0977a669f0f41c17775cd156bd071dfa1e9a4"
+      },
+      "sync_preservation": {
+        "number": 917,
+        "merge_sha": "36eaf10e06561f1bf437656f8f1522f4e5aa2b16"
+      },
+      "phone_ai_default_off": {
+        "number": 913,
+        "merge_sha": "60decc6b9584127be887c390d1317197489a7f47"
+      }
+    },
+    "production_vercel": {
+      "deployment_id": "dpl_GMexhx8fb7FakdYxGjXEVYzXaPvB",
+      "source_sha": "60decc6b9584127be887c390d1317197489a7f47",
+      "state": "READY",
+      "aliases": [
+        "mcpmaster.vercel.app",
+        "pandoras-box-system.vercel.app"
+      ],
+      "runtime_errors_operations_inference_last_15m": 0
+    },
+    "production_supabase": {
+      "project_ref": "jcyqixttuebxqqfkjonq",
+      "migrations": [
+        "pandora_bedrock_catalog_sync_v2",
+        "pandora_bedrock_control_trigger_v1",
+        "pandora_bedrock_sync_preserve_runtime_v1"
+      ],
+      "catalog_observed_at": "2026-10-02T13:17:55.948Z",
+      "last_probe_at": "2026-10-02T12:24:17.665Z"
+    }
+  },
+  "verified_outcome": {
+    "bedrock_catalog": {
+      "models": 120,
+      "conversational": 74,
+      "runtime_tested": 74,
+      "routable": 26
+    },
+    "probe_cycle": {
+      "attempts": 74,
+      "retries": 0,
+      "passed": 26,
+      "failed": 48,
+      "usage_tokens": {
+        "input": 311,
+        "output": 26,
+        "total": 337
+      },
+      "exact_usage_priced_cost_usd": 0.00012544,
+      "rounded_database_cost_ledger_micro_usd": 126,
+      "priced_successful_calls": 26,
+      "zero_token_failed_calls": 48,
+      "initial_failure_breakdown": {
+        "sigv4_colon_path_signature_mismatch": 26,
+        "account_unavailable": 19,
+        "invalid_payment_instrument": 2,
+        "kimi_probe_contract_temperature_unsupported": 1
+      }
+    },
+    "post_fix_control_plane_readback": {
+      "signer_blocked_models_checked": 26,
+      "fully_authorized_entitled_region_available": 22,
+      "agreement_not_available": 4,
+      "re_probe_performed": false
+    },
+    "sync_only_refresh": {
+      "model_invocations": 0,
+      "prior_probe_records_preserved": 74,
+      "prior_token_total_preserved": 337,
+      "cost_ledger_preserved": true,
+      "routable_before": 24,
+      "routable_after": 26
+    },
+    "phone_local_ai": {
+      "default_enabled": false,
+      "fail_closed": true,
+      "warm_gated": true,
+      "generation_gated": true,
+      "acceptance_gated": true,
+      "automatic_router_gated": true,
+      "resident_model_unloaded_when_disabled": true
+    }
+  },
+  "durable_lessons": [
+    "AWS Bedrock discovery/authorization metadata is not runtime proof; Routable requires a successful bounded provider invocation plus current agreement, authorization, entitlement and region availability.",
+    "SigV4 path signing must canonicalize colon-bearing Bedrock model IDs exactly once. Carry the raw ':' in the wire URL and RFC3986-encode it in the canonical URI; pre-encoding the path causes a signature mismatch.",
+    "Provider-minimal probes should omit optional inference fields unless required. Kimi K3 rejects temperature and requires maxTokens >= 16; other current conversational probe candidates use maxTokens=1.",
+    "A catalog-only AWS sync must preserve existing runtime and cost evidence only when the invocation target is unchanged. Changed targets invalidate runtime proof; removed models retire.",
+    "Never re-probe automatically after an implementation defect when the owner authorized one attempt per model. Fix source, preserve the failed evidence, and require new spend authorization for any second invocation.",
+    "Phone-local AI must be a device preference that defaults OFF and fail-closes local prewarm, routing, generation and residency. Enabling local AI makes it an allowed candidate, not a priority."
+  ],
+  "boundaries": {
+    "static_aws_credentials_stored": false,
+    "provider_secrets_exposed": false,
+    "extra_probe_attempts_after_owner_cycle": 0,
+    "load_test_performed": false,
+    "lane_e_composer_or_shell_modified": false,
+    "projectos_dependency": false
+  },
+  "open_loop": {
+    "lane_e_pr": 904,
+    "state": "open",
+    "implication": "Do not build/merge the model picker into the composer until Lane E global active-chat shell lands and Lane F UI work is rebased on current main.",
+    "re_probe_requirement": "The 22 fully available models whose first attempt was masked by the signer defect remain non-routable until a new explicit paid-probe authorization allows a second invocation."
+  },
+  "review_requirements": [
+    "Verify Box PR #913, #916, #917 and #918 merge/provider readback and final main SHA.",
+    "Verify Vercel deployment dpl_GMexhx8fb7FakdYxGjXEVYzXaPvB is READY on exact final main.",
+    "Verify Supabase live catalog counts, probe timestamps/tokens/cost ledger, and migration list.",
+    "Promote only after normal Memory review; this candidate does not self-promote."
+  ]
+}
