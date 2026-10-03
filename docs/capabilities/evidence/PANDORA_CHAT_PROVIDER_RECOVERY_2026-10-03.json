@@ -1,0 +1,73 @@
+{
+    "fix": [
+        "Restored Worker-B Gemini broker source truth to canonical gemini_api_key, but kept Gemini routing disabled because the provider project still returns PERMISSION_DENIED.",
+        "Verified and deployed the committed-ticket Bedrock bridge.",
+        "Merged PR 943 through the governed Supabase Vault coordinator and deployed exact merged source to Supabase Edge v81.",
+        "Added provider-diverse bounded fallback ordering so the six-attempt cap does not starve other eligible providers."
+    ],
+    "status": "provider_verified",
+    "project": "pandoras-box",
+    "incident": {
+        "symptom": "Authenticated mobile chat returned Pandora intelligence is temporarily unavailable with HTTP 503.",
+        "rootCauses": [
+            "The earlier Bedrock synchronous SQL bridge inserted a one-time ticket and called Vercel before the transaction committed, so the external claim could not see the ticket and returned BEDROCK_CHAT_TICKET_CLAIM_FAILED.",
+            "Gemini runtime credential drift existed: the live Worker-B broker had been altered to Gemini_api3 instead of canonical gemini_api_key. Gemini_api3 returned 401 because its bound service account is disabled/deleted; canonical gemini_api_key returned 403 because the Google project is denied access.",
+            "OpenRouter was not usable and its routing_eligible flag was fenced false; OpenAI and Kimi were disabled."
+        ]
+    },
+    "observedAt": "2026-10-03T05:55:00Z",
+    "production": {
+        "edgeVersion": 81,
+        "edgeFunction": "pandora-intelligence-chat",
+        "supabaseProject": "jcyqixttuebxqqfkjonq",
+        "exactSourceMarkers": [
+            "prioritizeProviderDiversity(routePlan.candidates,6)",
+            "pandora_issue_bedrock_chat_ticket_v1"
+        ]
+    },
+    "recordType": "failure_lesson_evidence",
+    "repository": "pandora-rvw-314296438-20260820/pandoras-box",
+    "verification": [
+        {
+            "pr": 943,
+            "kind": "github_merge",
+            "headSha": "89e5cc9e47591811c518750e8dfea8e5a039c992",
+            "mergeSha": "7884d2fe2851a8f06ac2329e30c772ffd25134d5",
+            "coordinatorCheckRunId": 111141027175,
+            "providerReadbackVerified": true
+        },
+        {
+            "kind": "ci",
+            "result": "all observed workflow families successful",
+            "headSha": "89e5cc9e47591811c518750e8dfea8e5a039c992"
+        },
+        {
+            "kind": "bedrock_live_smoke",
+            "model": "google.gemma-3-4b-it",
+            "reply": "OK.",
+            "httpStatus": 200
+        },
+        {
+            "kind": "bedrock_live_smoke",
+            "model": "deepseek.v3.2",
+            "reply": "OK",
+            "httpStatus": 200
+        },
+        {
+            "kind": "supabase_edge_readback",
+            "version": 81,
+            "verifyJwt": true,
+            "providerDiversity": true,
+            "committedBedrockTicket": true
+        }
+    ],
+    "durableLesson": "Never re-enable or prefer a model provider from catalog/config presence alone. Require a current live inference probe and authoritative provider readback. For cross-service one-time tickets, commit issuance before external claim. Keep failed providers fenced and ensure bounded fallback lists preserve provider diversity.",
+    "currentRouting": {
+        "kimi": "disabled",
+        "gemini": "routing ineligible; provider project denied",
+        "openai": "disabled",
+        "bedrock": "enabled and routing eligible; default deepseek.v3.2 live-smoke verified",
+        "openrouter": "routing ineligible"
+    },
+    "sourceMergeSha": "7884d2fe2851a8f06ac2329e30c772ffd25134d5"
+}
