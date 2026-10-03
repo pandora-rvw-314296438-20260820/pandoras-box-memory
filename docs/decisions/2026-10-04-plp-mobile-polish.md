@@ -34,3 +34,45 @@ The earlier merged owner-approved cube-menu change is PR #954, main commit 81ced
 ## Limits and next acceptance
 
 Documented, implemented, tested, built, merged, deployed, runtime verified, and production verified remain separate. Verify the latest exact head and run the authenticated continuous PLP journey, including unavailable sources, Activity Back, Team loading, drawer/keyboard/composer geometry, and Android system-bar contrast. Physical Redmi/Android performance and authenticated runtime acceptance were not obtained in this record. The Memory connector retrieval failed during this continuation; this GitHub record is a durable recovery source, not a claim that semantic Memory ingestion is healthy. Preserve history and supersede this record with newer provider evidence rather than deleting it.
+
+
+## Verified convergence and delivery — 2026-10-04 06:29 Asia/Manila
+
+Classification: provider evidence unless explicitly described as a lesson or limitation. This update supersedes the earlier candidate-status paragraph above without deleting its history.
+
+### Repository and test outcome
+
+Another authorized lane merged PR #960 as 130f8915dd78647dd2c5174ef752297fa166f171 while #958 was in progress. Provider tree comparisons showed #960 included the earlier visual correction and approved chat goldens, but not the later shared-state fixes. Closed #958 was not reopened. A scoped follow-up, PR #961, carried forward those missing fixes on the new main without overwriting its newer UI or touching Admin.
+
+PR #961 was normally squash-merged at 2026-10-03T22:22:21Z as **1eca94fdcc5dad0dc10192a5aa9c74f03171c4d3**. Tested head: **f940a402553ee32865be5d1bd8d6c6498f49012e**. Provider readback verified both commits have the identical source tree **9a35c3173fcd24f025d4052067a7ac5269a24ba9**. The follow-up changed 11 scoped source/test/evidence files. It did not change the separate chat implementation, approved golden PNGs, Admin duplicate, dependencies, or CI configuration.
+
+Exact-head results: Node 24 run 37157432203 succeeded; full Android/iOS validation run 37157432140 succeeded, including formatting, analysis, tests, Web build, Android build and iOS simulator build; mobile UX/golden run 37157432114 succeeded. CodeQL, Gitleaks, Trivy, source-contract and other required protected-branch checks were read back green before merge. No protection setting, bypass actor, or force update was used. CodeRabbit's green status was a skipped automatic review, not evidence of an independent review.
+
+### Live Web delivery
+
+Vercel production deployment **dpl_4kEHcxrzTc5i4D75oG7mC8HTdvuH** reached READY from exact merged SHA 1eca94fdcc5dad0dc10192a5aa9c74f03171c4d3. Project: prj_Y5rZVcq8xJVzHVt4uvfmg9wPvXMk. Deployment URL: mcpmaster-kry284uyu-mbanatao.vercel.app. Existing production aliases mcpmaster.vercel.app and pandoras-box-system.vercel.app were assigned successfully.
+
+Both production aliases returned HTTP 200 for /pandora-web/pandora-web-release-manifest.txt with source_sha=1eca94fdcc5dad0dc10192a5aa9c74f03171c4d3, app_version=0.4.0-rc.14+21, flutter_version=3.47.0, and web_tree_sha256=3b910aad71a74717a202203995116b6fad5cca91d2c679729b41d50165abe46d. This establishes deployed source delivery, not an authenticated resort journey or a measured performance result.
+
+### Android artifact and installed-app evidence
+
+Dedicated PLP Android run **37157432082**, job **111303633264**, succeeded. Artifact **11287290117** contains the arm64-v8a PLP Pandora Enterprise APK, package com.banataosystems.pandora.plp, version 0.4.0-rc.14+21, size 71,476,849 bytes, SHA-256 **7cb7a019298580f8b549a3b09dac0f71565f7a7d1cb2901087fdf4aeeb050678**. Source is f940a402553ee32865be5d1bd8d6c6498f49012e, the exact source tree merged in #961. Downloaded archive and APK hashes were independently checked against the provider artifact/manifest.
+
+Artifact **11286621151** records API-35 x86_64 installed-app acceptance: launch, drawn-window readiness, sign-in semantics, empty-submit validation, background/foreground, rotation, process restart and unauthenticated return to sign-in all passed; crash buffer was clear. Authenticated session restoration was explicitly not tested.
+
+The ARM APK manifest is **validation-candidate**, production_release=false and production_signer_verified=false. It has a debug certificate despite release compilation. Do not call it a production-signed update, recommend uninstalling an existing app to force installation, or infer physical-device/local-model acceptance. No local model is bundled. Physical Android/Redmi performance, authenticated continuous PLP acceptance and offline Qwen acceptance remain unverified.
+
+### Production-history precision
+
+Applied and source-reconciled migration **20261003215433_plp_activity_test_marker_precision_v2** replaces broad substring suppression with explicit root/nested flags, bounded legacy test-source prefixes, [MOCK QA] markers and MOCK booking references. Both public activity functions were read back using the helper while preserving authentication and tenant-entry guards. Definition MD5s: business feed 754c951d867446c1e7342f5fe1463f9e; Pandora logs 3b092124e13d59d9febf76944bd2cd07.
+
+Read-only aggregate inspection found 3 booking and 4 staff-task seed records: all seven raw rows remained stored, all seven were classified as test-only, and no production-eligible rows were manufactured. This is provider-table/filter evidence, not a customer-authenticated RPC acceptance. Non-persistent SQL assertions verified that a QA manager, Mockingbird PMS and a request for synthetic pillows are not test provenance. Matching Dart tests cover all ten root/nested flags, true encodings and legacy prefix/false-positive cases.
+
+### Lessons promoted from actual failures
+
+- Character-count-based hint wrapping is not width-safe. The merged conditional cap produced a real 42-pixel dock jump, 109px versus 67px, in the continuous journey. Capping every placeholder to one line fixed it while retaining multiline typed input. The strict cross-page rectangle equality and screenshot comparisons stayed enabled.
+- Test isolation must use provenance rather than ordinary words. Broad matches for qa/mock/synthetic can hide real staff, suppliers or product descriptions. Share the classifier between summary, counts, detail, operational lists and the provider boundary; filter before pagination.
+- Reconcile against a newer merged tree, not an old conversation's branch state. A successor can contain the visual work while omitting later state fixes. Preserve the new authoritative changes and carry only the missing deltas.
+- A five-second GitHub HTTP transport timeout is not proof that the repository or Vault credential is unwritable. After confirming no branch publication, a transaction-local http.curlopt_timeout_ms=20000 recovered the bounded request. No credential was exposed, permanent database timeout changed, or protection weakened. Do not repeat ambiguous writes without provider readback.
+
+Memory ingestion remains separate: this durable GitHub record is in review PR #143, not a claim that the failing Memory connector or semantic canonical ingestion has recovered. Keep future status updates evidence-backed and avoid saving polling events.
