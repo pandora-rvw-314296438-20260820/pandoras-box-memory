@@ -135,6 +135,44 @@ create unique index if not exists memory_growth_learning_source_identity_v1
   where source='projectos-post-task'
     and metadata->>'intake_kind'='growth_learning_v1';
 
+create or replace function private.pandora_growth_learning_contains_sensitive_v1(
+  p_value jsonb
+) returns boolean
+language sql
+immutable
+strict
+set search_path='pg_catalog'
+as $function$
+with recursive walk(value,key_name) as (
+  select p_value,null::text
+  union all
+  select child.value,child.key_name
+  from walk w
+  cross join lateral (
+    select e.value,e.key as key_name
+    from jsonb_each(
+      case when jsonb_typeof(w.value)='object' then w.value else '{}'::jsonb end
+    ) e
+    union all
+    select a.value,null::text
+    from jsonb_array_elements(
+      case when jsonb_typeof(w.value)='array' then w.value else '[]'::jsonb end
+    ) a
+  ) child
+)
+select exists (
+  select 1
+  from walk
+  where coalesce(key_name,'') ~* '(authorization[[:space:]]*[:=][[:space:]]*(bearer|basic)|github_pat_|gh[pousr]_[a-z0-9_]{16,}|sb_secret_|AIza[a-z0-9_-]{20,}|sk-[a-z0-9_-]{16,}|-----BEGIN [^-]*PRIVATE KEY)'
+     or (
+       jsonb_typeof(value)='string'
+       and coalesce(value#>>'{}','') ~* '(authorization[[:space:]]*[:=][[:space:]]*(bearer|basic)|github_pat_|gh[pousr]_[a-z0-9_]{16,}|sb_secret_|AIza[a-z0-9_-]{20,}|sk-[a-z0-9_-]{16,}|-----BEGIN [^-]*PRIVATE KEY)'
+     )
+);
+$function$;
+revoke all on function private.pandora_growth_learning_contains_sensitive_v1(jsonb)
+  from public,anon,authenticated,service_role;
+
 create or replace function public.memory_ingest_growth_learning_v1(
   p_memory_user_id uuid,
   p_payload jsonb
@@ -189,7 +227,7 @@ begin
     or v_binding-array['schema_version','source_scope','target_memory','candidate']<>'{}'::jsonb then
     raise exception 'GROWTH_LEARNING_BINDING_INVALID' using errcode='22023';
   end if;
-  if v_binding::text ~* '(authorization[[:space:]]*[:=][[:space:]]*(bearer|basic)|github_pat_|gh[pousr]_[a-z0-9_]{16,}|sb_secret_|AIza[a-z0-9_-]{20,}|sk-[a-z0-9_-]{16,}|-----BEGIN [^-]*PRIVATE KEY)' then
+  if private.pandora_growth_learning_contains_sensitive_v1(v_binding) is true then
     raise exception 'GROWTH_LEARNING_SENSITIVE_MATERIAL_REJECTED' using errcode='22023';
   end if;
   v_source_scope:=v_binding->'source_scope';
@@ -444,11 +482,21 @@ begin
         and candidate_type='projectos_outcome' and source_ref=v_source_ref;
     if not found
       or v_existing_review.source_metadata->>'candidateId' is distinct from v_candidate_id::text
-      or v_existing_review.audit_metadata->>'contentHash' is distinct from v_candidate->>'content_hash'
-      or v_existing_review.status<>'pending_review' then
+      or v_existing_review.audit_metadata->>'contentHash' is distinct from v_candidate->>'content_hash' then
       raise exception 'GROWTH_LEARNING_REPLAY_LINEAGE_INVALID' using errcode='55000';
     end if;
     v_review_item_id:=v_existing_review.id;
+    if v_existing_review.status<>'pending_review' then
+      return jsonb_build_object(
+        'ok',true,'status','already_reviewed',
+        'source_event_id',p_payload->>'source_event_id',
+        'learning_id',v_candidate->>'source_event_id',
+        'content_hash',v_candidate->>'content_hash',
+        'candidate_id',v_candidate_id,'review_item_id',v_review_item_id,
+        'review_status',v_existing_review.status,
+        'deduplicated',true
+      );
+    end if;
     v_deduplicated:=true;
   else
     select coalesce(array_agg(value->>'ref' order by ordinal),'{}'::text[])
