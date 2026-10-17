@@ -4,5 +4,9 @@ import { proxyPandoraMemoryRequest } from "@/lib/services/pandora-memory-bridge-
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  return proxyPandoraMemoryRequest(request, { action: "health" });
+  return proxyPandoraMemoryRequest(
+    request,
+    { action: "health" },
+    { target: "search" },
+  );
 }
