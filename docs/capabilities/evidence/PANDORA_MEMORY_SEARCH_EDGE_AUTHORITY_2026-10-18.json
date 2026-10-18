@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "record_type": "pandora_memory_search_edge_authority_source_evidence",
+  "repository": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+  "pull_request": 146,
+  "base_sha": "4440c21b7c79cf3089e1504a6e68517c2f3747ea",
+  "source_head_sha_before_evidence": "ca7729dcb30f4c8634d0a04f71afbe138aea5e5a",
+  "source_head_tree_sha_before_evidence": "91590dd6f0e9ee02cda58186d307b3a36f4d3edc",
+  "edge_authority_slug": "pandora-memory-search",
+  "edge_entrypoint": "supabase/functions/pandora-memory-search/index.ts",
+  "source_blobs": {
+    "app/api/pandora/health/route.ts": "d114308fe6a6e0aa6cf9ee4ba3b20342c5a533bd",
+    "app/api/pandora/memory/search/route.ts": "85df9c71117282861ec5ae83919f6a8008a219da",
+    "lib/services/pandora-memory-bridge-client.ts": "0b84e0300ba251fa1fd4121067f5227afa633e3a",
+    "scripts/verify_projectos_bridge_url_contract.mjs": "75a56ed228f24b04a16c33e36b89d4d8af06cc12",
+    "supabase/config.toml": "045b6438ade13a59bb7e32320c19810aac8a8fc9",
+    "supabase/functions/pandora-memory-search/deno.json": "7a1b8dffd83b661ed993dd599f7f00a7b777e823",
+    "supabase/functions/pandora-memory-search/deno.lock": "55544a4640c077425a75deb7e6f85c8b140fc440",
+    "supabase/functions/pandora-memory-search/handler.ts": "b06d47cc52c5306c26212f74bde52112775ce7b7",
+    "supabase/functions/pandora-memory-search/index.ts": "5f60752144476f836c928e1c88742e97a432000c",
+    "supabase/functions/pandora-memory-search/test/search-workload-endpoint.test.ts": "e9ac2686a229c67de769d4cae503b1bfed74e79b",
+    "supabase/functions/pandora-memory-search/workload-auth.ts": "cd929158f8d4ce3750a4c8c18bbba267e6df943a"
+  },
+  "dependency_pins": {
+    "deno_json_imports": {
+      "@supabase/supabase-js": "jsr:@supabase/supabase-js@2.57.2",
+      "jose": "npm:jose@5.10.0"
+    },
+    "index_ts_jsr_specifiers": [
+      "jsr:@supabase/functions-js@2.4.5/edge-runtime.d.ts",
+      "jsr:@supabase/supabase-js@2.57.2"
+    ]
+  },
+  "runtime_principal": "pandora-mcpmaster-production",
+  "allowed_actions": [
+    "search",
+    "health"
+  ],
+  "denied_action_response": "403 action_not_allowed",
+  "workload_auth_byte_identical_to": "supabase/functions/pandora-memory-bridge/workload-auth.ts",
+  "verify_jwt": false,
+  "coexisting_authority": {
+    "slug": "pandora-memory-bridge",
+    "source_changed": false,
+    "retains": "operations entrypoint and evidence-candidates route"
+  },
+  "gate_failures_addressed": {
+    "memory_hardening_readiness": {
+      "check_run_id": 117582281774,
+      "workflow_run_id": 39095943189,
+      "failure": "Edge authority set changed without lifecycle adjudication (pandora-memory-search absent from canonicalEdgeAuthorities)",
+      "observed_at_head": "f4dc1c211b6972ee7d5e32a7cbb8c5729556548e"
+    },
+    "capability_registry_gate": {
+      "check_run_id": 117582284157,
+      "workflow_run_id": 39095943861,
+      "failure": "Tracked source changed without a registry, manifest, evidence, or roadmap update",
+      "observed_at_head": "f4dc1c211b6972ee7d5e32a7cbb8c5729556548e"
+    }
+  },
+  "source_head_required_checks": {
+    "observed_at_head": "ca7729dcb30f4c8634d0a04f71afbe138aea5e5a",
+    "status": "RECORDED",
+    "checks": [
+      {
+        "context": "no-literal-secrets",
+        "check_run_id": 117585209112,
+        "conclusion": "success"
+      },
+      {
+        "context": "observability-truth",
+        "check_run_id": 117585209130,
+        "conclusion": "success"
+      },
+      {
+        "context": "Validate exact-head evidence registry",
+        "check_run_id": 117585209080,
+        "conclusion": "failure"
+      },
+      {
+        "context": "Prove Memory hardening readiness",
+        "check_run_id": 117585209060,
+        "conclusion": "failure"
+      },
+      {
+        "context": "Prove same-owner cross-namespace denial",
+        "check_run_id": 117585208969,
+        "conclusion": "success"
+      }
+    ]
+  },
+  "truth_boundary": {
+    "source_only": true,
+    "edge_function_not_deployed": true,
+    "vercel_routes_not_redeployed": true,
+    "no_migration_principal_grant_or_env_change": true,
+    "provider_readback_not_claimed": true,
+    "canonical_memory_write_not_claimed": true
+  }
+}

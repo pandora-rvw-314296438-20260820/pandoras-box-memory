@@ -37,8 +37,12 @@ export async function POST(request: NextRequest) {
     Object.entries(body).filter(([key]) => ALLOWED_KEYS.has(key)),
   );
 
-  return proxyPandoraMemoryRequest(request, {
-    action: "search",
-    ...payload,
-  });
+  return proxyPandoraMemoryRequest(
+    request,
+    {
+      action: "search",
+      ...payload,
+    },
+    { target: "search" },
+  );
 }

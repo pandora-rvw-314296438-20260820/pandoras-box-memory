@@ -11,18 +11,25 @@ const MAX_RETRY_AFTER_MS = 2_000;
 // can never redirect Pandora service-principal authentication.
 const CANONICAL_MEMORY_PROJECT_REF = "ivmvufhcsezyhczzondn";
 const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-bridge";
+const CANONICAL_SEARCH_PATH = "/functions/v1/pandora-memory-search";
 const DEFAULT_BRIDGE_URL =
   `https://${CANONICAL_MEMORY_PROJECT_REF}.supabase.co${CANONICAL_BRIDGE_PATH}`;
+const DEFAULT_SEARCH_URL =
+  `https://${CANONICAL_MEMORY_PROJECT_REF}.supabase.co${CANONICAL_SEARCH_PATH}`;
 
-function bridgeUrl() {
-  const configured =
-    process.env.PANDORA_MEMORY_BRIDGE_URL?.trim() ||
-    DEFAULT_BRIDGE_URL;
+export type PandoraMemoryProxyTarget = "bridge" | "search";
+
+function bridgeUrl(target: PandoraMemoryProxyTarget = "bridge") {
+  const isSearch = target === "search";
+  const configured = isSearch
+    ? process.env.PANDORA_MEMORY_SEARCH_URL?.trim() || DEFAULT_SEARCH_URL
+    : process.env.PANDORA_MEMORY_BRIDGE_URL?.trim() || DEFAULT_BRIDGE_URL;
+  const expectedPath = isSearch ? CANONICAL_SEARCH_PATH : CANONICAL_BRIDGE_PATH;
   const url = new URL(configured);
   if (
     url.protocol !== "https:" ||
     url.hostname !== `${CANONICAL_MEMORY_PROJECT_REF}.supabase.co` ||
-    url.pathname !== CANONICAL_BRIDGE_PATH ||
+    url.pathname !== expectedPath ||
     url.username ||
     url.password ||
     url.search ||
@@ -120,6 +127,7 @@ async function readBounded(response: Response) {
 export async function proxyPandoraMemoryRequest(
   request: NextRequest,
   payload: Record<string, unknown>,
+  options?: { target?: PandoraMemoryProxyTarget },
 ) {
   const token = workloadToken(request);
   if (!token) {
@@ -143,7 +151,7 @@ export async function proxyPandoraMemoryRequest(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), remainingMs);
     try {
-      const response = await fetch(bridgeUrl(), {
+      const response = await fetch(bridgeUrl(options?.target ?? "bridge"), {
         method: "POST",
         cache: "no-store",
         redirect: "error",

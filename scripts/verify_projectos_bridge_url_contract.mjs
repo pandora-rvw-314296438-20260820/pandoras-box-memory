@@ -29,4 +29,49 @@ if (/NEXT_PUBLIC_SUPABASE_URL/.test(source)) {
   throw new Error("Public Supabase configuration must not control the ProjectOS bridge.");
 }
 
-console.log("ProjectOS bridge URL and bounded read-retry contracts are verified.");
+const pandoraClient = await readFile(
+  new URL("../lib/services/pandora-memory-bridge-client.ts", import.meta.url),
+  "utf8",
+);
+const pandoraSearchRoute = await readFile(
+  new URL("../app/api/pandora/memory/search/route.ts", import.meta.url),
+  "utf8",
+);
+const pandoraHealthRoute = await readFile(
+  new URL("../app/api/pandora/health/route.ts", import.meta.url),
+  "utf8",
+);
+const pandoraEvidenceRoute = await readFile(
+  new URL("../app/api/pandora/memory/evidence-candidates/route.ts", import.meta.url),
+  "utf8",
+);
+
+const pandoraRequired = [
+  'const CANONICAL_MEMORY_PROJECT_REF = "ivmvufhcsezyhczzondn";',
+  'const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-bridge";',
+  'const CANONICAL_SEARCH_PATH = "/functions/v1/pandora-memory-search";',
+  "process.env.PANDORA_MEMORY_BRIDGE_URL",
+  "process.env.PANDORA_MEMORY_SEARCH_URL",
+  'url.hostname !== `${CANONICAL_MEMORY_PROJECT_REF}.supabase.co`',
+  'throw new Error("invalid_memory_bridge_url")',
+];
+
+for (const fragment of pandoraRequired) {
+  if (!pandoraClient.includes(fragment)) {
+    throw new Error(`Pandora bridge/search URL contract missing: ${fragment}`);
+  }
+}
+
+if (/NEXT_PUBLIC_SUPABASE_URL/.test(pandoraClient)) {
+  throw new Error("Public Supabase configuration must not control the Pandora bridge/search client.");
+}
+
+if (!pandoraSearchRoute.includes('target: "search"') || !pandoraHealthRoute.includes('target: "search"')) {
+  throw new Error("Pandora search and health routes must target pandora-memory-search.");
+}
+
+if (pandoraEvidenceRoute.includes('target: "search"')) {
+  throw new Error("Pandora evidence-candidates route must remain on pandora-memory-bridge.");
+}
+
+console.log("ProjectOS and Pandora bridge/search URL and bounded read-retry contracts are verified.");

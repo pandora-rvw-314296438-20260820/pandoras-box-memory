@@ -22,6 +22,10 @@
       "purpose": "Pandora-native Memory health, exact-project search, review-gated evidence intake and verified decision lineage under Vercel OIDC; source-only until separately deployed and provider-read back"
     },
     {
+      "slug": "pandora-memory-search",
+      "purpose": "Pandora-native search-only Memory health and exact-project search under Vercel OIDC for mcpmaster plan context; every other action fails closed with action_not_allowed; source-only until separately deployed and provider-read back"
+    },
+    {
       "slug": "pandora-projectos-bridge",
       "purpose": "ProjectOS Memory health, exact-project search and governed evidence intake under Vercel OIDC"
     },
@@ -75,6 +79,43 @@
       "edgeDeletionAuthorized": false,
       "providerReadbackRequiredBeforeActivation": true,
       "sourceEvidence": "docs/capabilities/evidence/PANDORA_NATIVE_MEMORY_BRIDGE_RETIREMENT_2026-09-26.json"
+    },
+    {
+      "observedAt": "2026-10-18T12:20:00+08:00",
+      "slug": "pandora-memory-search",
+      "disposition": "canonical_source_addition",
+      "runtimePrincipal": "pandora-mcpmaster-production",
+      "legacyPrincipal": "projectos-mcpmaster-production",
+      "legacyDisposition": "deactivate_only; never source authorization from legacy principal",
+      "productionDeploymentAuthorized": false,
+      "schemaMutationAuthorized": false,
+      "edgeDeletionAuthorized": false,
+      "providerReadbackRequiredBeforeActivation": true,
+      "sourceEvidence": "docs/capabilities/evidence/PANDORA_MEMORY_SEARCH_EDGE_AUTHORITY_2026-10-18.json",
+      "reportedThemisReview": {
+        "reviewer": "THEMIS",
+        "reportedBy": "ATHENA",
+        "reportedAt": "2026-10-18T12:17:00+08:00",
+        "verificationStatus": "reported_not_provider_verified",
+        "points": [
+          "verify_jwt=false plus service-role key accepted as designed",
+          "auth runs inside the function, fails closed, and allows a single principal",
+          "edge authority pandora-memory-search (the function) is scoped to search and health only",
+          "read RPCs plus one audit insert",
+          "Owner-approved",
+          "rollback means deleting the function and reverting the two routes"
+        ],
+        "edgeAuthority": "pandora-memory-search",
+        "authorizedCallerPrincipal": {
+          "principalKey": "pandora-mcpmaster-production",
+          "hardCoded": true,
+          "active": true,
+          "singleAuthorizedCaller": true
+        },
+        "sourceObservedAtHead": "ca7729dcb30f4c8634d0a04f71afbe138aea5e5a",
+        "rollbackAuthorizedByThisRecord": false,
+        "rollbackNote": "edgeDeletionAuthorized remains false; any rollback deletion of pandora-memory-search requires its own Owner-approved governed plan"
+      }
     }
   ]
 }

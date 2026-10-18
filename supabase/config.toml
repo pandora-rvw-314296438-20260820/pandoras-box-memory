@@ -3,3 +3,7 @@
 [functions.pandora-memory-bridge]
 verify_jwt = false
 entrypoint = "./functions/pandora-memory-bridge/operations-entrypoint.ts"
+
+[functions.pandora-memory-search]
+verify_jwt = false
+entrypoint = "./functions/pandora-memory-search/index.ts"
