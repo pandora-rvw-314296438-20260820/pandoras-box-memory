@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "jsr:@supabase/supabase-js@2.57.2";
 import { authorize } from "./workload-auth.ts";
 import {
   CANONICAL_SUPABASE_URL,
