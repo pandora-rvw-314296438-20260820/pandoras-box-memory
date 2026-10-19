@@ -245,7 +245,21 @@ export const parseGrowthLearningPayload = async (
   );
   // Phase A stores the exact bounded learning contract for review. It is not a
   // transport for raw provider/customer payloads or credential-like material.
-  if (CREDENTIAL_LIKE.test(JSON.stringify(binding))) {
+  const decodedStrings: string[] = [];
+  const collectDecodedStrings = (input: unknown): void => {
+    if (typeof input === "string") {
+      decodedStrings.push(input);
+    } else if (Array.isArray(input)) {
+      input.forEach(collectDecodedStrings);
+    } else if (input !== null && typeof input === "object") {
+      for (const [key, child] of Object.entries(input as JsonRecord)) {
+        decodedStrings.push(key);
+        collectDecodedStrings(child);
+      }
+    }
+  };
+  collectDecodedStrings(binding);
+  if (decodedStrings.some((entry) => CREDENTIAL_LIKE.test(entry))) {
     fail("growth_sensitive_material_rejected");
   }
   const sourceScope = record(binding.source_scope);
@@ -482,6 +496,40 @@ export const validateGrowthLearningReceipt = (
   value: unknown,
 ): JsonRecord => {
   const receipt = record(value);
+  if (receipt.status === "already_reviewed") {
+    exactKeys(receipt, [
+      "ok",
+      "status",
+      "source_event_id",
+      "learning_id",
+      "content_hash",
+      "candidate_id",
+      "review_item_id",
+      "review_status",
+      "deduplicated",
+    ], "growth_receipt_shape_invalid");
+    const reviewStatus = String(receipt.review_status ?? "");
+    if (
+      receipt.ok !== true ||
+      receipt.source_event_id !== parsed.payload.source_event_id ||
+      receipt.learning_id !== parsed.candidate.source_event_id ||
+      receipt.content_hash !== parsed.candidate.content_hash ||
+      !UUID.test(String(receipt.candidate_id ?? "")) ||
+      !UUID.test(String(receipt.review_item_id ?? "")) ||
+      ![
+        "needs_clarification",
+        "blocked_namespace_mismatch",
+        "blocked_sensitive",
+        "blocked_policy",
+        "approved_for_append",
+        "rejected",
+        "archived",
+      ].includes(reviewStatus) ||
+      receipt.deduplicated !== true
+    ) fail("growth_receipt_binding_invalid");
+    return receipt;
+  }
+
   exactKeys(receipt, [
     "ok",
     "status",
