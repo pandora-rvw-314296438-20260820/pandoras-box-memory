@@ -1,0 +1,379 @@
+{
+  "schemaVersion": "1.0.0",
+  "observedAt": "2026-10-10T07:30:00+08:00",
+  "statusVocabulary": [
+    "PROPOSED",
+    "TESTED",
+    "MERGED",
+    "DEPLOYED",
+    "PROD-VERIFIED",
+    "OBSERVED"
+  ],
+  "canonicalRepositories": [
+    "pandora-rvw-314296438-20260820/pandoras-box",
+    "pandora-rvw-314296438-20260820/pandoras-box-memory"
+  ],
+  "blacklistedOwners": [
+    "banataosystems",
+    "mbanatao"
+  ],
+  "baseline": {
+    "pandorasBoxMainSha": "a75a052c",
+    "pandorasBoxMainPr": 981,
+    "supabaseProdProject": "jcyqixttuebxqqfkjonq",
+    "supabaseProdLedgerVersions": 961,
+    "supabaseProdLatestVersion": "20261009070802"
+  },
+  "items": [
+    {
+      "id": "baseline-pandoras-box-main",
+      "area": "Baseline",
+      "summary": "pandoras-box main = a75a052c (PR #981)",
+      "status": "MERGED",
+      "evidence": "pandoras-box git main commit a75a052c",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "baseline-supabase-prod",
+      "area": "Baseline",
+      "summary": "Supabase prod project jcyqixttuebxqqfkjonq: 961 ledger versions, latest 20261009070802",
+      "status": "PROD-VERIFIED",
+      "evidence": "Production migration ledger readback for jcyqixttuebxqqfkjonq",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "supabase-preview-failure-observation",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "Supabase Preview failing on every main push touching supabase/ since at least 2026-10-04 (735ca390) through a75a052c: Remote migration versions not found in local migrations directory.",
+      "status": "OBSERVED",
+      "evidence": "CI logs from 735ca390 through a75a052c",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "supabase-preview-missing-versions-cause",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "25 versions applied to prod with no repo file (20261003190317 pandora_direct_tenant_owner_access_v1; 23 PayPal/PLP billing migrations 20261008093605..20261008202133; 20261009070802 plp_entitlement_v1). Repo also had 20261009090000_plp_entitlement_v1 (byte-identical to prod 20261009070802, misnumbered) and 20261009070000_plp_billing_live_paypal_closure (never applied; differs from live change_plan_v1).",
+      "status": "PROD-VERIFIED",
+      "evidence": "Ledger comparison between remote database and supabase/migrations directory",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "supabase-parity-fix-pr-1009",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "PR #1009 (branch grok/supabase-migration-parity, head 6784f4f9, was de062f23) adds exact prod bytes (md5/sha256 verified), renames, retires unapplied file, adds receipt + parity test.",
+      "status": "PROPOSED",
+      "evidence": "PR #1009 git branch grok/supabase-migration-parity head 6784f4f9",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "supabase-parity-fix-testing",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "Fix candidate testing: Local replay 961 OK, parity test 5/5; CI: all 6 required checks green",
+      "status": "TESTED",
+      "evidence": "Local replay 961 OK, parity test 5/5; CI: all 6 required checks green",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "supabase-edge-deploy-freeze-pr-1009",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "A second commit freezes integration Edge deploys: supabase/config.toml now declares the 11 previously undeclared function folders (pandora-connections-broker, pandora-coordinator-gate, pandora-facebook-signup-hook, pandora-github-uiux-convergence-20260828, pandora-google-workspace-oauth, pandora-intelligence-review-attestation, pandora-intelligence-router, pandora-meta-oauth, pandora-operations-runtime, pandora-preview-content, pandora-source-files) with enabled = false, lists them in supabase/functions/DEPLOY_FROZEN.json, and a test asserts every deployable folder is disabled. Expected effect of merging #1009: migrate step applies 0 migrations (961/961 parity); Edge deploy step deploys nothing (26 of 26 deployable folders disabled). Status: PROPOSED + TESTED (local config tests 58/58). Still NOT MERGED; owner approval required. Without that commit, merging would have deployed 11 functions from main, including 2 not in production (pandora-facebook-signup-hook, pandora-meta-oauth) while production is at the 100-function ceiling.",
+      "status": "TESTED",
+      "evidence": "PR #1009 commit 6784f4f9, local config tests 58/58",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "supabase-superseded-pr-957",
+      "area": "Supabase Preview root cause and fix",
+      "summary": "PR #957 (draft, 20261003190317 source) superseded by #1009; its file is byte-identical.",
+      "status": "PROPOSED",
+      "evidence": "PR #957 diff comparison against PR #1009",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-auth-leaked-password-protection",
+      "area": "Security/advisors",
+      "summary": "auth_leaked_password_protection: disabled -> owner approval (Auth setting).",
+      "status": "RECOMMENDATION",
+      "evidence": "Supabase Auth settings readback 2026-10-10",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "security-extension-in-public",
+      "area": "Security/advisors",
+      "summary": "extension_in_public pg_net 0.20.4 (not relocatable; move = drop/recreate) -> owner decision, recommend accept-risk/defer.",
+      "status": "RECOMMENDATION",
+      "evidence": "Supabase security advisor readback 2026-10-10",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "security-function-search-path-mutable",
+      "area": "Security/advisors",
+      "summary": "function_search_path_mutable private.pandora_plp_billing_money(bigint) -> fixed in PR #1010 (draft, DO NOT MERGE without approval).",
+      "status": "PROPOSED",
+      "evidence": "PR #1010 branch and migration commit",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "security-function-search-path-mutable-tested",
+      "area": "Security/advisors",
+      "summary": "Search path fix testing: PR #1010 local evidence: 962 migrations replayed OK, 11/11 tests pass",
+      "status": "TESTED",
+      "evidence": "PR #1010 local evidence: 962 migrations replayed OK, 11/11 tests pass",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-authenticated-definer-functions",
+      "area": "Security/advisors",
+      "summary": "authenticated_security_definer_function_executable: 98 functions, all search_path pinned, none anon-executable, all gate on auth.uid()/helper authority -> intended RPC surface, no change.",
+      "status": "PROD-VERIFIED",
+      "evidence": "Supabase security advisor readback 2026-10-10",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-rls-enabled-no-policy",
+      "area": "Security/advisors",
+      "summary": "rls_enabled_no_policy 215 (INFO): fail-closed service-role tables, intended.",
+      "status": "PROD-VERIFIED",
+      "evidence": "Supabase security advisor readback 2026-10-10",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-perf-auth-rls-initplan",
+      "area": "Security/advisors",
+      "summary": "Performance: auth_rls_initplan 21 policies -> fixed in PR #1010.",
+      "status": "PROPOSED",
+      "evidence": "PR #1010 branch and migration diff",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "security-perf-auth-rls-initplan-tested",
+      "area": "Security/advisors",
+      "summary": "auth_rls_initplan fix testing: PR #1010 local evidence: 962 migrations replayed OK, 11/11 tests pass",
+      "status": "TESTED",
+      "evidence": "PR #1010 local evidence: 962 migrations replayed OK, 11/11 tests pass",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-perf-multiple-permissive-policies",
+      "area": "Security/advisors",
+      "summary": "multiple_permissive_policies on 9 enterprise_vision_* tables -> optional follow-up.",
+      "status": "RECOMMENDATION",
+      "evidence": "Supabase performance advisor readback 2026-10-10",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-perf-index-hygiene",
+      "area": "Security/advisors",
+      "summary": "unindexed FK 440 / unused index 263 informational.",
+      "status": "PROD-VERIFIED",
+      "evidence": "Supabase performance advisor readback 2026-10-10",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "security-edge-functions-ceiling",
+      "area": "Security/advisors",
+      "summary": "Edge Functions: prod has 100 functions (provider ceiling), many one-off ops functions (e.g. *-vault-*, merge-pr*) with verify_jwt=false -> recommended cleanup review (owner approval; deletion is prod change).",
+      "status": "RECOMMENDATION",
+      "evidence": "Supabase Edge Functions inventory readback 2026-10-10",
+      "needsOwnerApproval": true
+    },
+    {
+      "id": "deploy-parity-enterprise",
+      "area": "Deployment parity",
+      "summary": "enterprise project (enterprise-omega-five.vercel.app) serves dpl_EC91eAEkyJ8kcowzfmGvp1YYkxYg built from main d21d6c55; latest production-target enterprise deploys are ERROR (e.g. at 0e10cbeb).",
+      "status": "DEPLOYED",
+      "evidence": "Vercel API readback on enterprise project",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "deploy-parity-mcpmaster",
+      "area": "Deployment parity",
+      "summary": "mcpmaster project (mcpmaster.vercel.app, pandoras-box-system.vercel.app) serves dpl_8PeA3Bee7fgjkN6denBDYiy94wHh from main 82f664c4 (old).",
+      "status": "DEPLOYED",
+      "evidence": "Vercel API readback on mcpmaster project",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "deploy-parity-main-drift",
+      "area": "Deployment parity",
+      "summary": "main a75a052c is 6 commits ahead of d21d6c55 (#1008, #999, #982, #979, #983, #981) -> DEPLOYED != MERGED. No deploys were made.",
+      "status": "PROD-VERIFIED",
+      "evidence": "Git commit graph compared to Vercel production deployment records",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "pr-disposition-billing-prs",
+      "area": "PR disposition",
+      "summary": "Billing PRs #1000-#1007, #991, #989, #985: all CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branches retained; Billing UI owned by Order 2 (grok/plp-conversion-checkout).",
+      "status": "OBSERVED",
+      "evidence": "GitHub PR status readback for #1000-#1007, #991, #989, #985",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "gov-open-pr-triage-snapshot",
+      "area": "Governance findings (blacklisted references)",
+      "summary": "pandoras-box docs/status/OPEN_PR_TRIAGE.json: repository banataosystems/Pandoras-box, snapshot 2026-08-23 (base 5a630893). Its PR numbers refer to blacklisted origin -> classify as historical snapshot; must not be cited as current triage. Consumed by src/projectos/canonical-status-provider.js and two tests (counts only).",
+      "status": "OBSERVED",
+      "evidence": "pandoras-box docs/status/OPEN_PR_TRIAGE.json contents and usage audit",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "gov-stale-repair-plan-authority",
+      "area": "Governance findings (blacklisted references)",
+      "summary": "pandoras-box docs/supabase/recovery/jcyqixttuebxqqfkjonq/MIGRATION_PARITY_REPAIR_PLAN.md names banataosystems/Pandoras-box as canonical -> stale.",
+      "status": "RECOMMENDATION",
+      "evidence": "pandoras-box docs/supabase/recovery/jcyqixttuebxqqfkjonq/MIGRATION_PARITY_REPAIR_PLAN.md contents",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "gov-vercel-team-slug",
+      "area": "Governance findings (blacklisted references)",
+      "summary": "Vercel team slug is mbanatao (hosting account) -> note only.",
+      "status": "OBSERVED",
+      "evidence": "Vercel organization readback",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "test-candidate-node-check",
+      "area": "Tests",
+      "summary": "Candidate de062f23 (#1009), Node 24.21, box TZ Asia/Manila: npm run check PASS.",
+      "status": "TESTED",
+      "evidence": "Execution of npm run check on audit box",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "test-candidate-node-test-suite",
+      "area": "Tests",
+      "summary": "npm test 4406 tests: 4402 pass, 3 fail, 1 skipped. The 3 failures are timezone-dependent (pandora-chat-request-admission current_date, pandora-core-automation-titles and pandora-m2-008-activity-history-db timestamp rendering) and pass 36/36 under TZ=UTC (CI runs UTC; CI node24 green on #1009) -> test fragility, not a regression.",
+      "status": "TESTED",
+      "evidence": "Execution of npm test on audit box with TZ=Asia/Manila and TZ=UTC comparison, CI node24 check green",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "test-candidate-flutter",
+      "area": "Tests",
+      "summary": "Flutter 3.47.0 (same as CI) on candidate de062f23, apps/pandora-mobile: flutter pub get OK; flutter analyze: 0 errors, 12 warnings, 164 infos (exit 1, pre-existing; #1009 changes no apps/ files); flutter test test/app test/features/enterprise: 304/304 pass; full flutter test: 940 pass, 23 fail = 21 golden pixel-diff failures (Linux rendering vs committed baselines) + 2 test/architecture/foundation_source_guard_test.dart failures (bootstrap file 93 lines vs limit 80; a feature widget imports supabase_flutter) — pre-existing on main, not caused by #1009.",
+      "status": "TESTED",
+      "evidence": "Flutter 3.47.0 execution in apps/pandora-mobile on candidate de062f23",
+      "needsOwnerApproval": false
+    },
+    {
+      "id": "test-candidate-device-e2e",
+      "area": "Tests",
+      "summary": "Device/E2E tests: NOT PERFORMED (no device available).",
+      "status": "NOT PERFORMED",
+      "evidence": "Audit box environment inspection",
+      "needsOwnerApproval": false
+    }
+  ],
+  "prDisposition": [
+    {
+      "number": 1009,
+      "recommendation": "MERGE",
+      "reason": "Parity candidate: merge after owner approval of the pipeline unblock."
+    },
+    {
+      "number": 1010,
+      "recommendation": "MERGE",
+      "reason": "Advisor hardening: merge after #1009 + owner approval (applies DDL to prod)."
+    },
+    {
+      "number": 957,
+      "recommendation": "CLOSE",
+      "reason": "Close as superseded by #1009 after #1009 merges."
+    },
+    {
+      "number": 950,
+      "recommendation": "REBASE_OR_CLOSE",
+      "reason": "46 files, UX responsive check failing: rebase + fix failing check, or close."
+    },
+    {
+      "number": 867,
+      "recommendation": "RENUMBER_OR_CLOSE",
+      "reason": "Migration 20261001093000 is older than prod head (out-of-order) and node24 + PLP Android failing -> renumber/rebase or close."
+    },
+    {
+      "number": 840,
+      "recommendation": "RENUMBER_OR_CLOSE",
+      "reason": "Migration 20260930101500 collides with an existing version (pandora_universal_core_registry_rls_v1) -> must renumber or close."
+    },
+    {
+      "number": 793,
+      "recommendation": "CLOSE_OR_HANDOFF",
+      "reason": "Conflicting, migration 20260921110000 out-of-order, touches apps/pandora-mobile (Order 2 territory) -> close or hand to billing worker."
+    },
+    {
+      "number": 985,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 989,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 991,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1000,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1001,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1002,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1003,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1004,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1005,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1006,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    },
+    {
+      "number": 1007,
+      "recommendation": "RETAIN_CLOSED",
+      "reason": "CLOSED 2026-10-09 (~03:17-03:18 Asia/Manila 10-10), head branch retained. Billing UI owned by Order 2 (grok/plp-conversion-checkout)."
+    }
+  ],
+  "blockers": [
+    "Owner approval required before merging PR #1009 to re-enable the Supabase deploy-to-production pipeline (migrate -> edge functions), blocked since 2026-10-04.",
+    "Owner approval required before applying production DDL via PR #1010 (private.pandora_plp_billing_money search_path mutable and 21 auth_rls_initplan performance policies).",
+    "Owner approval required to enable auth_leaked_password_protection in Supabase Auth settings.",
+    "Owner decision required on non-relocatable pg_net 0.20.4 extension in public schema (recommend accept-risk/defer).",
+    "Owner approval required for Edge Functions cleanup review before deleting any of the 100 production functions (provider ceiling).",
+    "Vercel enterprise project deployment is failing with ERROR at 0e10cbeb; main a75a052c is 6 commits ahead of deployed d21d6c55."
+  ],
+  "nextActions": [
+    "Obtain owner approval for Supabase pipeline unblock and merge PR #1009",
+    "Monitor post-merge Supabase production deployment (migrate -> edge functions) for PR #1009",
+    "Obtain owner approval for PR #1010 and merge after #1009 merges (applies DDL to prod)",
+    "Close superseded PR #957 after PR #1009 merges",
+    "Resolve open stale/failing PRs per PR disposition: rebase + fix failing check or close #950, renumber/rebase or close #867 and #840, close or hand #793 to billing worker",
+    "Conduct owner review of Auth leaked password protection and 100 Edge Functions (unverified JWT ops functions)",
+    "Investigate and resolve Vercel enterprise build errors at 0e10cbeb to restore deployment parity with main a75a052c",
+    "Fix the 2 source-guard violations and decide golden baseline platform"
+  ]
+}

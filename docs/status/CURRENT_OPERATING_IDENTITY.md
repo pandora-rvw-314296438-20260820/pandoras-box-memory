@@ -15,6 +15,8 @@ Classification: **current operational identity**
 
 `banataosystems/pandoras-box-memory`, `banataosystems/Pandoras-box`, and every `mbanatao/*` repository are historical/recovery evidence only. They must not determine current source authority or receive normal new work.
 
+- Master audit status is recorded in [`docs/status/MASTER_AUDIT_STATUS_2026-10-10.md`](./MASTER_AUDIT_STATUS_2026-10-10.md); pandoras-box `docs/status/OPEN_PR_TRIAGE.json` is a 2026-08-23 snapshot of the blacklisted `banataosystems/Pandoras-box` origin and must not be cited as current PR triage.
+
 ## Recorded runtime identity
 
 | Field | Value |
