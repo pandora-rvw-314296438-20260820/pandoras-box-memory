@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "lesson_candidate",
+  "evidence_id": "pandora-core-mobile-shell-6548-audit-2026-10-03",
+  "recorded_at": "2026-10-03T13:48:28Z",
+  "review_state": "pending_review",
+  "approved_canonical": false,
+  "training_eligibility": "NOT_EVALUATED_NOT_ADMITTED",
+  "scope": {
+    "project": "Pandora Core mobile chat shell",
+    "project_id": "7c686cbd-d968-49d5-86cc-918f5e777bd2",
+    "namespace": "real_life",
+    "sensitivity": "Sanitized engineering audit; no credentials, private conversation bodies, or customer tenant data."
+  },
+  "owner_decision": {
+    "authority": "Current owner instruction, 2026-10-03",
+    "directive": "Inspect canonical GitHub, Supabase, Vercel and Pandora Memory and produce an exact implementation/deployment plan for all production-remediation requirements of core mobile chat shown in 6548.mp4. Preserve Lane E app-level contextual conversation. This is generic Pandora Core, not PLP. Require deterministic state ownership and continuous exact-source Android journey evidence; do not equate build success with production readiness.",
+    "standing_capture_authority": "Save significant verified findings and reusable lessons, keeping raw events out of canonical Memory."
+  },
+  "source_evidence": {
+    "canonical_repo": "pandora-rvw-314296438-20260820/pandoras-box",
+    "source_sha": "593d8f5db34da6fc727c0449e807174cd3d9835a",
+    "source_tree": "18a8a4c8a2d57d13450df903eee43f044cb1db08",
+    "memory_repo": "pandora-rvw-314296438-20260820/pandoras-box-memory",
+    "memory_source_sha": "aeef12b3fa20e18cee7e2d735055c7caba3464c4",
+    "video": {
+      "filename": "6548.mp4",
+      "sha256": "ee7d57334d83be9c8600c5342354b2ad703a5c83565798fc4334c75e09282671",
+      "bytes": 26825085,
+      "duration_seconds": 75.464808,
+      "source_apk_sha": "NOT_ESTABLISHED"
+    },
+    "android": {
+      "run_id": 37114859056,
+      "artifact_id": 11270583894,
+      "apk_sha256": "bebe63a461048e30a4f6057c2899d7941338d32985735bb35d9dd0445f60e9f5",
+      "package": "com.banataosystems.pandora_mobile",
+      "version": "0.4.0-rc.14+21",
+      "kind": "debug-signed Owner Test; build evidence only",
+      "install_or_continuous_runtime_proven": false
+    },
+    "supabase": {
+      "project_ref": "jcyqixttuebxqqfkjonq",
+      "chat_edge_version": 84,
+      "deployed_index_matches_source_sha": true,
+      "memory_project_ref": "ivmvufhcsezyhczzondn"
+    },
+    "vercel": {
+      "project": "mcpmaster",
+      "deployment_id": "dpl_9CTGq1Qn8YWzppZ5DcR3UAkWE9oT",
+      "source_sha": "593d8f5db34da6fc727c0449e807174cd3d9835a",
+      "state": "READY",
+      "memory_production_source_sha": "7942a5b5bd72a809360db0f06b68749040cf4357"
+    }
+  },
+  "verified_findings": [
+    {
+      "class": "source_observation",
+      "finding": "Recent-conversation cache mirrors text into local-chat without canonical thread ID; restoration renders text while _threadId remains null. New Chat does not clear the active cache pointer.",
+      "paths": [
+        "apps/pandora-mobile/lib/core/local/pandora_local_state_cache.dart",
+        "apps/pandora-mobile/lib/features/simple/ask_pandora_screen.dart"
+      ]
+    },
+    {
+      "class": "source_observation",
+      "finding": "_ChatMessage lacks stable message/turn/attempt/generation IDs. Failure rows are appended; retry removes positional/equal-text rows and submits with a new key. Cloud, thread-load, dictation and picker completions lack shared identity fencing.",
+      "paths": [
+        "apps/pandora-mobile/lib/features/simple/ask_pandora_screen.dart"
+      ]
+    },
+    {
+      "class": "source_observation",
+      "finding": "Current picker is a transparent Material and uncontained fixed-position column. Header top inset ownership and viewport anchoring are fragmented; count-only/mutable-list change detection cannot represent streamed content revisions.",
+      "paths": [
+        "apps/pandora-mobile/lib/features/simple/pandora_model_picker.dart",
+        "apps/pandora-mobile/lib/features/simple/ask_pandora_screen.dart",
+        "apps/pandora-mobile/lib/app/pandora_chat_shell.dart"
+      ]
+    },
+    {
+      "class": "source_and_provider_observation",
+      "finding": "Cloud chat is buffered, separate from Activity progress streaming. Deployed native capability dispatcher emits the registry/runtime-evidence/model-assumption prose directly. Prompt-only remediation cannot fix the SQL-generated answer.",
+      "paths": [
+        "apps/pandora-mobile/lib/core/data/pandora_intelligence_api.dart",
+        "supabase/functions/pandora-intelligence-chat/index.ts",
+        "supabase/migrations/20260925063000_pandora_meta_native_capability_v1.sql"
+      ]
+    },
+    {
+      "class": "source_observation",
+      "finding": "Bedrock receives prior roles flattened into text inside one user Converse message. Preserve role-aware history across every adapter and test parity; this alone does not prove the cause of recorded greetings.",
+      "paths": [
+        "supabase/functions/pandora-intelligence-chat/bedrock.ts",
+        "src/providers/aws-bedrock-runtime.js"
+      ]
+    },
+    {
+      "class": "provider_observation",
+      "finding": "Canonical Memory retrieval is now wired into deployed chat, superseding the older source-absence finding. In the scoped 72h assistant sample, 6 results recorded degraded canonical Memory and none recorded available. Existing M5 retrieval logs in scoped last7d:115; zero used_for_decision, used_for_routing or outcome linkage. The current healthy M5 task-context RPC returned two older lessons and no specific mobile-shell lesson."
+    },
+    {
+      "class": "provider_observation",
+      "finding": "The live chat sample has 13 model runs over 72h (6 success,7 fail),40 attempt rows. Run-level provider latency/TTFT/end-to-end fields and provider request IDs/status are unpopulated. This is a small operational sample, not a controlled benchmark or proof of duplicate user requests."
+    },
+    {
+      "class": "release_observation",
+      "finding": "Current Android workflow builds/tests but has no APK install/emulator journey. No tracked integration_test harness exists. PR Android build SHA and UX test SHA can differ. ARM64-only debug artifact and signer/installed-APK identity require explicit verification."
+    }
+  ],
+  "durable_lessons": [
+    "Persist canonical conversation and logical turn identity with cached text; never display unidentified cached text as if it belongs to a new server thread.",
+    "A stable logical turn survives retry; attempts and diagnostic events are separate. Unrelated later success must not falsely mark an earlier failed action recovered.",
+    "Fence all asynchronous UI and transport work by scope, conversation, turn, attempt/generation and draft revision; reuse existing Activity fencing instead of assuming it covers chat.",
+    "Separate routing preference, response-depth preference and execution receipt. Freeze dispatched settings; apply later preference changes to subsequent turns.",
+    "Activity status streaming is not assistant-token streaming. Trace the complete provider-to-transport-to-Dart-render path before claiming streaming.",
+    "Correct natural customer wording at its actual source, including deterministic database functions, while retaining internal factual verification.",
+    "Use actual layout constraints and keyed content-revision anchors. Do not diagnose double IME padding from nested widgets without checking Flutter inset consumption.",
+    "Compile/tests/Vercel READY do not prove mobile quality. Bind the full no-reset journey to the exact installed/distributed APK hash and source."
+  ],
+  "proposed_implementation": {
+    "status": "PLAN_ONLY_NOT_IMPLEMENTED",
+    "approach": "Preserve the retained app-level shell; introduce one typed session/turn controller, identity-preserving local/remote store, versioned attempt/stream contracts, viewport/presentation coordinator and stable composer/picker. Add actual Android runtime tests and measured latency spans; ship compatible backend first, then exact-source signed candidate, then staged runtime acceptance."
+  },
+  "limitations": [
+    "No application code, schema, production configuration or deployment was changed during this inspection.",
+    "The recording's APK/source SHA is not established; current-main code findings and recorded symptoms are separate evidence sets.",
+    "Transient Back chip was observed in the original recording, but is absent from inspected current source; cause is not established.",
+    "No runtime journey, cancellation/retry exercise, provider probe, frame/CPU/memory profiling or production acceptance was performed by this audit.",
+    "Memory production behind main by a documentation candidate commit is not evidence that deployment lag caused current Memory HTTP503.",
+    "This document is a pending review candidate, not an approved M5 item or proof of future runtime retrieval."
+  ],
+  "review_requirements": [
+    "Review exact source/provider links and source scope.",
+    "Keep proposed implementation distinct from owner requirement and verified audit facts.",
+    "Promote only through normal Memory review, without inventing authorization or execution receipts.",
+    "Revalidate mutable provider state before implementation or release."
+  ]
+}
