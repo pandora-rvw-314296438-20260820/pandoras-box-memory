@@ -20,7 +20,7 @@ Because there is no global row, every postgres-created function also gets the bu
 Schema-specific rows are additive and cannot remove the built-in/global grant.
 
 ## 2. Effective grants / callers
-21 non-extension public functions are client-executable; 0 are SECURITY DEFINER (10 trigger functions, 4 INVOKER RPCs with PUBLIC/anon, 7 INVOKER RPCs authenticated-only). This change does not modify them.
+21 non-extension public functions are client-executable; 0 are SECURITY DEFINER (9 trigger functions, 4 INVOKER RPCs with PUBLIC/anon, 8 INVOKER RPCs authenticated-only). This change does not modify them.
 Repo references are contract/verify scripts only; no deployed edge function calls them. Edge functions use service-role clients.
 
 ## 3. Change
