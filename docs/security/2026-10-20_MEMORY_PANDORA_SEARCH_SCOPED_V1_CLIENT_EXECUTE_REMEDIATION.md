@@ -1,7 +1,7 @@
 # Security remediation: client EXECUTE on `public.memory_pandora_search_scoped_v1` (2026-10-20 PHT)
 
 Owner authorization: Mark Johnson (narrowly scoped production fix). Project: pandoras-box-memory `ivmvufhcsezyhczzondn`.
-Migration: `supabase/migrations/20261019235854_revoke_client_execute_memory_pandora_search_scoped_v1.sql`. No secrets, keys, or memory row contents are recorded here.
+Migration: `supabase/migrations/20261019235951_revoke_client_execute_memory_pandora_search_scoped_v1.sql`. No secrets, keys, or memory row contents are recorded here.
 
 ## Finding
 - `public.memory_pandora_search_scoped_v1(uuid, text, uuid, text, text, text[], text[], integer)` is SECURITY DEFINER, owned by `postgres` (BYPASSRLS), `search_path=pg_catalog, public`.
@@ -27,3 +27,11 @@ Revoke EXECUTE from anon and authenticated; re-assert EXECUTE for service_role. 
 
 ## Residual risk
 DROP + CREATE of this function would re-grant anon/authenticated via the default ACL; CREATE OR REPLACE keeps the revoked ACL. A separate default-privilege hardening change is drafted, not applied.
+
+## Provider readback (applied 2026-10-20 ~08:00 PHT via Supabase MCP apply_migration, once)
+- Provider migration version: `20261019235951` (`revoke_client_execute_memory_pandora_search_scoped_v1`); this file was renamed to match provider history. Migration count 142 -> 143.
+- ACL after: `{postgres=X/postgres,service_role=X/postgres}`; has_function_privilege anon=false, authenticated=false, service_role=true; PUBLIC entry absent.
+- pg_get_functiondef md5 unchanged: `7576577e6d5b3ccfd200cf8752a01759`.
+- All 172 other public-schema function ACLs identical to the before snapshot (173 functions; only the target differs).
+- Security advisors: `anon_security_definer_function_executable` and `authenticated_security_definer_function_executable` (this function) are gone; the remaining lints are unchanged.
+- Synthetic test, rolled back: as service_role the call reached the body and raised `project_not_allowed` as designed for a nonexistent tuple. As anon: `permission denied for function`.
