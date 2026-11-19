@@ -688,3 +688,68 @@ Deno.test("authenticated handler keeps growth markers out of generic intake", as
     delete globals[slot];
   }
 });
+
+Deno.test("rejects credential-like decoded string values and object keys", async () => {
+  const sensitive = String.fromCharCode(
+    65,
+    117,
+    116,
+    104,
+    111,
+    114,
+    105,
+    122,
+    97,
+    116,
+    105,
+    111,
+    110,
+    58,
+    9,
+    66,
+    101,
+    97,
+    114,
+    101,
+    114,
+    32,
+    115,
+    121,
+    110,
+    116,
+    104,
+    101,
+    116,
+    105,
+    99,
+  );
+
+  const valuePayload = await fixture();
+  valuePayload.growth_learning.candidate.claim = sensitive;
+  await expectReject(valuePayload, "growth_sensitive_material_rejected");
+
+  const keyPayload = await fixture();
+  (keyPayload.growth_learning.candidate as Record<string, unknown>)[sensitive] =
+    "x";
+  await expectReject(keyPayload, "growth_sensitive_material_rejected");
+});
+
+Deno.test("accepts an exact terminal receipt for an already-reviewed replay", async () => {
+  const payload = await fixture();
+  const parsed = await parseGrowthLearningPayload(payload);
+  const terminal = validateGrowthLearningReceipt(parsed, {
+    ok: true,
+    status: "already_reviewed",
+    source_event_id: parsed.payload.source_event_id,
+    learning_id: parsed.candidate.source_event_id,
+    content_hash: parsed.candidate.content_hash,
+    candidate_id: "11111111-1111-4111-8111-111111111111",
+    review_item_id: "22222222-2222-4222-8222-222222222222",
+    review_status: "approved_for_append",
+    deduplicated: true,
+  });
+  assert(
+    terminal.status === "already_reviewed",
+    "terminal replay receipt lost",
+  );
+});

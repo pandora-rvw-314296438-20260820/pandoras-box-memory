@@ -10,6 +10,7 @@ on:
       - 'supabase/migrations/20260929030000_growth_learning_intake_v1.sql'
       - 'tests/sql/growth_learning_intake_baseline.sql'
       - 'tests/sql/growth_learning_intake_behavior.sql'
+      - 'tests/sql/growth_learning_intake_security_regression.sql'
       - '.github/workflows/growth-learning-intake.yml'
   push:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'supabase/migrations/20260929030000_growth_learning_intake_v1.sql'
       - 'tests/sql/growth_learning_intake_baseline.sql'
       - 'tests/sql/growth_learning_intake_behavior.sql'
+      - 'tests/sql/growth_learning_intake_security_regression.sql'
       - '.github/workflows/growth-learning-intake.yml'
 
 permissions:
@@ -83,6 +85,8 @@ jobs:
         run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < supabase/migrations/20260929030000_growth_learning_intake_v1.sql
       - name: Exercise atomic intake, replay, conflict, ACL, and no-canon behavior
         run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/growth_learning_intake_behavior.sql
+      - name: Exercise decoded-string and reviewed-replay regressions
+        run: docker exec -i growth-learning-postgres psql -U postgres -v ON_ERROR_STOP=1 < tests/sql/growth_learning_intake_security_regression.sql
       - name: Stop disposable database
         if: always()
         run: docker rm -f growth-learning-postgres >/dev/null 2>&1 || true
