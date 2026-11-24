@@ -166,4 +166,3 @@ export const authorize = async (
   }
   return { ok: true, principal };
 };
-

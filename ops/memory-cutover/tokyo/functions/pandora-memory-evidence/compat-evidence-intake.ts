@@ -761,4 +761,3 @@ export const submitEvidenceCandidate = async (
     privacy_policy: "metadata_only_v1",
   }, candidateCreated || reviewCreated ? 202 : 200);
 };
-
