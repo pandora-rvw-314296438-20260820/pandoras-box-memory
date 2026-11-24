@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { proxyProjectOSMemoryRequest } from "@/lib/services/projectos-memory-bridge-client";
+import { proxyPandoraMemoryRequest } from "@/lib/services/pandora-memory-bridge-client";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "unexpected_field" }, { status: 400 });
   }
 
-  return proxyProjectOSMemoryRequest(request, {
+  return proxyPandoraMemoryRequest(request, {
     action: "submit_evidence_candidate",
     ...Object.fromEntries(entries),
   });
