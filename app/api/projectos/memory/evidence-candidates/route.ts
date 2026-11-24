@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   }
 
   return proxyPandoraMemoryRequest(request, {
-    action: "submit_evidence_candidate",
+    action: "submit_legacy_evidence_candidate",
     ...Object.fromEntries(entries),
   });
 }
