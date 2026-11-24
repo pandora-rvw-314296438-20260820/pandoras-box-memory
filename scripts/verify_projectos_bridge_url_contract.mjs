@@ -47,10 +47,10 @@ const pandoraEvidenceRoute = await readFile(
 );
 
 const pandoraRequired = [
-  'const CANONICAL_MEMORY_PROJECT_REF = "ivmvufhcsezyhczzondn";',
-  'const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-bridge";',
+  'const CANONICAL_MEMORY_PROJECT_REF = "xyefkykwuppbweabvvmk";',
+  'const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-evidence";',
   'const CANONICAL_SEARCH_PATH = "/functions/v1/pandora-memory-search";',
-  "process.env.PANDORA_MEMORY_BRIDGE_URL",
+  "process.env.PANDORA_MEMORY_EVIDENCE_URL",
   "process.env.PANDORA_MEMORY_SEARCH_URL",
   'url.hostname !== `${CANONICAL_MEMORY_PROJECT_REF}.supabase.co`',
   'throw new Error("invalid_memory_bridge_url")',

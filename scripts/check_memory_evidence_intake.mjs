@@ -26,8 +26,8 @@ for (const marker of [
   "MAX_BODY_BYTES = 16 * 1024",
   '"idempotency_key"',
   'error: "unexpected_field"',
-  'action: "submit_evidence_candidate"',
-  "proxyProjectOSMemoryRequest",
+  'action: "submit_legacy_evidence_candidate"',
+  "proxyPandoraMemoryRequest",
 ]) {
   assert.ok(route.includes(marker), `route marker missing: ${marker}`);
 }
@@ -114,3 +114,12 @@ assert.ok(
 );
 
 console.log("Governed Memory evidence intake source contract: PASS");
+
+// Validate the new fixed compatibility route and both provider-readback handlers.
+const endpoint = fs.readFileSync("ops/memory-cutover/tokyo/functions/pandora-memory-evidence/index.ts","utf8");
+for (const marker of ["submit_legacy_evidence_candidate","submitCompatibilityCandidate","for share","scopedClient","on conflict do nothing","authorize(req,client)"]) assert.ok(endpoint.includes(marker), "Tokyo evidence boundary missing: "+marker);
+for (const file of ["evidence-intake.ts","compat-evidence-intake.ts"]) {
+ const source=fs.readFileSync("ops/memory-cutover/tokyo/functions/pandora-memory-evidence/"+file,"utf8");
+ for (const marker of ["evidenceSensitiveReason","ensureEvidenceReviewItem","storedEvidenceSnapshot","idempotency_conflict","canonical_memory_written: false","requires_review: true","privacy_scan_version: EVIDENCE_PRIVACY_SCAN_VERSION"]) assert.ok(source.includes(marker), file+" missing: "+marker);
+ assert.ok(!source.includes('.from("memory_items")'),file+" must not mutate canonical memory");
+}

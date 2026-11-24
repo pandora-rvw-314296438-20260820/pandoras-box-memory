@@ -2,18 +2,22 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+const mode=process.env.PANDORA_TOKYO_EVIDENCE_TEST;
+const principalKey=mode?"pandora-mcpmaster-production":"projectos-mcpmaster-production";
 
 const bridge = fs.readFileSync(
-  "supabase/functions/pandora-projectos-bridge/index.ts",
+  mode?`ops/memory-cutover/tokyo/functions/pandora-memory-evidence/${mode==="compat"?"compat-evidence-intake.ts":"evidence-intake.ts"}`:"supabase/functions/pandora-projectos-bridge/index.ts",
   "utf8",
 );
 const helperStart = bridge.indexOf("const EVIDENCE_PROOF_STAGES");
-const helperEnd = bridge.indexOf("\nDeno.serve(", helperStart);
+const helperEnd = mode?bridge.length:bridge.indexOf("\nDeno.serve(", helperStart);
 assert.ok(helperStart >= 0 && helperEnd > helperStart, "evidence helper not found");
 
-const helper = bridge.slice(helperStart, helperEnd);
+const helper = bridge.slice(helperStart, helperEnd).replace("export const submitEvidenceCandidate", "const submitEvidenceCandidate");
 const harness = `
-const PRINCIPAL_KEY = "projectos-mcpmaster-production";
+const PRINCIPAL_KEY = "${principalKey}";
 type JsonRecord = Record<string, unknown>;
 type AdminClient = any;
 type Principal = {
@@ -155,7 +159,7 @@ class FakeAdmin {
       pandora_projects: projectRows(),
       pandora_project_grants: grants
         ? projectRows().map((project) => ({
-            principal_key: "projectos-mcpmaster-production",
+            principal_key: principalKey,
             project_id: project.id,
             environment: "production",
             is_active: true,
@@ -408,3 +412,5 @@ async function json(response) {
 }
 
 console.log("Governed Memory evidence intake behavioral tests: PASS");
+
+if (!mode) for (const variant of ["native","compat"]) execFileSync(process.execPath,[fileURLToPath(import.meta.url)],{env:{...process.env,PANDORA_TOKYO_EVIDENCE_TEST:variant},stdio:"inherit"});

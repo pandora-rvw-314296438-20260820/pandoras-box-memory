@@ -9,8 +9,8 @@ const MAX_RETRY_AFTER_MS = 2_000;
 // Security boundary: configuration may change the deployment URL only within
 // the canonical Memory Supabase project. A stale/foreign public Supabase URL
 // can never redirect Pandora service-principal authentication.
-const CANONICAL_MEMORY_PROJECT_REF = "ivmvufhcsezyhczzondn";
-const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-bridge";
+const CANONICAL_MEMORY_PROJECT_REF = "xyefkykwuppbweabvvmk";
+const CANONICAL_BRIDGE_PATH = "/functions/v1/pandora-memory-evidence";
 const CANONICAL_SEARCH_PATH = "/functions/v1/pandora-memory-search";
 const DEFAULT_BRIDGE_URL =
   `https://${CANONICAL_MEMORY_PROJECT_REF}.supabase.co${CANONICAL_BRIDGE_PATH}`;
@@ -23,7 +23,7 @@ function bridgeUrl(target: PandoraMemoryProxyTarget = "bridge") {
   const isSearch = target === "search";
   const configured = isSearch
     ? process.env.PANDORA_MEMORY_SEARCH_URL?.trim() || DEFAULT_SEARCH_URL
-    : process.env.PANDORA_MEMORY_BRIDGE_URL?.trim() || DEFAULT_BRIDGE_URL;
+    : process.env.PANDORA_MEMORY_EVIDENCE_URL?.trim() || DEFAULT_BRIDGE_URL;
   const expectedPath = isSearch ? CANONICAL_SEARCH_PATH : CANONICAL_BRIDGE_PATH;
   const url = new URL(configured);
   if (
