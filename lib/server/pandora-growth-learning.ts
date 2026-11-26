@@ -1,7 +1,7 @@
 import type { Principal } from "./pandora-memory-workload-auth";
 
 type JsonRecord = Record<string, unknown>;
-type AdminClient = { rpc: (name: string, args: Record<string, unknown>) => Promise<{data: unknown; error: any}> };
+type AdminClient = { rpc: (name: string, args: Record<string, unknown>) => PromiseLike<{data: unknown; error: any}> };
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const respond = (body: unknown, status = 200) =>

@@ -8,7 +8,7 @@ const GLOBAL_JWKS = createRemoteJWKSet(
 );
 const issuerJwks = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
-type Principal = {
+export type Principal = {
   principal_key: string;
   issuer: string;
   audience: string;

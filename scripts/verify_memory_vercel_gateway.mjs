@@ -31,7 +31,7 @@ for (const [name, source, markers] of [
 for (const source of [health, search, evidence, operationsRoute, growthRoute, projectosEvidence]) {
   assert.ok(!source.includes("proxyPandoraMemoryRequest") && !source.includes("xyefkykwuppbweabvvmk"));
 }
-assert.ok(stagingReadme.includes("NOT CANONICAL") && stagingReadme.includes("exists only as live objects"));
+assert.ok(stagingReadme.includes("NOT CANONICAL") && stagingReadme.includes("exist only as live objects"));
 const migrationFiles = (await readdir(new URL("../supabase/migrations/", import.meta.url))).filter((f) => f.endsWith(".sql"));
 const migrationText = (await Promise.all(migrationFiles.map((f) => read("supabase/migrations/" + f)))).join("\n");
 for (const marker of ["pandora_memory_native", "pandora_memory_migration", "pandora_memory_runtime"]) assert.ok(!migrationText.includes(marker));
