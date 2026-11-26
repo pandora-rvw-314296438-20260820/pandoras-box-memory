@@ -1,5 +1,4 @@
 export const CANONICAL_SUPABASE_URL = "https://ivmvufhcsezyhczzondn.supabase.co";
-const PRINCIPAL_KEY = "pandora-mcpmaster-production";
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_QUERY_LENGTH = 4_000;
 const MAX_ITEMS = 50;
@@ -74,6 +73,7 @@ export type AdminClient = {
   rpc?: (fn: string, args?: Record<string, unknown>) => any;
 };
 export type Principal = {
+  principal_key: string;
   issuer: string;
   audience: string;
   subject: string;
@@ -365,7 +365,7 @@ export const searchMemory = async (
   const { data: projectGrant, error: projectGrantError } = await supabase
     .from("pandora_project_grants")
     .select("project_id,allowed_record_types")
-    .eq("principal_key", PRINCIPAL_KEY)
+    .eq("principal_key", principal.principal_key)
     .eq("project_id", canonicalProjectId)
     .eq("environment", principal.environment)
     .eq("is_active", true)
@@ -384,7 +384,7 @@ export const searchMemory = async (
     (typeof projectGrant.environment === "string" &&
       projectGrant.environment !== principal.environment) ||
     (typeof projectGrant.principal_key === "string" &&
-      projectGrant.principal_key !== PRINCIPAL_KEY)
+      projectGrant.principal_key !== principal.principal_key)
   ) {
     return respond({ ok: false, error: "project_not_allowed" }, 403);
   }
@@ -409,7 +409,7 @@ export const searchMemory = async (
       "memory_context_pack_v2",
       {
         p_project_id: canonicalProjectId,
-        p_principal_key: PRINCIPAL_KEY,
+        p_principal_key: principal.principal_key,
         p_namespace: namespace,
         p_as_of: new Date().toISOString(),
         p_max_bytes: 12 * 1024,
@@ -432,7 +432,7 @@ export const searchMemory = async (
         rawContextPack.namespace === namespace &&
         packProject?.id === canonicalProjectId &&
         packProject?.projectKey === canonicalProjectKey &&
-        packAuthorization?.principalKey === PRINCIPAL_KEY &&
+        packAuthorization?.principalKey === principal.principal_key &&
         packAuthorization?.environment === principal.environment &&
         packAuthorization?.canRead === true &&
         packDegradation?.legacyUnscopedPackUsed === false &&
@@ -469,7 +469,7 @@ export const searchMemory = async (
           p_user_id: principal.memory_user_id,
           p_namespace: namespace,
           p_project_id: canonicalProjectId,
-          p_principal_key: PRINCIPAL_KEY,
+          p_principal_key: principal.principal_key,
           p_environment: principal.environment,
           p_intent: intent,
           p_action_mode: actionMode,
@@ -513,7 +513,7 @@ export const searchMemory = async (
           typedProject?.projectKey === canonicalProjectKey &&
           typedTask?.intent === intent &&
           typedTask?.actionMode === actionMode &&
-          typedAuthorization?.principalKey === PRINCIPAL_KEY &&
+          typedAuthorization?.principalKey === principal.principal_key &&
           typedAuthorization?.environment === principal.environment &&
           typedAuthorization?.canRead === true &&
           typedAuthorization?.retrievalDoesNotGrantExecutionAuthority === true &&
@@ -549,7 +549,7 @@ export const searchMemory = async (
           p_user_id: principal.memory_user_id,
           p_namespace: namespace,
           p_project_id: canonicalProjectId,
-          p_principal_key: PRINCIPAL_KEY,
+          p_principal_key: principal.principal_key,
           p_environment: principal.environment,
           p_terms: terms,
           p_canon_statuses: canonStatuses,
@@ -622,7 +622,7 @@ export const searchMemory = async (
           project_id: canonicalProjectId,
           memory_item_ids: approvedMemoryItemIds,
           metadata: {
-            principal: PRINCIPAL_KEY,
+            principal: principal.principal_key,
             source: "pandora",
             project_id: canonicalProjectId,
             project_key: canonicalProjectKey,
