@@ -12,14 +12,16 @@
     "typecheck": "tsc --noEmit",
     "verify:bridge-url": "node scripts/verify_projectos_bridge_url_contract.mjs",
     "verify:migration-authority": "node scripts/verify_migration_authority.mjs",
-    "verify:growth-memory-context": "node scripts/verify_growth_memory_context_contract.mjs"
+    "verify:growth-memory-context": "node scripts/verify_growth_memory_context_contract.mjs",
+    "verify:vercel-memory-gateway": "node scripts/verify_memory_vercel_gateway.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.9",
     "next": "16.4.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "jose": "5.10.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
