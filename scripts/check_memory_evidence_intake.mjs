@@ -26,8 +26,11 @@ for (const marker of [
   "MAX_BODY_BYTES = 16 * 1024",
   '"idempotency_key"',
   'error: "unexpected_field"',
-  'action: "submit_legacy_evidence_candidate"',
-  "proxyPandoraMemoryRequest",
+  'action: "submit_evidence_candidate"',
+  "submitProjectOsEvidenceCandidate",
+  "authorizeMemoryWorkload",
+  "getMemoryAdminClient",
+  "readBoundedJson",
 ]) {
   assert.ok(route.includes(marker), `route marker missing: ${marker}`);
 }

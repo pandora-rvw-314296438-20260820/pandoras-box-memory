@@ -2,7 +2,6 @@
 // Invoked only AFTER the native bridge verifies the actual Vercel workload JWT.
 // This module never accepts caller-supplied principal/user/environment credentials.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const PRINCIPAL = 'pandora-mcpmaster-production';
 const ORIGIN = 'https://ivmvufhcsezyhczzondn.supabase.co';
 const encode = new TextEncoder();
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -58,7 +57,7 @@ export async function handleOperationsMemory(body, principal, client, options = 
       && ['context','performance','propose_outcome','readback'].includes(body.operation), 'OPS_MEMORY_REQUEST_INVALID');
     requireThat(encode.encode(JSON.stringify(body)).byteLength <= 40000, 'OPS_MEMORY_PAYLOAD_LIMIT');
     requireThat(principal?.is_active === true && principal.project_name === 'mcpmaster'
-      && principal.environment === 'production' && UUID.test(principal.memory_user_id)
+      && ['production','preview'].includes(principal.environment) && principal.principal_key === `pandora-mcpmaster-${principal.environment}` && UUID.test(principal.memory_user_id)
       && Array.isArray(principal.allowed_namespaces) && principal.allowed_namespaces.includes('real_life')
       && Array.isArray(principal.scopes)
       && principal.scopes.includes(['context','performance'].includes(body.operation) ? 'memory:read' : 'memory:write'), 'OPS_MEMORY_PRINCIPAL_DENIED');
@@ -67,7 +66,7 @@ export async function handleOperationsMemory(body, principal, client, options = 
     requireThat(Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= 12000, 'OPS_MEMORY_RUNTIME_DENIED');
     if (signal?.aborted) return deny('OPS_MEMORY_CANCELLED', 409);
     const args = {p_memory_user_id:principal.memory_user_id,p_namespace:'real_life',
-      p_project_id:body.projectId,p_principal_key:PRINCIPAL,p_environment:principal.environment};
+      p_project_id:body.projectId,p_principal_key:principal.principal_key,p_environment:principal.environment};
     const name = body.operation === 'performance' ? 'memory_operations_performance_v1' : 'memory_operations_bridge_v1';
     if (body.operation === 'performance') args.p_request = body.payload;
     else { args.p_operation = body.operation; args.p_payload = body.payload; }

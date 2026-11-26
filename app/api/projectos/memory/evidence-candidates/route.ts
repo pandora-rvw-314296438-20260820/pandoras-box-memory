@@ -1,58 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-
-import { proxyPandoraMemoryRequest } from "@/lib/services/pandora-memory-bridge-client";
-
+import { authorizeMemoryWorkload, getMemoryAdminClient, jsonResponse, readBoundedJson } from "@/lib/server/pandora-memory-runtime";
+import { submitProjectOsEvidenceCandidate } from "@/lib/server/projectos-evidence-intake";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
 const MAX_BODY_BYTES = 16 * 1024;
 const ALLOWED_KEYS = new Set([
-  "namespace",
-  "project_id",
-  "project_key",
-  "title",
-  "summary",
-  "proof_stage",
-  "evidence_kind",
-  "claim",
-  "evidence_refs",
-  "provenance",
-  "idempotency_key",
+  "namespace","project_id","project_key","title","summary","proof_stage","evidence_kind",
+  "claim","evidence_refs","provenance","idempotency_key",
 ]);
-
-const byteLength = (value: string) => new TextEncoder().encode(value).byteLength;
-
-export async function POST(request: NextRequest) {
-  const declaredLength = Number(request.headers.get("content-length") || "0");
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
-    return NextResponse.json({ ok: false, error: "body_too_large" }, { status: 413 });
+export async function POST(request: Request) {
+  if (request.headers.has("origin")) return jsonResponse({ ok: false, error: "browser_request_denied" }, 403);
+  const url = new URL(request.url);
+  if (url.search || url.hash) return jsonResponse({ ok: false, error: "route_not_found" }, 404);
+  const parsed = await readBoundedJson(request, MAX_BODY_BYTES);
+  if (!parsed.ok) return parsed.response;
+  if (Object.keys(parsed.body).some((key) => !ALLOWED_KEYS.has(key))) {
+    return jsonResponse({ ok: false, error: "unexpected_field" }, 400);
   }
-
-  const raw = await request.text();
-  if (!raw || byteLength(raw) > MAX_BODY_BYTES) {
-    return NextResponse.json(
-      { ok: false, error: raw ? "body_too_large" : "invalid_json" },
-      { status: raw ? 413 : 400 },
-    );
-  }
-
-  let body: unknown;
   try {
-    body = JSON.parse(raw);
-  } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
-  }
-
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
-  }
-
-  const entries = Object.entries(body);
-  if (entries.some(([key]) => !ALLOWED_KEYS.has(key))) {
-    return NextResponse.json({ ok: false, error: "unexpected_field" }, { status: 400 });
-  }
-
-  return proxyPandoraMemoryRequest(request, {
-    action: "submit_legacy_evidence_candidate",
-    ...Object.fromEntries(entries),
-  });
+    const client = getMemoryAdminClient();
+    const authorization = await authorizeMemoryWorkload(request, client);
+    if (!authorization.ok) return authorization.error;
+    return await submitProjectOsEvidenceCandidate({ ...parsed.body, action: "submit_evidence_candidate" }, authorization.principal, client);
+  } catch { return jsonResponse({ ok: false, error: "memory_runtime_unavailable" }, 503); }
 }

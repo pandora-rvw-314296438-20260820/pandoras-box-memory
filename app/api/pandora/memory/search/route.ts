@@ -1,48 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { proxyPandoraMemoryRequest } from "@/lib/services/pandora-memory-bridge-client";
-
+import { ALLOWED_SEARCH_KEYS } from "@/supabase/functions/pandora-memory-search/handler";
+import { jsonResponse, readBoundedJson, runMemorySearch } from "@/lib/server/pandora-memory-runtime";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const ALLOWED_KEYS = new Set([
-  "namespace",
-  "project_id",
-  "project_key",
-  "query",
-  "current_task",
-  "max_items",
-  "include_semantic",
-  "include_profiles",
-  "include_recent",
-  "include_open_loops",
-  "canon_statuses",
-  "intent",
-  "intent_domain",
-  "intentDomain",
-  "action_mode",
-  "actionMode",
-  "consequential",
-  "required_capabilities",
-  "requiredCapabilities",
-]);
-
-export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null);
-  if (!body || typeof body !== "object" || Array.isArray(body)) {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, {
-      status: 400,
-    });
-  }
-
-  const payload = Object.fromEntries(
-    Object.entries(body).filter(([key]) => ALLOWED_KEYS.has(key)),
-  );
-
-  return proxyPandoraMemoryRequest(
-    request,
-    {
-      action: "search",
-      ...payload,
-    },
-    { target: "search" },
-  );
+export async function POST(request: Request) {
+  if (request.headers.has("origin")) return jsonResponse({ ok: false, error: "browser_request_denied" }, 403);
+  const url = new URL(request.url);
+  if (url.search || url.hash) return jsonResponse({ ok: false, error: "route_not_found" }, 404);
+  const parsed = await readBoundedJson(request, 64 * 1024);
+  if (!parsed.ok) return parsed.response;
+  const filtered = Object.fromEntries(Object.entries(parsed.body).filter(([key]) => ALLOWED_SEARCH_KEYS.has(key)));
+  try { return await runMemorySearch(request, { ...filtered, action: "search" }); }
+  catch { return jsonResponse({ ok: false, error: "memory_runtime_unavailable" }, 503); }
 }

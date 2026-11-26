@@ -9,6 +9,7 @@ const GLOBAL_JWKS = createRemoteJWKSet(
 const issuerJwks = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
 type Principal = {
+  principal_key: string;
   issuer: string;
   audience: string;
   subject: string;
@@ -131,7 +132,7 @@ export const authorize = async (
   const { data, error } = await supabase
     .from("pandora_service_principals")
     .select(
-      "issuer,audience,subject,owner_id,project_id,project_name,environment,memory_user_id,allowed_namespaces,scopes,is_active",
+      "principal_key,issuer,audience,subject,owner_id,project_id,project_name,environment,memory_user_id,allowed_namespaces,scopes,is_active",
     )
     .eq("principal_key", PRINCIPAL_KEY)
     .eq("is_active", true)
